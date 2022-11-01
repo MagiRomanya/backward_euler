@@ -1,0 +1,75 @@
+#ifndef SYSTEM_H
+#define SYSTEM_H
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/IterativeLinearSolvers>
+#include <eigen3/Eigen/Sparse>
+#include <eigen3/Eigen/src/Core/Matrix.h>
+#include <eigen3/Eigen/src/IterativeLinearSolvers/ConjugateGradient.h>
+#include <eigen3/Eigen/src/SparseCore/SparseMatrix.h>
+#include <eigen3/Eigen/src/SparseCore/SparseMatrixBase.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include "vec3.h"
+
+class System {
+  public:
+    System(int p_number)
+      // It is important to be 3*num as each particle requires 3 dimensions in
+      // space
+      : num{p_number}, x(3 * num), v(3 * num), Mass(3 * num, 3 * num),
+        f0(3 * num), df_dx(3 * num, 3 * num), df_dv(3 * num, 3 * num),
+        delta_v(3 * num), df_dv_s(3*num, 3*num), df_dx_s(3*num, 3*num),
+        Mass_s(3*num, 3*num){
+      Mass.setIdentity();
+      x.setZero();
+      v.setZero();
+      delta_v.setZero();
+      f0.setZero();
+      df_dv.setZero();
+      df_dx.setZero();
+      Mass_s.setIdentity();
+      for (int i=0; i < num; i++) { fixed.push_back(false); }
+    }
+    // particle number
+    int num;
+    // System positions and velocities
+    Eigen::VectorXd x;
+    Eigen::VectorXd v;
+    // Mass matrix
+    Eigen::MatrixXd Mass;
+    Eigen::SparseMatrix<double> Mass_s;
+    // Forces and their derivatives
+    Eigen::VectorXd f0;
+    Eigen::MatrixXd df_dx;
+    Eigen::MatrixXd df_dv;
+    Eigen::SparseMatrix<double> df_dx_s;
+    Eigen::SparseMatrix<double> df_dv_s;
+
+    std::vector<bool> fixed;
+    // Velocity difference
+    Eigen::VectorXd delta_v;
+
+    double h = 0.01; // Integration step
+
+    void update_vel_and_pos();
+
+    // Returns the i particle position
+    inline vec3 particle_position(int i) const {
+      return vec3(x(i*3), x(i*3 +1), x(i*3 +2));
+    }
+    // Returns the i particle velocity
+    inline vec3 particle_velocity(int i) const {
+      return vec3(v(i*3), v(i*3 +1), v(i*3 +2));
+    }
+
+    vec3 particle_force(int i) const {
+      return vec3(f0(i * 3), f0(i * 3 + 1), f0(i * 3 + 2));
+    }
+
+    void backward_euler();
+
+    void backward_euler_sparse();
+};
+
+#endif
