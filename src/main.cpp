@@ -4,10 +4,11 @@
 #include "system.h"
 #include <cmath>
 #include <iostream>
+#include "clock.h"
 
 // Dimensions of the particles grid
-#define N 10
-#define M 10
+#define N 20
+#define M 20
 
 void initialize_grid(System &s, Spring_list &springs, double step) {
   // Gives value to the starting positions in a greed manner
@@ -49,7 +50,7 @@ void initialize_grid(System &s, Spring_list &springs, double step) {
   }
 }
 
-void integration_step(System &s, const Spring_list &springs) {
+void integration_step(System &s, Spring_list &springs) {
   // Set all forces and derivatives to zero
   s.f0.setZero();
   s.df_dx.setZero();
@@ -73,8 +74,8 @@ void integration_step(System &s, const Spring_list &springs) {
   s.fixed[index] = true;
 
   // Compute a solution using backward euler
-  s.backward_euler();
-  // s.backward_euler_sparse();
+  // s.backward_euler();
+  s.backward_euler_sparse();
   // Update velocity and positons
   s.update_vel_and_pos();
 }
@@ -102,7 +103,13 @@ int main() {
 
   // RENDER LOOP
   while (!WindowShouldClose()) {
+
     integration_step(system, springs);
+
+    if (IsKeyPressed(KEY_Q)) {
+      CloseWindow();
+    }
+
     BeginDrawing();
     ClearBackground(RAYWHITE);
     // Drawing nodes
@@ -124,5 +131,7 @@ int main() {
     EndDrawing();
   }
 
+  Clock last("last");
+  last.printClocks();
   return 0;
 }

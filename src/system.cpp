@@ -1,4 +1,5 @@
 #include "system.h"
+#include "clock.h"
 
 
 void System::update_vel_and_pos() {
@@ -17,8 +18,14 @@ void System::update_vel_and_pos() {
 void System::backward_euler() {
     // We calculate the system of equations we want to solve
     // equation_matrix * x = equation_vector
-    Eigen::MatrixXd equation_matrix = Mass - h * df_dv - h * h * df_dx;
-    Eigen::VectorXd equation_vector = h * (f0 + h * df_dx * v);
+    Clock c1("Dense euler");
+    Eigen::MatrixXd equation_matrix;
+    Eigen::VectorXd equation_vector;
+    {
+        Clock c2("build equation");
+        equation_matrix = Mass - h * df_dv - h * h * df_dx;
+        equation_vector = h * (f0 + h * df_dx * v);
+    }
     // Gradient conjugate solving method class
     Eigen::ConjugateGradient<Eigen::MatrixXd> cg;
     // Solving the system of equations
@@ -30,8 +37,14 @@ void System::backward_euler() {
 void System::backward_euler_sparse() {
     // We calculate the system of equations we want to solve
     // equation_matrix * x = equation_vector
-    Eigen::SparseMatrix<double> equation_matrix = Mass - h * df_dv_s - h * h * df_dx_s;
+    Clock c1("sparse euler");
+    Eigen::SparseMatrix<double> equation_matrix;
     Eigen::VectorXd equation_vector = h * (f0 + h * df_dx_s * v);
+    {
+        Clock c2("build equation");
+        equation_matrix = Mass - h * df_dv_s - h * h * df_dx_s;
+        equation_vector = h * (f0 + h * df_dx_s * v);
+    }
     // Gradient conjugate solving method class
     Eigen::ConjugateGradient<Eigen::SparseMatrix<double>> cg;
     // Solving the system of equations

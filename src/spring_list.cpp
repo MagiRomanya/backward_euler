@@ -46,7 +46,11 @@ void Spring_list::spring_derivatives_finite(System &s) const {
     s.df_dx = df_dx;
 }
 
-void Spring_list::add_spring_derivatives(System &s) const {
+void Spring_list::add_spring_derivatives(System &s) {
+    // Triplets for sparse matrices
+    typedef Eigen::Triplet<double> tri;
+    std::vector<tri> triplets;
+    triplets.reserve(4*3*3*springs.size()); // Sets the triplets vector length
     for (int i = 0; i < springs.size(); i++) {
         // Calculates the force derivative matrix of a given string
         // and adds the result to the global df/dx derivative matrix
@@ -58,17 +62,23 @@ void Spring_list::add_spring_derivatives(System &s) const {
             for (int k = 0; k < 3; k++) {
                 // df1_dx1
                 s.df_dx(3 * p1 + j, 3 * p1 + k) += df_dx(j, k);
-                s.df_dx_s.coeffRef(3 * p1 + j, 3 * p1 + k) += df_dx(j, k);
+                triplets.push_back(tri(3 * p1 + j, 3 * p1 + k, df_dx(j, k)));
+                // s.df_dx_s.coeffRef(3 * p1 + j, 3 * p1 + k) += df_dx(j, k);
                 // df2_dx1
                 s.df_dx(3 * p1 + j, 3 * p2 + k) -= df_dx(j, k);
-                s.df_dx_s.coeffRef(3 * p1 + j, 3 * p2 + k) -= df_dx(j, k);
+                triplets.push_back(tri(3 * p1 + j, 3 * p2 + k, -df_dx(j, k)));
+                // s.df_dx_s.coeffRef(3 * p1 + j, 3 * p2 + k) -= df_dx(j, k);
                 // df1_dx2
                 s.df_dx(3 * p2 + j, 3 * p1 + k) -= df_dx(j, k);
-                s.df_dx_s.coeffRef(3 * p2 + j, 3 * p1 + k) -= df_dx(j, k);
+                triplets.push_back(tri(3 * p2 + j, 3 * p1 + k, -df_dx(j, k)));
+                // s.df_dx_s.coeffRef(3 * p2 + j, 3 * p1 + k) -= df_dx(j, k);
                 // df2_dx2
                 s.df_dx(3 * p2 + j, 3 * p2 + k) += df_dx(j, k);
-                s.df_dx_s.coeffRef(3 * p2 + j, 3 * p2 + k) += df_dx(j, k);
+                triplets.push_back(tri(3 * p2 + j, 3 * p2 + k, df_dx(j, k)));
+                // s.df_dx_s.coeffRef(3 * p2 + j, 3 * p2 + k) += df_dx(j, k);
             }
         }
     }
+    // Construct sparse matrix from triplets
+    s.df_dx_s.setFromTriplets(triplets.begin(), triplets.end());
 }

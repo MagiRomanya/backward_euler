@@ -1,10 +1,9 @@
 LIB=-lm -lraylib
-CFLAGS= -O3
+CFLAGS= -O3 -std=c++20
 EXENAME=springs.out
 
 all: exe
-
-debug: CFLAGS = -g -Wall # Change the flags for debug mode
+debug: CFLAGS = -g -Wall -std=c++20 # Change the flags for debug mode
 debug: clean
 debug: exe
 
