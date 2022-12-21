@@ -28,6 +28,7 @@ class System {
       f0.setZero();
       df_dv.setZero();
       df_dx.setZero();
+      df_dx_s.resize(3*num, 3*num);
       Mass_s.setIdentity();
       for (int i=0; i < num; i++) { fixed.push_back(false); }
     }
@@ -45,8 +46,13 @@ class System {
     Eigen::MatrixXd df_dv;
     Eigen::SparseMatrix<double> df_dx_s;
     Eigen::SparseMatrix<double> df_dv_s;
+    typedef Eigen::Triplet<double> tri;
+    std::vector<tri> df_dx_triplets;
+    std::vector<tri> df_dv_triplets;
+    std::vector<tri> equation_matrix_triplets;
 
     std::vector<bool> fixed;
+    std::vector<int> fixed_particles;
     // Velocity difference
     Eigen::VectorXd delta_v;
 
@@ -63,9 +69,16 @@ class System {
       return vec3(v(i*3), v(i*3 +1), v(i*3 +2));
     }
 
-    vec3 particle_force(int i) const {
+    inline vec3 particle_force(int i) const {
       return vec3(f0(i * 3), f0(i * 3 + 1), f0(i * 3 + 2));
     }
+
+    inline void fix_particle(int p){
+      fixed[p] = true;
+      fixed_particles.push_back(p);
+    }
+
+    void begin_equation_matrix();
 
     void backward_euler();
 

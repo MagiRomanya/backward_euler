@@ -13,9 +13,9 @@ class vec3 {
       e[1] = y;
       e[2] = z;
     }
-    inline double x() { return e[0]; }
-    inline double y() { return e[1]; }
-    inline double z() { return e[2]; }
+    inline double x() const { return e[0]; }
+    inline double y() const { return e[1]; }
+    inline double z() const { return e[2]; }
 
     inline double length2() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
     inline double length() const { return sqrt(this->length2()); }

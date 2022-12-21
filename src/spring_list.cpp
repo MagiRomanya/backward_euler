@@ -58,27 +58,6 @@ void Spring_list::add_spring_derivatives(System &s) {
         int p2 = springs[i].j;
         Eigen::Matrix3d df_dx = springs[i].force_derivative(s);
         // Add the derivative to the big matrix componentwise
-        for (int j = 0; j < 3; j++) {
-            for (int k = 0; k < 3; k++) {
-                // df1_dx1
-                s.df_dx(3 * p1 + j, 3 * p1 + k) += df_dx(j, k);
-                triplets.push_back(tri(3 * p1 + j, 3 * p1 + k, df_dx(j, k)));
-                // s.df_dx_s.coeffRef(3 * p1 + j, 3 * p1 + k) += df_dx(j, k);
-                // df2_dx1
-                s.df_dx(3 * p1 + j, 3 * p2 + k) -= df_dx(j, k);
-                triplets.push_back(tri(3 * p1 + j, 3 * p2 + k, -df_dx(j, k)));
-                // s.df_dx_s.coeffRef(3 * p1 + j, 3 * p2 + k) -= df_dx(j, k);
-                // df1_dx2
-                s.df_dx(3 * p2 + j, 3 * p1 + k) -= df_dx(j, k);
-                triplets.push_back(tri(3 * p2 + j, 3 * p1 + k, -df_dx(j, k)));
-                // s.df_dx_s.coeffRef(3 * p2 + j, 3 * p1 + k) -= df_dx(j, k);
-                // df2_dx2
-                s.df_dx(3 * p2 + j, 3 * p2 + k) += df_dx(j, k);
-                triplets.push_back(tri(3 * p2 + j, 3 * p2 + k, df_dx(j, k)));
-                // s.df_dx_s.coeffRef(3 * p2 + j, 3 * p2 + k) += df_dx(j, k);
-            }
-        }
+        springs[i].add_derivatives_and_forces(s);
     }
-    // Construct sparse matrix from triplets
-    s.df_dx_s.setFromTriplets(triplets.begin(), triplets.end());
 }

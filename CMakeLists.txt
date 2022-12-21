@@ -24,15 +24,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 # External libraries
 find_package(raylib REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(assimp REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
   ${RAYLIB_INCLUDE_DIR}
   ${EIGEN_INCLUDE_DIR}
+  ${ASSIMP_INCLUDE_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
   raylib
+  rt
   ${RAYLIB_LIBRARIES}
   ${EIGEN_LIBRARIES}
+  ${ASSIMP_LIBRARIES}
 )
