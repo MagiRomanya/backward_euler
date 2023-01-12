@@ -13,11 +13,11 @@
 // TODO: Triangular -
 // TODO: Fijación -
 // TODO: Muelles de flexión
-// TODO: Test dejando valancear la tela
+// TODO: Test dejando valancear la tela -
 // BUG: Si quito los muelles diagonales de la simulación esta se vuelve inestable.
 
 // Define physical parameters of the simulation
-#define K_SPRING 100
+#define K_SPRING 1000
 #define GRAVITY 1
 #define NODE_MASS 100
 
@@ -36,6 +36,9 @@ void initialize_grid(System &s, Spring_list &springs, double step) {
       s.x(3 * index) = 0.0;                 // x
       s.x(3 * index + 1) = y_in + step * i; // y
       s.x(3 * index + 2) = z_in + step * j; // z
+      // TODO: make the cloth fall from a plane
+      s.x(3 * index) = z_in + step * j;
+      s.x(3 * index + 2) = 0.0;
 
       // Velocity components
       s.v(3 * index) = 0.0;     // vx
@@ -69,10 +72,13 @@ void initialize_grid(System &s, Spring_list &springs, double step) {
 }
 
 void integration_step(System &s, Spring_list &springs) {
+  // Fix corners
+  int index = M * (N - 1);
+  s.fix_particle(0);
+  s.fix_particle(index);
+
   // Set all forces and derivatives to zero
   s.f0.setZero();
-  s.df_dx.setZero();
-  s.df_dv.setZero();
   s.df_dv_s.setZero();
   s.df_dx_s.setZero();
   s.begin_equation_matrix();
@@ -83,17 +89,12 @@ void integration_step(System &s, Spring_list &springs) {
 
   // Add gravity
   double gravity = GRAVITY * s.Mass(0, 0); // assuming all equal masses
-  for (int i = 0; i < N * M * 3; i += 3) {
-    s.f0[i + 2] += gravity; // z direction
+  for (int i = 0; i < N * M ; i += 1) {
+    if (!s.fixed[i])
+      s.f0[3*i + 2] += gravity; // z direction
   }
 
-  // Fix extremes
-  int index = M * (N - 1);
-  s.fix_particle(0);
-  s.fix_particle(index);
-
   // Compute a solution using backward euler
-  // s.backward_euler();
   s.backward_euler_sparse();
   // Update velocity and positons
   s.update_vel_and_pos();
@@ -138,7 +139,7 @@ int main() {
       DrawCircle(system.x[i + 1] + 100, system.x[i + 2] + 100, radius,
                  (Color){0, 0, 0, 255});
       DrawCircle(system.x[i + 1] + 100, system.x[i] + 100, radius,
-                 (Color){0, 0, 0, 255}); // 3d pesrspective
+                 (Color){255, 0, 0, 255}); // 3d pesrspective
     }
     // Drawing connections between nodes
     for (int i = 0; i < springs.springs.size(); i++) {
@@ -152,7 +153,5 @@ int main() {
     EndDrawing();
   }
   CloseWindow();
-  Clock last("last");
-  last.printClocks();
   return 0;
 }

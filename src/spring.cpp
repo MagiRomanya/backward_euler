@@ -37,12 +37,13 @@ Eigen::Matrix3d Spring::force_derivative(const System &s) const {
   return df_dx; // 3x3 matrix
 }
 
-void Spring::add_derivatives_and_forces(System &s) const {
+void Spring::add_derivatives(System &s) const {
   Eigen::Matrix3d df_dx = this->force_derivative(s);
   typedef Eigen::Triplet<double> tri;
   const int p1 = this->i;
   const int p2 = this->j;
   const double h2 = - s.h * s.h;
+  if (s.fixed[p1] and s.fixed[p2]) return;
   if (s.fixed[p1]){
     for (int j=0; j < 3; j++){
       for (int k=0; k < 3; k++){

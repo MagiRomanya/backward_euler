@@ -18,16 +18,13 @@ class System {
       // It is important to be 3*num as each particle requires 3 dimensions in
       // space
       : num{p_number}, x(3 * num), v(3 * num), Mass(3 * num, 3 * num),
-        f0(3 * num), df_dx(3 * num, 3 * num), df_dv(3 * num, 3 * num),
-        delta_v(3 * num), df_dv_s(3*num, 3*num), df_dx_s(3*num, 3*num),
+        f0(3 * num), delta_v(3 * num), df_dv_s(3*num, 3*num), df_dx_s(3*num, 3*num),
         Mass_s(3*num, 3*num){
       Mass.setIdentity();
       x.setZero();
       v.setZero();
       delta_v.setZero();
       f0.setZero();
-      df_dv.setZero();
-      df_dx.setZero();
       df_dx_s.resize(3*num, 3*num);
       Mass_s.setIdentity();
       for (int i=0; i < num; i++) { fixed.push_back(false); }
@@ -42,8 +39,6 @@ class System {
     Eigen::SparseMatrix<double> Mass_s;
     // Forces and their derivatives
     Eigen::VectorXd f0;
-    Eigen::MatrixXd df_dx;
-    Eigen::MatrixXd df_dv;
     Eigen::SparseMatrix<double> df_dx_s;
     Eigen::SparseMatrix<double> df_dv_s;
     typedef Eigen::Triplet<double> tri;
@@ -51,8 +46,8 @@ class System {
     std::vector<tri> df_dv_triplets;
     std::vector<tri> equation_matrix_triplets;
 
-    std::vector<bool> fixed;
-    std::vector<int> fixed_particles;
+    std::vector<bool> fixed; // whether a particle is fixed or not (size = # of particles)
+    std::vector<int> fixed_particles; // list of fixed particles (size = # of fixed particles)
     // Velocity difference
     Eigen::VectorXd delta_v;
 
@@ -79,8 +74,6 @@ class System {
     }
 
     void begin_equation_matrix();
-
-    void backward_euler();
 
     void backward_euler_sparse();
 };

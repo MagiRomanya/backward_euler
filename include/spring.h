@@ -25,7 +25,7 @@ class Spring {
 
     vec3 force(const System &s) const ;
     Eigen::Matrix3d force_derivative(const System &s) const ;
-    void add_derivatives_and_forces(System &s) const ;
+    void add_derivatives(System &s) const ;
 };
 
 #endif

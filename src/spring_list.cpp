@@ -7,14 +7,17 @@ void Spring_list::add_spring_forces(System &s) const {
 
         // Calculate the force of the string joining p1 and p2
         vec3 force = springs[i].force(s);
-        s.f0(3 * p1) += force.x();     // f0.x
-        s.f0(3 * p1 + 1) += force.y(); // f0.y
-        s.f0(3 * p1 + 2) += force.z(); // f0.z
-
+        if (!s.fixed[p1]){
+            s.f0(3 * p1) += force.x();     // f0.x
+            s.f0(3 * p1 + 1) += force.y(); // f0.y
+            s.f0(3 * p1 + 2) += force.z(); // f0.z
+        }
         // 3º Newton law: Equal and oposite reaction
-        s.f0(3 * p2) += -force.x();     // f0.x
-        s.f0(3 * p2 + 1) += -force.y(); // f0.y
-        s.f0(3 * p2 + 2) += -force.z(); // f0.z
+        if (!s.fixed[p2]){
+            s.f0(3 * p2) += -force.x();     // f0.x
+            s.f0(3 * p2 + 1) += -force.y(); // f0.y
+            s.f0(3 * p2 + 2) += -force.z(); // f0.z
+        }
     }
 }
 
@@ -43,21 +46,10 @@ void Spring_list::spring_derivatives_finite(System &s) const {
             }
         }
     }
-    s.df_dx = df_dx;
 }
 
 void Spring_list::add_spring_derivatives(System &s) {
-    // Triplets for sparse matrices
-    typedef Eigen::Triplet<double> tri;
-    std::vector<tri> triplets;
-    triplets.reserve(4*3*3*springs.size()); // Sets the triplets vector length
     for (int i = 0; i < springs.size(); i++) {
-        // Calculates the force derivative matrix of a given string
-        // and adds the result to the global df/dx derivative matrix
-        int p1 = springs[i].i;
-        int p2 = springs[i].j;
-        Eigen::Matrix3d df_dx = springs[i].force_derivative(s);
-        // Add the derivative to the big matrix componentwise
-        springs[i].add_derivatives_and_forces(s);
+        springs[i].add_derivatives(s);
     }
 }
