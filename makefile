@@ -1,32 +1,9 @@
-LIB=-lm -lraylib
-CFLAGS= -O3 -std=c++20
-EXENAME=springs.out
 
-all: exe
-debug: CFLAGS = -g -Wall -std=c++20 # Change the flags for debug mode
-debug: clean
-debug: exe
+# This is a dummy makefile to call the real one in the build directory
 
-exe: main.o vec3.o system.o spring.o spring_list.o
-	g++ $(CFLAGS) main.o vec3.o system.o spring.o spring_list.o -o $(EXENAME) $(LIB)
+PROJECT_DIR=~/Master/Project/backward_euler
+all:
+	cd $(PROJECT_DIR)/build && make
 
-main.o: main.cpp
-	g++ $(CFLAGS) -c main.cpp
-
-vec3.o: vec3.cpp
-	g++ $(CFLAGS) -c vec3.cpp
-
-system.o: system.cpp
-	g++ $(CFLAGS) -c system.cpp
-
-spring.o: spring.cpp
-	g++ $(CFLAGS) -c spring.cpp
-
-spring_list.o: spring_list.cpp
-	g++ $(CFLAGS) -c spring_list.cpp
-
-run: exe
-	./$(EXENAME)
-
-clean:
-	rm *.out *.o
+run: all
+	$(PROJECT_DIR)/build/BackwardEuler

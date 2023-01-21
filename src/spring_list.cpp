@@ -1,6 +1,9 @@
 #include "spring_list.h"
 
+// DEPRECATED for interaction vector in the system class
+
 void Spring_list::add_spring_forces(System &s) const {
+    /* Adds the force between particles joined with springs to the system */
     for (int i = 0; i < springs.size(); i++) {
         int p1 = springs[i].i;
         int p2 = springs[i].j;
@@ -21,7 +24,15 @@ void Spring_list::add_spring_forces(System &s) const {
     }
 }
 
+void Spring_list::add_energy(System &s) const {
+    /* Adds the potential energy of the spring to the total energy of the system */
+    for (int i; i < springs.size(); i++){
+        s.energy += springs[i].energy(s);
+    }
+}
+
 void Spring_list::spring_derivatives_finite(System &s) const {
+    /* Calculates the spring force derivateves using a finite step */
     Eigen::MatrixXd df_dx(3*s.num, 3*s.num);
     df_dx.setZero();
     double epsilon = s.h;
@@ -49,7 +60,8 @@ void Spring_list::spring_derivatives_finite(System &s) const {
 }
 
 void Spring_list::add_spring_derivatives(System &s) {
+    /* Adds the spring force derivatives to the system */
     for (int i = 0; i < springs.size(); i++) {
-        springs[i].add_derivatives(s);
+        springs[i].add_derivative(s);
     }
 }

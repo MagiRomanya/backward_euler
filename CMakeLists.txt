@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED 1)
+set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 project(BackwardEuler)
 
@@ -11,10 +11,11 @@ set(SOURCE_FILES
   src/vec3.cpp
   src/spring_list.cpp
   src/clock.cpp
+  src/mesh.cpp
 )
 set(CMAKE_BUILD_TYPE Release)
 
-# set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -O3)
+# set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 

@@ -1,157 +1,111 @@
 #include "raylib.h"
+#include "system.h"
 #include "spring.h"
 #include "spring_list.h"
-#include "system.h"
 #include <cmath>
 #include <iostream>
 #include "clock.h"
+#include "mesh.h"
 
 // Dimensions of the particles grid
 #define N 20
 #define M 20
 
-// TODO: Triangular -
-// TODO: Fijación -
+// NOTE: spring_list is being deprecated
+
+// TODO: Añadir sistema de aristas para crear la cuadricula y para añadir muelles de flexión
 // TODO: Muelles de flexión
-// TODO: Test dejando valancear la tela -
-// BUG: Si quito los muelles diagonales de la simulación esta se vuelve inestable.
 
 // Define physical parameters of the simulation
 #define K_SPRING 1000
-#define GRAVITY 1
 #define NODE_MASS 100
 
-void initialize_grid(System &s, Spring_list &springs, double step) {
-  // Gives value to the starting positions in a greed manner
-  // the greed is in te y-z plane
-  // And also joins the particles with springs
+void load_from_mesh(System &system, const SimpleMesh &mesh){
+    /* Reads a mesh and treats the vertices as particles and the
+     * edges as springs */
 
-  // Starting coordinates and separation between nodes
-  double z_in, y_in;
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < M; j++) {
-      int index = M * i + j; // Particle index
-      // Position components
-      // Form a grid
-      s.x(3 * index) = 0.0;                 // x
-      s.x(3 * index + 1) = y_in + step * i; // y
-      s.x(3 * index + 2) = z_in + step * j; // z
-      // TODO: make the cloth fall from a plane
-      s.x(3 * index) = z_in + step * j;
-      s.x(3 * index + 2) = 0.0;
+    const double k = K_SPRING;
 
-      // Velocity components
-      s.v(3 * index) = 0.0;     // vx
-      s.v(3 * index + 1) = 0.0; // vy
-      s.v(3 * index + 2) = 0.0; // vz
+    const unsigned int n_coord = 3 * mesh.vertices.size();
+    system.update_dimensions(mesh.vertices.size());
+
+    for (size_t i=0; i < n_coord; i+=3){
+        glm::vec3 p = mesh.vertices[i/3].Position;
+        system.x[i]   = p.x;
+        system.x[i+1] = p.y;
+        system.x[i+2] = p.z;
     }
-  }
 
-  const double k = K_SPRING;
-  const double L0 = step * 0.8;
-  const double Ldiagonal = sqrt(2)*L0;
-  // Now it is time to join with springs
-  for (int i = 0; i < N; i++) {
-    for (int j = 0; j < M; j++) {
-      int index = M * i + j; // Particle index
-      int i1 = M * (i + 1) + j; // particle to the right
-      int i2 = M * i + (j + 1); // particle to the bottom
-      if (i != N - 1) {
-        springs.add_spring(index, i1, k, L0);
-      }
-      if (j != M - 1) {
-        // grid
-        springs.add_spring(index, i2, k, L0);
-        // diagonals
-        if (i != N - 1){
-          springs.add_spring(i2, i1, k, Ldiagonal);
-        }
-      }
+    // Add the springs
+    std::vector<Edge> internalEdges;
+    std::vector<Edge> externalEdges;
+
+    mesh.boundary(internalEdges, externalEdges);
+
+    double L;
+    for (size_t i=0; i < externalEdges.size(); i++){
+        Edge &e = externalEdges[i];
+        L = mesh.distance(e.a, e.b);
+        system.interactions.push_back(new Spring(e.a, e.b, k, L));
     }
-  }
-}
 
-void integration_step(System &s, Spring_list &springs) {
-  // Fix corners
-  int index = M * (N - 1);
-  s.fix_particle(0);
-  s.fix_particle(index);
+    for (size_t i=0; i < internalEdges.size(); i+=2){
+        Edge &e1 = internalEdges[i];
+        Edge &e2 = internalEdges[2];
+        L = mesh.distance(e1.a, e1.b);
+        system.interactions.push_back(new Spring(e1.a, e1.b, k, L));
+    }
 
-  // Set all forces and derivatives to zero
-  s.f0.setZero();
-  s.df_dv_s.setZero();
-  s.df_dx_s.setZero();
-  s.begin_equation_matrix();
-  // Calculate forces and derivatives
-  springs.add_spring_forces(s);
-  springs.add_spring_derivatives(s);
-  // springs.spring_derivatives_finite(s);
-
-  // Add gravity
-  double gravity = GRAVITY * s.Mass(0, 0); // assuming all equal masses
-  for (int i = 0; i < N * M ; i += 1) {
-    if (!s.fixed[i])
-      s.f0[3*i + 2] += gravity; // z direction
-  }
-
-  // Compute a solution using backward euler
-  s.backward_euler_sparse();
-  // Update velocity and positons
-  s.update_vel_and_pos();
 }
 
 int main() {
-  System system(M * N);
-  Spring_list springs;
+    System system;
 
-  system.h = 1.;
-  // Dense and sparse mass
-  system.Mass *= NODE_MASS;
-  system.Mass_s *= NODE_MASS;
+    // separation between the particles
+    double step = 50;
 
-  // separation between the particles
-  double step = 50;
+    SimpleMesh mesh;
+    CreateGrid(mesh, N, M, step);
 
-  initialize_grid(system, springs, step);
+    load_from_mesh(system, mesh);
 
-  // RAYLIB RENDERING
-  const int screenWidth = 1200;
-  const int screenHeight = 1000;
+    // Fix corners
+    int index = M * (N - 1);
+    system.fix_particle(0);
+    system.fix_particle(index);
+    system.h = 1;
 
-  InitWindow(screenWidth, screenHeight, "Backward Euler");
-  float radius = step / 10;
+    // Dense and sparse mass
+    system.Mass *= NODE_MASS;
+    system.Mass_s *= NODE_MASS;
 
-  SetTargetFPS(120);
+    // RAYLIB RENDERING
+    const int screenWidth = 1200;
+    const int screenHeight = 1000;
 
-  // RENDER LOOP
-  while (!WindowShouldClose()) {
+    InitWindow(screenWidth, screenHeight, "Backward Euler");
+    float radius = step / 10;
 
-    integration_step(system, springs);
+    SetTargetFPS(120);
 
-    if (IsKeyPressed(KEY_Q)) {
-      CloseWindow();
+    // RENDER LOOP
+    while (!WindowShouldClose()) {
+
+        system.update();
+
+        if (IsKeyPressed(KEY_Q)) {
+            CloseWindow();
+        }
+
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        system.render();
+
+        DrawFPS(50, 50);
+        DrawText(TextFormat("Energy: %d", system.energy), 50, screenHeight - 50, 20, BLACK);
+        EndDrawing();
     }
-
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
-    // Drawing nodes
-    for (int i = 0; i < N * M * 3; i += 3) {
-      DrawCircle(system.x[i + 1] + 100, system.x[i + 2] + 100, radius,
-                 (Color){0, 0, 0, 255});
-      DrawCircle(system.x[i + 1] + 100, system.x[i] + 100, radius,
-                 (Color){255, 0, 0, 255}); // 3d pesrspective
-    }
-    // Drawing connections between nodes
-    for (int i = 0; i < springs.springs.size(); i++) {
-      double sPosX = 100 + system.x[3 * springs.springs[i].i + 1];
-      double sPosY = 100 + system.x[3 * springs.springs[i].i + 2];
-      double ePosX = 100 + system.x[3 * springs.springs[i].j + 1];
-      double ePosY = 100 + system.x[3 * springs.springs[i].j + 2];
-      DrawLine(sPosX, sPosY, ePosX, ePosY, BLACK);
-    }
-    DrawFPS(50, 50);
-    EndDrawing();
-  }
-  CloseWindow();
-  return 0;
+    CloseWindow();
+    return 0;
 }

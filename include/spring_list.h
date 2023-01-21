@@ -3,6 +3,8 @@
 
 #include "spring.h"
 
+// DEPRECATED for interaction vector in the system class
+
 class Spring_list {
   public:
         // All the springs of the simulation
@@ -21,6 +23,7 @@ class Spring_list {
         // TODO: For the sparse matrix: Replace the .coeffReff by pushing the elements by triplets.
         // TODO: For the dense matrix: Push the 3x3 matrix as a whole (not by coordinates)
         void add_spring_derivatives(System &s);
+        void add_energy(System &s) const;
 };
 
 
