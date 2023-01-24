@@ -17,9 +17,9 @@ bool operator==(const Edge& e1, const Edge& e2){
 }
 
 void SimpleMesh::boundary(std::vector<Edge> &internalEdges, std::vector<Edge> &externalEdges) const {
-    /* Makes a vector of all the semi-edges,
-     * and orders it so that the semi-edge and it's
-     * inverse are always next to each other. */
+    /* Fills the internal edges and external edges vectors. In the internal edges vectors, we order the vector
+     * by puting a semi-edge and its inverse next to each other. */
+
     std::vector<Edge> edges;
     edges.reserve(2 * 3 * triangles.size()); // In the worst case scenario all the mesh will be boudary
     std::unordered_map<Edge, int> in_vector;
@@ -97,7 +97,9 @@ void CreateGrid(SimpleMesh &m, int nY, int nZ, double step){
     for (unsigned int j = 0; j < nY; j++){
         for (unsigned int k = 0; k < nZ; k++){
             Vertex v;
-            v.Position = glm::vec3(0.0, step * j, step * k);
+            // v.Position = glm::vec3(0.0, step * j, step * k);
+            // NOTE uncomment to make the cloth fall from flat to vertical
+            v.Position = glm::vec3(step*k, step * j, 0.0);
             m.vertices[nZ*j + k] = v;
         }
     }

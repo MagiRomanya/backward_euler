@@ -15,10 +15,14 @@ class Spring : public Interaction {
         Spring() {}
         Spring(unsigned int pi, unsigned int pj, double sk, double sL0)
             : i(pi), j(pj), k(sk), L0(sL0) { }
+        Spring(unsigned int pi, unsigned int pj, double sk, double sL0, Color color)
+            : i(pi), j(pj), k(sk), L0(sL0), color(color) { }
         // The two particles bound by a spring
         unsigned int i, j;
         // The spring stiffness & the spring rest length
         double k, L0;
+
+        Color color = BLACK;
 
         vec3 force(const System &s) const ;
         double energy(const System &s) const ;

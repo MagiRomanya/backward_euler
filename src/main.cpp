@@ -17,7 +17,7 @@
 // TODO: Muelles de flexión
 
 // Define physical parameters of the simulation
-#define K_SPRING 1000
+#define K_SPRING 10000
 #define NODE_MASS 100
 
 void load_from_mesh(System &system, const SimpleMesh &mesh){
@@ -25,6 +25,7 @@ void load_from_mesh(System &system, const SimpleMesh &mesh){
      * edges as springs */
 
     const double k = K_SPRING;
+    const double k_flex = k/ 100;
 
     const unsigned int n_coord = 3 * mesh.vertices.size();
     system.update_dimensions(mesh.vertices.size());
@@ -51,9 +52,14 @@ void load_from_mesh(System &system, const SimpleMesh &mesh){
 
     for (size_t i=0; i < internalEdges.size(); i+=2){
         Edge &e1 = internalEdges[i];
-        Edge &e2 = internalEdges[2];
+        Edge &e2 = internalEdges[i+1];
         L = mesh.distance(e1.a, e1.b);
+        // Normal spring
         system.interactions.push_back(new Spring(e1.a, e1.b, k, L));
+
+        // Flex spring
+        L = mesh.distance(e1.opposite, e2.opposite);
+        system.interactions.push_back(new Spring(e1.opposite, e2.opposite, k_flex, L, RED));
     }
 
 }

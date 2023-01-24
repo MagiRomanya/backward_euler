@@ -1,0 +1,8 @@
+* Backward Euler
+** DONE Muelles de flexión
+** TODO Entender la parte de los signos de la matriz de la ecuación y la matriz de derivadas df_dx_s
+** DONE Añadir sistema de aristas para crear la cuadricula y para añadir muelles de flexión
+** DONE Triangular
+** DONE Fijación
+** DONE Test dejando valancear la tela
+** DONE Arreglar diferéncias finitas

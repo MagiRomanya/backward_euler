@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
 
     SimpleMesh m;
 
-    CreateGrid(m, 3, 3, 1);
+    CreateGrid(m, 2, 2, 1);
 
     std::vector<Edge> internalEdges;
     std::vector<Edge> externalEdges;
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < internalEdges.size(); i+=2){
         Edge& e1 = internalEdges[i];
         Edge& e2 = internalEdges[i+1];
-        std::cout << e1.a <<", "<< e1.b << "\t"<< e2.a <<", " << e2.b<< std::endl;
+        std::cout << e1.a <<", "<< e1.b<<", "  << e1.opposite << "\t\t"<< e2.a <<", " << e2.b <<", " << e2.opposite << std::endl;
     }
 
 

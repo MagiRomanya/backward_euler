@@ -91,13 +91,13 @@ void Spring::add_derivative(System &s) const {
     typedef Eigen::Triplet<double> tri;
     const int p1 = this->i;
     const int p2 = this->j;
-    const double h2 = - s.h * s.h;
+    const double h2 = s.h * s.h;
     if (s.fixed[i] and s.fixed[p2]) return;
     if (s.fixed[i]){
         for (int j=0; j < 3; j++){
             for (int k=0; k < 3; k++){
                 s.df_dx_triplets.push_back(tri(3 * p2 + j, 3 * p2 + k, df_dx(j, k)));
-                s.equation_matrix_triplets.push_back(tri(3 * p2 + j, 3 * p2 + k, h2 * df_dx(j, k)));
+                s.equation_matrix_triplets.push_back(tri(3 * p2 + j, 3 * p2 + k, -h2 * df_dx(j, k)));
             }
         }
         return;
@@ -106,7 +106,7 @@ void Spring::add_derivative(System &s) const {
         for (int j=0; j < 3; j++){
             for (int k=0; k < 3; k++){
                 s.df_dx_triplets.push_back(tri(3 * p1 + j, 3 * p1 + k, df_dx(j, k)));
-                s.equation_matrix_triplets.push_back(tri(3 * p1 + j, 3 * p1 + k, h2 * df_dx(j, k)));
+                s.equation_matrix_triplets.push_back(tri(3 * p1 + j, 3 * p1 + k, -h2 * df_dx(j, k)));
             }
         }
         return;
@@ -122,10 +122,10 @@ void Spring::add_derivative(System &s) const {
             // The full equation matrix
             // In this equation we need
             // equation_matrix = Mass_s - h * df_dv_s - h * h * df_dx_s;
-            s.equation_matrix_triplets.push_back(tri(3 * p1 + j, 3 * p1 + k, h2 * df_dx(j, k)));
-            s.equation_matrix_triplets.push_back(tri(3 * p1 + j, 3 * p2 + k, -h2 * df_dx(j, k)));
-            s.equation_matrix_triplets.push_back(tri(3 * p2 + j, 3 * p1 + k, -h2 * df_dx(j, k)));
-            s.equation_matrix_triplets.push_back(tri(3 * p2 + j, 3 * p2 + k, h2 * df_dx(j, k)));
+            s.equation_matrix_triplets.push_back(tri(3 * p1 + j, 3 * p1 + k, -h2 * df_dx(j, k)));
+            s.equation_matrix_triplets.push_back(tri(3 * p1 + j, 3 * p2 + k, h2 * df_dx(j, k)));
+            s.equation_matrix_triplets.push_back(tri(3 * p2 + j, 3 * p1 + k, h2 * df_dx(j, k)));
+            s.equation_matrix_triplets.push_back(tri(3 * p2 + j, 3 * p2 + k, -h2 * df_dx(j, k)));
         }
     }
 }
@@ -145,5 +145,5 @@ void Spring::render(System &s){
     DrawLine(offset + pos_i.y(),
              offset + pos_i.z(),
              offset + pos_j.y(),
-             offset + pos_j.z(), BLACK);
+             offset + pos_j.z(), color);
 }

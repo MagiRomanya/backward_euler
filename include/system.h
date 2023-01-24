@@ -17,35 +17,25 @@
 
 class System {
     public:
-        // System(int particle_number)
-        //     // It is important to be 3*num as each particle requires 3 dimensions in
-        //     // space
-        //     : num{particle_number}, x(3 * num), v(3 * num), Mass(3 * num, 3 * num),
-        //       f0(3 * num), delta_v(3 * num), df_dv_s(3*num, 3*num), df_dx_s(3*num, 3*num),
-        //       Mass_s(3*num, 3*num){
-        //     Mass.setIdentity();
-        //     x.setZero();
-        //     v.setZero();
-        //     delta_v.setZero();
-        //     f0.setZero();
-        //     df_dx_s.resize(3*num, 3*num);
-        //     Mass_s.setIdentity();
-        //     fixed.resize(num, false);
-        // }
         System(){};
         ~System();
+
         // particle number
         int num;
+
         // System positions and velocities
         Eigen::VectorXd x;
         Eigen::VectorXd v;
+
         // Mass matrix
         Eigen::MatrixXd Mass;
         Eigen::SparseMatrix<double> Mass_s;
+
         // Forces and their derivatives
         Eigen::VectorXd f0;
         Eigen::SparseMatrix<double> df_dx_s;
         Eigen::SparseMatrix<double> df_dv_s;
+
         typedef Eigen::Triplet<double> tri;
         std::vector<tri> df_dx_triplets;
         std::vector<tri> df_dv_triplets;
