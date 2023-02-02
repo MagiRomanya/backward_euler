@@ -8,7 +8,6 @@ class Interaction{
  * Examples: springs, gravity, friction, etc  */
     public:
         virtual void apply(System &s) {}
-        virtual void render(System &s) {}
 };
 
 

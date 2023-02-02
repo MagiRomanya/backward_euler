@@ -7,7 +7,6 @@
 #include <math.h>
 #include <ostream>
 #include <vector>
-#include <raylib.h>
 
 // TODO: Convert the new_spring function to the constructor of the same class
 class Spring : public Interaction {
@@ -15,14 +14,11 @@ class Spring : public Interaction {
         Spring() {}
         Spring(unsigned int pi, unsigned int pj, double sk, double sL0)
             : i(pi), j(pj), k(sk), L0(sL0) { }
-        Spring(unsigned int pi, unsigned int pj, double sk, double sL0, Color color)
-            : i(pi), j(pj), k(sk), L0(sL0), color(color) { }
+
         // The two particles bound by a spring
         unsigned int i, j;
         // The spring stiffness & the spring rest length
         double k, L0;
-
-        Color color = BLACK;
 
         vec3 force(const System &s) const ;
         double energy(const System &s) const ;
@@ -33,7 +29,6 @@ class Spring : public Interaction {
         void add_force(System &s) const ; // To implement
         void add_derivative(System &s) const ;
         void apply(System &s);
-        void render(System &s);
 };
 
 #endif

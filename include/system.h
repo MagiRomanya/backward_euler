@@ -10,10 +10,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include "vec3.h"
 #include "interaction.h"
-#include "raylib.h"
 #include "mesh.h"
+#include "object.h"
+#include "spring.h"
 
 class System {
     public:
@@ -51,9 +53,11 @@ class System {
         // List of interactions of the system
         std::vector<Interaction*> interactions;
 
-        double h = 1; // Default integration step
-        double energy = 0;
+        double h = 1.0; // Default integration step
+        double energy = 0.0;
 
+        SimpleMesh mesh;
+        Object object;
 
         inline vec3 particle_position(int i) const {
             // Returns the i-th particle position
@@ -75,6 +79,10 @@ class System {
             fixed_particles.push_back(p);
         }
 
+        void load_from_mesh(SimpleMesh &mesh, double k_spring, Shader shader);
+
+        void update_mesh();
+
         void update_dimensions(int new_particle_number);
 
         void update_vel_and_pos();
@@ -84,8 +92,6 @@ class System {
         void begin_equation_matrix();
 
         void calculate_kinetic_energy();
-
-        void render();
 
         void update();
 };

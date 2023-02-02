@@ -8,6 +8,7 @@ void System::update_vel_and_pos() {
             x[3*i+j] += h * v[3*i+j];
         }
     }
+    update_mesh();
 }
 
 void System::backward_euler_sparse() {
@@ -80,7 +81,7 @@ void System::update() {
     double gravity = 1 * Mass(0, 0); // assuming all equal masses
     for (int i = 0; i < num ; i += 1) {
         if (!fixed[i])
-            f0[3*i + 2] += gravity; // z direction
+            f0[3*i + 1] += gravity; // z direction
     }
 
     // Calculate the next velocities and positions
@@ -95,21 +96,6 @@ System::~System(){
     }
 }
 
-void System::render(){
-    int offset = 100;
-    float radius = 5;
-    // Drawing nodes
-    for (int i=0; i < 3 * num; i+=3){
-        DrawCircle(offset + x[i+1], offset + x[i+2], radius,
-                   (Color){0,0,0,255});
-        DrawCircle(x[i + 1] + 100, x[i] + 100, radius,
-                   (Color){255, 0, 0, 255}); // 3d pesrspective
-    }
-    // Draw interactions
-    for (int i=0; i < interactions.size(); i++){
-        interactions[i]->render(*this);
-    }
-}
 
 void System::update_dimensions(int new_particle_number){
     /* Call this function whenever we change the number of particles
@@ -137,4 +123,61 @@ void System::update_dimensions(int new_particle_number){
 
      Mass.setIdentity();
      Mass_s.setIdentity();
+}
+
+void System::load_from_mesh(SimpleMesh &mesh, double k_spring, Shader shader){
+    /* Reads a mesh and treats the vertices as particles and the
+     * edges as springs */
+    this->mesh = mesh;
+
+    const double k = k_spring;
+    const double k_flex = k/ 100;
+
+    const unsigned int n_coord = 3 * mesh.vertices.size();
+    update_dimensions(mesh.vertices.size());
+
+    for (size_t i=0; i < n_coord; i+=3){
+        glm::vec3 p = mesh.vertices[i/3].Position;
+        x[i]   = p.x;
+        x[i+1] = p.y;
+        x[i+2] = p.z;
+    }
+
+    // Add the springs
+    std::vector<Edge> internalEdges;
+    std::vector<Edge> externalEdges;
+
+    mesh.boundary(internalEdges, externalEdges);
+
+    double L;
+    for (size_t i=0; i < externalEdges.size(); i++){
+        Edge &e = externalEdges[i];
+        L = mesh.distance(e.a, e.b);
+        interactions.push_back(new Spring(e.a, e.b, k, L));
+    }
+
+    for (size_t i=0; i < internalEdges.size(); i+=2){
+        Edge &e1 = internalEdges[i];
+        Edge &e2 = internalEdges[i+1];
+        L = mesh.distance(e1.a, e1.b);
+        // Normal spring
+        interactions.push_back(new Spring(e1.a, e1.b, k, L));
+
+        // Flex spring
+        L = mesh.distance(e1.opposite, e2.opposite);
+        interactions.push_back(new Spring(e1.opposite, e2.opposite, k_flex, L));
+    }
+    object = Object(mesh, shader);
+}
+
+void System::update_mesh(){
+    /* Updates the positions of the mesh with the simulated data */
+    std::cout << "Mesh vertices " << mesh.vertices.size() << " System particles " << num << std::endl;
+    if (num - mesh.vertices.size() != 0) return;
+    std::cout << "hello" << std::endl;
+    for (unsigned int i = 0; i < num; i++){
+        const vec3& current_pos = particle_position(i);
+        mesh.vertices[i].Position = glm::vec3(current_pos.x(), current_pos.y(), current_pos.z());
+    }
+    mesh.updateVAO();
 }

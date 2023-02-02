@@ -136,14 +136,3 @@ void Spring::apply(System &s){
     add_force(s);
     add_derivative(s);
 }
-
-void Spring::render(System &s){
-    /* Renders the spring to the screen as a line between the particles */
-    int offset = 100;
-    vec3 pos_i = s.particle_position(i);
-    vec3 pos_j = s.particle_position(j);
-    DrawLine(offset + pos_i.y(),
-             offset + pos_i.z(),
-             offset + pos_j.y(),
-             offset + pos_j.z(), color);
-}

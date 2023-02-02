@@ -1,11 +1,11 @@
-#include "raylib.h"
 #include "system.h"
 #include "spring.h"
 #include "spring_list.h"
 #include <cmath>
 #include <iostream>
 #include "clock.h"
-#include "mesh.h"
+
+#include "renderer.h"
 
 // Dimensions of the particles grid
 #define N 20
@@ -20,60 +20,33 @@
 #define K_SPRING 10000
 #define NODE_MASS 100
 
-void load_from_mesh(System &system, const SimpleMesh &mesh){
-    /* Reads a mesh and treats the vertices as particles and the
-     * edges as springs */
+void processInput(GLFWwindow* window);
 
-    const double k = K_SPRING;
-    const double k_flex = k/ 100;
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-    const unsigned int n_coord = 3 * mesh.vertices.size();
-    system.update_dimensions(mesh.vertices.size());
-
-    for (size_t i=0; i < n_coord; i+=3){
-        glm::vec3 p = mesh.vertices[i/3].Position;
-        system.x[i]   = p.x;
-        system.x[i+1] = p.y;
-        system.x[i+2] = p.z;
-    }
-
-    // Add the springs
-    std::vector<Edge> internalEdges;
-    std::vector<Edge> externalEdges;
-
-    mesh.boundary(internalEdges, externalEdges);
-
-    double L;
-    for (size_t i=0; i < externalEdges.size(); i++){
-        Edge &e = externalEdges[i];
-        L = mesh.distance(e.a, e.b);
-        system.interactions.push_back(new Spring(e.a, e.b, k, L));
-    }
-
-    for (size_t i=0; i < internalEdges.size(); i+=2){
-        Edge &e1 = internalEdges[i];
-        Edge &e2 = internalEdges[i+1];
-        L = mesh.distance(e1.a, e1.b);
-        // Normal spring
-        system.interactions.push_back(new Spring(e1.a, e1.b, k, L));
-
-        // Flex spring
-        L = mesh.distance(e1.opposite, e2.opposite);
-        system.interactions.push_back(new Spring(e1.opposite, e2.opposite, k_flex, L, RED));
-    }
-
-}
+Renderer renderer = Renderer();
 
 int main() {
     System system;
-
     // separation between the particles
     double step = 50;
 
     SimpleMesh mesh;
     CreateGrid(mesh, N, M, step);
 
-    load_from_mesh(system, mesh);
+    Shader shader = Shader("/home/magi/Documents/Project/backward_euler/shaders/test.v0.vert",
+                           "/home/magi/Documents/Project/backward_euler/shaders/test.v0.frag");
+
+    system.load_from_mesh(mesh, K_SPRING, shader);
+
+    system.object.model = glm::translate(system.object.model, glm::vec3(0.0f , 0.0f, -4.0f));
+    system.object.model = glm::scale(system.object.model, glm::vec3(0.005f));
+    system.object.view = renderer.camera.GetViewMatrix();
+    system.object.proj = glm::perspective(30.0f, 1.0f, 0.1f, 100.f);
+    system.object.loadTexture("gandalf", "../../renderer/img/gandalf.png");
+
+    renderer.objects.push_back(&system.object);
 
     // Fix corners
     int index = M * (N - 1);
@@ -89,29 +62,83 @@ int main() {
     const int screenWidth = 1200;
     const int screenHeight = 1000;
 
-    InitWindow(screenWidth, screenHeight, "Backward Euler");
+    GLFWwindow* window = renderer.window;
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+
     float radius = step / 10;
 
-    SetTargetFPS(120);
-
     // RENDER LOOP
-    while (!WindowShouldClose()) {
+    while (!glfwWindowShouldClose(window)){
+        // Input
+        processInput(window);
 
+        // Simulation step
         system.update();
 
-        if (IsKeyPressed(KEY_Q)) {
-            CloseWindow();
-        }
+        // Render
+        renderer.render();
 
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-
-        system.render();
-
-        DrawFPS(50, 50);
-        DrawText(TextFormat("Energy: %d", system.energy), 50, screenHeight - 50, 20, BLACK);
-        EndDrawing();
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
-    CloseWindow();
+    glfwTerminate();
     return 0;
+}
+void processInput(GLFWwindow* window){
+    /* Controlls user input through the window */
+    if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+        glfwSetWindowShouldClose(window, true);
+    }
+
+    float deltaTime = 0.0f;
+    static float lastFrame = 0.0f;
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+        renderer.camera.ProcessKeyboard(FORWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+        renderer.camera.ProcessKeyboard(BACKWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        renderer.camera.ProcessKeyboard(LEFT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+        renderer.camera.ProcessKeyboard(RIGHT, deltaTime);
+    }
+
+    // Enable / disable orbital cam
+    static bool escape_last_frame = false;
+    bool escape_this_frame = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+    if (escape_this_frame and (escape_this_frame != escape_last_frame)){
+        renderer.camera.is_orbital = !renderer.camera.is_orbital;
+        if (renderer.camera.is_orbital)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    escape_last_frame = escape_this_frame;
+    glm::mat4 view = renderer.camera.GetViewMatrix();
+    for (int i=0; i < renderer.objects.size(); i++){
+        renderer.objects[i]->view = view;
+    }
+}
+void framebuffer_size_callback(GLFWwindow* window, int width, int height){
+    /* Gets called every time we resize the window */
+    glViewport(0, 0, width, height);
+    for (int i = 0; i < renderer.objects.size(); i++)
+        renderer.objects[i]->proj = glm::perspective(30.0f, ( (float) width) / height, 0.1f, 100.f);
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+    static float lastX = WIDTH/2.0f;
+    static float lastY = HEIGHT/2.0f;
+    float deltaX = xpos - lastX;
+    float deltaY = ypos - lastY;
+    lastX = xpos;
+    lastY = ypos;
+    renderer.camera.ProcessMouseMovement(deltaX, deltaY);
 }

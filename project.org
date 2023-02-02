@@ -1,6 +1,11 @@
 * Backward Euler
+** DONE Entender la parte de los signos de la matriz de la ecuación y la matriz de derivadas df_dx_s
+- La h² que multiplicaba a los factores de la matriz de derivadas ya tenía un signo negativo incorporado.
+    #+begin_src c++
+    double h2 = - h * h
+    #+end_src
 ** DONE Muelles de flexión
-** TODO Entender la parte de los signos de la matriz de la ecuación y la matriz de derivadas df_dx_s
+- Los muelles de flexión tienen una /stiffness/ de $K_\text{flexión} = \frac{K_\text{tensión}}{100}$
 ** DONE Añadir sistema de aristas para crear la cuadricula y para añadir muelles de flexión
 ** DONE Triangular
 ** DONE Fijación
