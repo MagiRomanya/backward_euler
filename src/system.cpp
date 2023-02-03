@@ -8,7 +8,6 @@ void System::update_vel_and_pos() {
             x[3*i+j] += h * v[3*i+j];
         }
     }
-    update_mesh();
 }
 
 void System::backward_euler_sparse() {
@@ -87,6 +86,7 @@ void System::update() {
     // Calculate the next velocities and positions
     backward_euler_sparse();
     update_vel_and_pos();
+    update_mesh();
 }
 
 System::~System(){
@@ -167,14 +167,12 @@ void System::load_from_mesh(SimpleMesh &mesh, double k_spring, Shader shader){
         L = mesh.distance(e1.opposite, e2.opposite);
         interactions.push_back(new Spring(e1.opposite, e2.opposite, k_flex, L));
     }
-    object = Object(mesh, shader);
+    object = Object(&mesh, shader);
 }
 
 void System::update_mesh(){
     /* Updates the positions of the mesh with the simulated data */
-    std::cout << "Mesh vertices " << mesh.vertices.size() << " System particles " << num << std::endl;
     if (num - mesh.vertices.size() != 0) return;
-    std::cout << "hello" << std::endl;
     for (unsigned int i = 0; i < num; i++){
         const vec3& current_pos = particle_position(i);
         mesh.vertices[i].Position = glm::vec3(current_pos.x(), current_pos.y(), current_pos.z());

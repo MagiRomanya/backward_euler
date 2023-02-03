@@ -40,8 +40,10 @@ int main() {
 
     system.load_from_mesh(mesh, K_SPRING, shader);
 
-    system.object.model = glm::translate(system.object.model, glm::vec3(0.0f , 0.0f, -4.0f));
-    system.object.model = glm::scale(system.object.model, glm::vec3(0.005f));
+    system.object.translation = glm::vec3(0.0f, 0.0f, -4.0f);
+    system.object.scaling = glm::vec3(0.005f);
+    system.object.updateModelMatrix();
+
     system.object.view = renderer.camera.GetViewMatrix();
     system.object.proj = glm::perspective(30.0f, 1.0f, 0.1f, 100.f);
     system.object.loadTexture("gandalf", "../../renderer/img/gandalf.png");
@@ -82,7 +84,7 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    glfwTerminate();
+
     return 0;
 }
 void processInput(GLFWwindow* window){
@@ -134,10 +136,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height){
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos){
-    static float lastX = WIDTH/2.0f;
-    static float lastY = HEIGHT/2.0f;
+    static float lastX = 0.0f;
+    static float lastY = 0.0f;
     float deltaX = xpos - lastX;
     float deltaY = ypos - lastY;
+    const float threshold = 70.0f;
+    deltaX = abs(deltaX) > threshold ? 0.0f: deltaX;
+    deltaY = abs(deltaY) > threshold ? 0.0f: deltaY;
     lastX = xpos;
     lastY = ypos;
     renderer.camera.ProcessMouseMovement(deltaX, deltaY);

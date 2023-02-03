@@ -9,7 +9,6 @@ set(SOURCE_FILES
   src/system.cpp
   src/spring.cpp
   src/vec3.cpp
-  src/spring_list.cpp
   src/clock.cpp
 )
 
