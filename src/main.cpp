@@ -7,6 +7,12 @@
 
 #include "renderer.h"
 
+// TODO Calcular las normales de la mesh en cada frame
+//  - a nivel de facetas
+//  - interpolar para tener normales a nivel de vertices
+// TODO Introducir muelles de flexión basados en los angulos
+// TODO Añadir luz phong al renderer
+
 // Dimensions of the particles grid
 #define N 20
 #define M 20
@@ -33,15 +39,16 @@ int main() {
     double step = 50;
 
     SimpleMesh mesh;
+    // mesh.loadFromFile("../../renderer/img/bunny.obj");
     CreateGrid(mesh, N, M, step);
 
-    Shader shader = Shader("/home/magi/Documents/Project/backward_euler/shaders/test.v0.vert",
-                           "/home/magi/Documents/Project/backward_euler/shaders/test.v0.frag");
+    Shader shader = Shader("../shaders/test.v0.vert", "../shaders/test.v0.frag");
 
     system.load_from_mesh(mesh, K_SPRING, shader);
 
     system.object.translation = glm::vec3(0.0f, 0.0f, -4.0f);
     system.object.scaling = glm::vec3(0.005f);
+    // system.object.scaling = glm::vec3(100.0f);
     system.object.updateModelMatrix();
 
     system.object.view = renderer.camera.GetViewMatrix();
@@ -57,7 +64,6 @@ int main() {
     system.h = 1;
 
     // Dense and sparse mass
-    system.Mass *= NODE_MASS;
     system.Mass_s *= NODE_MASS;
 
     // RAYLIB RENDERING

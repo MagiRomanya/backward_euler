@@ -30,7 +30,6 @@ class System {
         Eigen::VectorXd v;
 
         // Mass matrix
-        Eigen::MatrixXd Mass;
         Eigen::SparseMatrix<double> Mass_s;
 
         // Forces and their derivatives

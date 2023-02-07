@@ -57,7 +57,7 @@ void System::calculate_kinetic_energy() {
     /* Calculated the kinetic energy of a particle */
     for (int i = 0; i < num; i++){
         vec3 vel = particle_velocity(i);
-        energy += 0.5 * Mass(i,i) * vel.length2();
+        energy += 0.5 * Mass_s.coeff(i,i) * vel.length2();
     }
 }
 
@@ -77,7 +77,7 @@ void System::update() {
     }
 
     // Add gravity
-    double gravity = 1 * Mass(0, 0); // assuming all equal masses
+    double gravity = 1 * Mass_s.coeff(0, 0); // assuming all equal masses
     for (int i = 0; i < num ; i += 1) {
         if (!fixed[i])
             f0[3*i + 1] += gravity; // z direction
@@ -110,7 +110,6 @@ void System::update_dimensions(int new_particle_number){
      fixed.resize(num, false);
 
      // Matrices
-     Mass.resize(3*num, 3*num);
      Mass_s.resize(3*num, 3*num);
      df_dv_s.resize(3*num, 3*num);
      df_dx_s.resize(3*num, 3*num);
@@ -121,7 +120,6 @@ void System::update_dimensions(int new_particle_number){
      f0.setZero();
      delta_v.setZero();
 
-     Mass.setIdentity();
      Mass_s.setIdentity();
 }
 
