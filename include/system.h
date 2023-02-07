@@ -56,7 +56,6 @@ class System {
         double energy = 0.0;
 
         SimpleMesh mesh;
-        Object object;
 
         inline vec3 particle_position(int i) const {
             // Returns the i-th particle position
@@ -78,7 +77,7 @@ class System {
             fixed_particles.push_back(p);
         }
 
-        void load_from_mesh(SimpleMesh &mesh, double k_spring, Shader shader);
+        void load_from_mesh(const SimpleMesh &mesh, double k_spring);
 
         void update_mesh();
 

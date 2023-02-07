@@ -25,8 +25,8 @@ class Spring : public Interaction {
         Eigen::Matrix3d force_derivative(const System &s) const ;
         Eigen::Matrix3d force_derivative_finite(System &s) const ;
 
-        void add_energy(System &s) const ; // to implement
-        void add_force(System &s) const ; // To implement
+        void add_energy(System &s) const ;
+        void add_force(System &s) const ;
         void add_derivative(System &s) const ;
         void apply(System &s);
 };

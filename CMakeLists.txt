@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.13)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(BackwardEuler)
 
@@ -25,8 +26,6 @@ set(CMAKE_BUILD_TYPE Release)
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-# Generate compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 # External libraries
 find_package(Eigen3 REQUIRED)

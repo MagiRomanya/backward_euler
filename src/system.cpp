@@ -123,10 +123,11 @@ void System::update_dimensions(int new_particle_number){
      Mass_s.setIdentity();
 }
 
-void System::load_from_mesh(SimpleMesh &mesh, double k_spring, Shader shader){
+void System::load_from_mesh(const SimpleMesh &mesh, double k_spring){
     /* Reads a mesh and treats the vertices as particles and the
      * edges as springs */
     this->mesh = mesh;
+    this->mesh.isDynamic = true;
 
     const double k = k_spring;
     const double k_flex = k/ 100;
@@ -165,7 +166,6 @@ void System::load_from_mesh(SimpleMesh &mesh, double k_spring, Shader shader){
         L = mesh.distance(e1.opposite, e2.opposite);
         interactions.push_back(new Spring(e1.opposite, e2.opposite, k_flex, L));
     }
-    object = Object(&mesh, shader);
 }
 
 void System::update_mesh(){
