@@ -14,6 +14,9 @@
 //  - interpolar para tener normales a nivel de vertices
 // TODO Introducir muelles de flexión basados en los angulos
 // TODO Añadir luz phong al renderer
+// TODO Introducir contacto:
+//  - Punto <-> plano
+//  - Punto <-> esfera
 
 // Dimensions of the particles grid
 #define N 20
@@ -37,7 +40,7 @@ int main() {
     system.load_from_mesh(mesh, K_SPRING);
     system.Mass_s *= NODE_MASS;
 
-    Shader shader = Shader("../shaders/test.v0.vert", "../shaders/test.v0.frag");
+    Shader shader = Shader(SHADER_PATH"/test.v0.vert", SHADER_PATH"/test.v0.frag");
 
     Object cloth = Object(&system.mesh, shader);
 
@@ -48,7 +51,7 @@ int main() {
     cloth.updateModelMatrix();
 
     // Load a texture for the object
-    cloth.loadTexture("gandalf", "../../renderer/img/gandalf.png");
+    cloth.loadTexture("gandalf", TEXTURE_PATH"/gandalf.png");
 
     // Add the object to the renderer
     renderer.addObject(&cloth);
@@ -59,25 +62,21 @@ int main() {
     system.fix_particle(index);
     system.h = 1;
 
-
-    GLFWwindow* window = renderer.window;
-    // glfwSetCursorPosCallback(window, mouse_callback);
-
     // RENDER LOOP
     while (!renderer.windowShouldClose()){
         // Input
         renderer.cameraInput();
 
         // Simulation step
-        system.update();
+        {
+            Clock timer("Simulation Step");
+            system.update();
+        }
 
         // Render
         renderer.render();
-
-        // Swap buffers + poll events
-        glfwSwapBuffers(window);
-        glfwPollEvents();
     }
-
+    Clock results("result");
+    results.printClocks();
     return 0;
 }

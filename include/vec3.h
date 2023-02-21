@@ -56,6 +56,8 @@ class vec3 {
         double e[3];
 };
 
+vec3 normalize(const vec3& v);
+
 double dot(const vec3 &v1, const vec3 &v2);
 
 vec3 cross(const vec3 &v1, const vec3 &v2);

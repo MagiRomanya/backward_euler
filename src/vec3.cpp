@@ -50,3 +50,7 @@ std::ostream& operator<<(std::ostream& os, const vec3& v){
 os << "(" <<v.x() << ", " << v.y() << ", " << v.z() << ")";
 return os;
 }
+
+vec3 normalize(const vec3& v){
+    return v / v.length();
+}
