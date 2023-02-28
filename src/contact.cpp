@@ -4,6 +4,7 @@ float distance_point_sphere(const vec3& point, const Sphere& sphere){
     /* Distance between a point and a sphere.
      * The result is positive when the point is outside, zero when the point is on the surface,
      * and is negative when the point is inside the sphere. */
+
     const vec3 dv = point - sphere.center;
     return dv.length() - sphere.r;
 }
@@ -13,6 +14,7 @@ float distance_point_inf_plane(const vec3& point, const InfPlane& plane){
      * The result is positive when the point is in the region of space where the
      * normal of the plane points to the point, zero when the point is on the surface of the
      * plane, and it is negative if the normal points to the opposite direction of where the point is */
+
     return dot(plane.normal, plane.center - point);
 }
 

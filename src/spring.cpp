@@ -1,20 +1,25 @@
 #include "spring.h"
 
-vec3 Spring::force(const System &s) const {
+void Spring::get_state(ParticleSystem &sys){
+    unsigned int sys_index = sys.index;
+    itg_i = sys.index + i*3;
+    itg_j = sys.index + j*3;
+
+    x1 = sys.get_particle_position(i);
+    x2 = sys.get_particle_position(j);
+
+    L = (x1 - x2).length();
+}
+
+vec3 Spring::force(const Integrator &igt) const {
     /* Computes the spring force */
-    const vec3 &x1 = s.particle_position(i);
-    const vec3 &x2 = s.particle_position(j);
-    double L = (x1 - x2).length();
     double f = -k * (1.0 - L0 / L);
     vec3 force = f * (x1 - x2);
     return force;
 }
 
-double Spring::energy(const System &s) const {
+double Spring::energy(const Integrator &igt) const {
     /* Computes the spring's energy */
-    const vec3 &x1 = s.particle_position(i);
-    const vec3 &x2 = s.particle_position(j);
-    double L = (x1 - x2).length();
     double energy = 0.5 * k * (L - L0) * (L - L0);
     return energy;
 }
@@ -30,10 +35,6 @@ Eigen::Matrix3d outer_product(const vec3& v1, const vec3& v2){
 Eigen::Matrix3d Spring::force_derivative(const System &s) const {
     /*Calculates the derivative of the force of a string with respect to position
      * df/dx */
-    const vec3 &x1 = s.particle_position(i);
-    const vec3 &x2 = s.particle_position(j);
-    // Distance between particles
-    double L = (x1 -x2).length();
     // u is the normalized vector between particles 1 and 2
     vec3 u = (x1 - x2)/L;
     // Initialize the derivative matrix

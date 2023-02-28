@@ -34,14 +34,13 @@ float distance_point_fin_plane(const vec3& point, const FinPlane& plane, bool& v
 
 class Contact{
     public:
-        Contact(unsigned int particle,const Sphere& sphere);
-        Contact(unsigned int particle,const InfPlane& plane);
-        Contact(unsigned int particle,const FinPlane& plane);
+        Contact(unsigned int particle, const Sphere& sphere);
+        Contact(unsigned int particle, const InfPlane& plane);
+        Contact(unsigned int particle, const FinPlane& plane);
 
         ~Contact();
 
         GEOMETRY_TYPE geometry_type;
         void* geometry;
-    private:
 };
 #endif // CONTACT_H_

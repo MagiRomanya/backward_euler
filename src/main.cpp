@@ -42,7 +42,7 @@ int main() {
 
     Shader shader = Shader(SHADER_PATH"/test.v0.vert", SHADER_PATH"/test.v0.frag");
 
-    Object cloth = Object(&system.mesh, shader);
+    Object cloth = Object(&system.mesh, &shader);
 
     // Set up model matrix for the object
     cloth.translation = glm::vec3(0.0f, 0.0f, -4.0f);
