@@ -1,10 +1,11 @@
-#include "system.h"
-#include "spring.h"
+#include "mass_spring.hpp"
+#include "integrator.hpp"
 #include <cmath>
 #include <iostream>
 #include "clock.h"
 
 #include "renderer.h"
+#include "object_manager.hpp"
 
 // DONE: Añadir sistema de aristas para crear la cuadricula y para añadir muelles de flexión
 // DONE: Muelles de flexión
@@ -30,37 +31,36 @@
 Renderer renderer = Renderer();
 
 int main() {
-    System system;
+    Integrator integrator(1.0f);
     // separation between the particles
     double step = 50;
 
+    ObjectManager manager;
     SimpleMesh mesh;
     // mesh.loadFromFile("../../renderer/img/bunny.obj");
     CreateGrid(mesh, N, M, step);
-    system.load_from_mesh(mesh, K_SPRING);
-    system.Mass_s *= NODE_MASS;
 
-    Shader shader = Shader(SHADER_PATH"/test.v0.vert", SHADER_PATH"/test.v0.frag");
+    manager.loadMesh("cloth", mesh);
+    MassSpring mass_spring = MassSpring(&integrator ,manager.getMesh("cloth"), NODE_MASS, K_SPRING);
 
-    Object cloth = Object(&system.mesh, &shader);
+    manager.loadShader("test",SHADER_PATH"/test.v0.vert", SHADER_PATH"/test.v0.frag");
+    manager.loadTexture("gandalf", TEXTURE_PATH"/gandalf.png");
+
+    Object cloth = manager.createObject("cloth", "test");
+    cloth.useTexture("gandalf", manager.getTextureID("gandalf"));
 
     // Set up model matrix for the object
     cloth.translation = glm::vec3(0.0f, 0.0f, -4.0f);
     cloth.scaling = glm::vec3(0.005f);
-    // cloth.scaling = glm::vec3(100.0f);
     cloth.updateModelMatrix();
-
-    // Load a texture for the object
-    cloth.loadTexture("gandalf", TEXTURE_PATH"/gandalf.png");
 
     // Add the object to the renderer
     renderer.addObject(&cloth);
 
     // Fix corners
     const int index = M * (N - 1);
-    system.fix_particle(0);
-    system.fix_particle(index);
-    system.h = 1;
+    mass_spring.fix_particle(0);
+    mass_spring.fix_particle(index);
 
     // RENDER LOOP
     while (!renderer.windowShouldClose()){
@@ -70,7 +70,7 @@ int main() {
         // Simulation step
         {
             Clock timer("Simulation Step");
-            system.update();
+            integrator.integration_step();
         }
 
         // Render

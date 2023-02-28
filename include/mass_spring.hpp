@@ -7,11 +7,15 @@
 
 class MassSpring : public ParticleSystem {
     public:
-        MassSpring(SimpleMesh* mesh, double k_spring);
+        MassSpring(Integrator* integrator, SimpleMesh* mesh, double node_mass, double k_spring);
         ~MassSpring();
 
+        void update_state() override;
+
+        void update_mesh();
+
     private:
-        void load_from_mesh(SimpleMesh* mesh, double k_spring);
+        void load_from_mesh(SimpleMesh* mesh, double node_mass, double k_spring);
         SimpleMesh* mesh;
 };
 

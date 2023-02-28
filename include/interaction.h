@@ -11,7 +11,7 @@ class Interaction{
  * Examples: springs, gravity, friction, etc  */
     public:
         // virtual void apply(System &s) {}
-        virtual void apply(Integrator* integrator);
+        virtual void apply(Integrator &itg, ParticleSystem* sys) {};
 };
 
 

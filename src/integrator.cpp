@@ -1,4 +1,5 @@
 #include "integrator.hpp"
+#include <iostream>
 
 void Integrator::resize_containers() {
     f0.resize(nDoF);
@@ -29,16 +30,38 @@ void Integrator::clear_containers() {
     df_dx_triplets.clear();
     df_dv_triplets.clear();
     mass_triplets.clear();
+    equation_matrix_triplets.clear();
+}
+
+void Integrator::add_simulable(Simulable* simulable){
+    unsigned int index = this->nDoF;
+    resize_containers(this->nDoF + simulable->nDoF);
+    simulable->index = index;
+    simulable->integrator = this;
+    simulable->initialized = true;
+    simulables.push_back(simulable);
 }
 
 void Integrator::integration_step() {
     clear_containers();
 
-    // TODO: fill containers
+    if (simulables.size() == 0){
+        std::cout << "ERROR::INTEGRATOR::INTEGRATION_STEP: No simulables added!" << std::endl;
+        exit(-1);
+    }
+
+    // Fill containers
+    for (int i = 0; i < simulables.size(); i++){
+        Simulable* sim = simulables[i];
+        sim->fill_containers();
+    }
 
     implicit_euler();
 
-    // TODO: update simulables
+    // update simulables
+    for (int i = 0; i < simulables.size(); i++){
+        simulables[i]->update_state();
+    }
 }
 
 void Integrator::implicit_euler() {
@@ -50,6 +73,9 @@ void Integrator::implicit_euler() {
     equation_matrix.setFromTriplets(equation_matrix_triplets.begin(), equation_matrix_triplets.end());
 
     equation_vector = h * (f0 + h * df_dx * v);
+    std::cout << "force " << f0.isZero() << std::endl;
+    std::cout << "velocity " << v.isZero() << std::endl;
+    std::cout << "equation_vector " << equation_vector.isZero() << std::endl;
 
     // Gradient conjugate solving method class
     Eigen::ConjugateGradient<Eigen::SparseMatrix<double>> cg;

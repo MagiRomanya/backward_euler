@@ -10,6 +10,7 @@
 class ParticleSystem : public Simulable {
 
     public:
+        ParticleSystem() {}
         std::vector<Interaction*> interactions;
 
         inline void fix_particle(int p){
@@ -28,10 +29,18 @@ class ParticleSystem : public Simulable {
 
         vec3 get_particle_position(int index);
 
+        vec3 get_particle_velocity(int index);
 
-    private:
+        inline bool is_fixed(int index) { return fixed[index]; }
+
+
+    protected:
         Eigen::VectorXd x;
         Eigen::VectorXd v;
+
+        std::vector<double> mass;
+
+        unsigned int n_particles;
 
         // Fixed particles
         std::vector<bool> fixed;

@@ -7,7 +7,9 @@ project(BackwardEuler)
 
 set(SOURCE_FILES
   src/main.cpp
-  src/system.cpp
+  src/particle_system.cpp
+  src/mass_spring.cpp
+  src/integrator.cpp
   src/spring.cpp
   src/vec3.cpp
   src/clock.cpp

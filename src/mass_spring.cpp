@@ -1,7 +1,9 @@
-#include "mass_spring.hpp";
+#include "mass_spring.hpp"
 
-MassSpring::MassSpring(SimpleMesh* mesh, double k_spring) {
-    load_from_mesh(mesh, k_spring);
+MassSpring::MassSpring(Integrator* integrator, SimpleMesh* mesh, double node_mass, double k_spring)
+{
+    load_from_mesh(mesh, node_mass, k_spring);
+    integrator->add_simulable(this);
 }
 
 MassSpring::~MassSpring() {
@@ -11,7 +13,7 @@ MassSpring::~MassSpring() {
     }
 }
 
-void MassSpring::load_from_mesh(SimpleMesh* mesh, double k_spring) {
+void MassSpring::load_from_mesh(SimpleMesh* mesh, double node_mass, double k_spring) {
     /* Reads a mesh and treats the vertices as particles and the
      * edges as springs */
     this->mesh = mesh;
@@ -21,7 +23,12 @@ void MassSpring::load_from_mesh(SimpleMesh* mesh, double k_spring) {
     const double k_flex = k/ 100;
 
     const unsigned int n_coord = 3 * mesh->vertices.size();
-    resize_containers(mesh->vertices.size());
+    n_particles = mesh->vertices.size();
+    nDoF = 3 * n_particles;
+    resize_containers(nDoF);
+
+    // Mass for each node
+    mass.resize(n_particles, node_mass);
 
     for (size_t i=0; i < n_coord; i+=3){
         glm::vec3 p = mesh->vertices[i/3].Position;
@@ -54,4 +61,27 @@ void MassSpring::load_from_mesh(SimpleMesh* mesh, double k_spring) {
         L = mesh->distance(e1.opposite, e2.opposite);
         interactions.push_back(new Spring(e1.opposite, e2.opposite, k_flex, L));
     }
+}
+
+void MassSpring::update_mesh() {
+    /* Updates the positions of the mesh with the simulated data */
+    if (n_particles - mesh->vertices.size() != 0) {
+        std::cout << "ERROR::MASS_SPRING::UPDDATE_MESH: The number of particles and the number of vertices of the mesh are different" << std::endl;
+    }
+    for (unsigned int i = 0; i < n_particles; i++){
+        const vec3& current_pos = get_particle_position(i);
+        mesh->vertices[i].Position = glm::vec3(current_pos.x(), current_pos.y(), current_pos.z());
+    }
+    mesh->updateVAO();
+}
+
+void MassSpring::update_state() {
+    /* Update of the position & velocity vectors */
+    for (int i=0; i < n_particles; i++) {
+        for (int j=0; j <3; j++) {
+            v[3*i+j] += integrator->delta_v(index + 3*i+j);
+            x[3*i+j] += integrator->getTimeStep() * v(3*i+j);
+        }
+    }
+    update_mesh();
 }
