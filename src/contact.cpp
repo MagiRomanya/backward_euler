@@ -77,26 +77,18 @@ Contact::~Contact(){
 }
 
 void Contact::apply(Integrator &itg, ParticleSystem* sys) {
-    vec3 miny = vec3(0,1000000000, 0);
-    int ind;
-    for (int i = 0; i < sys->get_n_particles(); i++) {
-        if (miny.y() > -sys->get_particle_position(i).y()){
-            miny = -sys->get_particle_position(i);
-            ind = i;
-        }
-    }
-    std::cout << miny <<", " << ind << std::endl;
-
+    bool valid;
+    // std::cout << geometry->distance_point(sys->get_particle_position(19), valid) << std::endl;
     for (int i = 0; i < sys->get_n_particles(); i++) {
         ///////////// COLLISION DETECTION ///////////////
         bool valid;
         vec3 point = -sys->get_particle_position(i);
         double dist = geometry->distance_point(point, valid);
 
-        if (!(valid && dist < 0.0)) return;
-        if (sys->is_fixed(i)) return;
+        if (!valid) continue;
+        if (dist > 0) continue;
+        if (sys->is_fixed(i)) continue;
 
-        std::cout << "Hello " << i << std::endl;
         /////////////// COLLISION RESPONSE ////////////////
         vec3 direction = geometry->outward_direction(point);
         vec3 f = force(sys, direction, dist);

@@ -58,6 +58,6 @@ class Contact : public Interaction {
 
         GEOMETRY_TYPE geometry_type;
         ContactGeometry* geometry;
-        double contact_stiffness = 1.0f;
+        double contact_stiffness = 10.0f;
 };
 #endif // CONTACT_H_
