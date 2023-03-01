@@ -11,7 +11,6 @@ class ParticleSystem : public Simulable {
 
     public:
         ParticleSystem() {}
-        std::vector<Interaction*> interactions;
 
         inline void fix_particle(int p){
             // Make a particle fixed: this particle is not affected by any interaction and will not move
@@ -31,10 +30,15 @@ class ParticleSystem : public Simulable {
 
         vec3 get_particle_velocity(int index);
 
-        inline bool is_fixed(int index) { return fixed[index]; }
+        inline unsigned int get_n_particles() const { return n_particles; }
+
+        inline bool is_fixed(int index) const { return fixed[index]; }
+
+        inline void add_interaction(Interaction* interaction) { interactions.push_back(interaction); }
 
 
     protected:
+        std::vector<Interaction*> interactions;
         Eigen::VectorXd x;
         Eigen::VectorXd v;
 

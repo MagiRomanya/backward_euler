@@ -60,3 +60,9 @@ void ParticleSystem::update_state() {
         }
     }
 }
+
+void ParticleSystem::set_particle_position(int index, vec3& pos){
+    x(3 * index) = pos.x();
+    x(3 * index + 1) = pos.y();
+    x(3 * index + 2) = pos.z();
+}

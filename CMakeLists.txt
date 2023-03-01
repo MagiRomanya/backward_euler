@@ -13,6 +13,7 @@ set(SOURCE_FILES
   src/spring.cpp
   src/vec3.cpp
   src/clock.cpp
+  src/contact.cpp
 )
 
 set(RENDERER_DIR ${CMAKE_SOURCE_DIR}/../renderer/)

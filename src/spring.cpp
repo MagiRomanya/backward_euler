@@ -23,14 +23,6 @@ double Spring::energy() const {
     return energy;
 }
 
-Eigen::Matrix3d outer_product(const vec3& v1, const vec3& v2){
-    Eigen::Matrix3d result;
-    result << v1.x() * v2.x(), v1.x() * v2.y(), v1.x() * v2.z(),
-        v1.y() * v2.x(), v1.y() * v2.y(), v1.y() * v2.z(),
-        v1.z() * v2.x(), v1.z() * v2.y(), v1.z() * v2.z();
-    return result;
-}
-
 Eigen::Matrix3d Spring::force_derivative() const {
     /*Calculates the derivative of the force of a string with respect to position
      * df/dx */

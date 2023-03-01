@@ -73,9 +73,6 @@ void Integrator::implicit_euler() {
     equation_matrix.setFromTriplets(equation_matrix_triplets.begin(), equation_matrix_triplets.end());
 
     equation_vector = h * (f0 + h * df_dx * v);
-    std::cout << "force " << f0.isZero() << std::endl;
-    std::cout << "velocity " << v.isZero() << std::endl;
-    std::cout << "equation_vector " << equation_vector.isZero() << std::endl;
 
     // Gradient conjugate solving method class
     Eigen::ConjugateGradient<Eigen::SparseMatrix<double>> cg;

@@ -1,6 +1,8 @@
 #ifndef CONTACT_H_
 #define CONTACT_H_
 #include <string.h>
+
+#include "interaction.h"
 #include "vec3.h"
 
 enum GEOMETRY_TYPE {
@@ -9,38 +11,53 @@ INFPLANE = 1,
 FINPLANE = 2,
 };
 
-struct Sphere{
-    float r;
-    vec3 center;
+struct ContactGeometry {
+    virtual double distance_point(const vec3& point, bool& valid) { return 0.0; }
+    virtual vec3 outward_direction(const vec3& point) {return vec3(0, 0, 0); }
 };
 
-struct InfPlane{
+struct Sphere : public ContactGeometry {
+    double r;
+    vec3 center;
+    double distance_point(const vec3& point, bool& valid) override;
+    vec3 outward_direction(const vec3& point) override;
+};
+
+struct InfPlane : public ContactGeometry {
     vec3 normal;
     vec3 center;
+    double distance_point(const vec3& point, bool& valid) override;
+    vec3 outward_direction(const vec3& point) override;
 };
 
-struct FinPlane{
+struct FinPlane : public ContactGeometry {
     vec3 normal;
     vec3 center;
     vec3 up;
-    float radius;
+    double radius;
+    double distance_point(const vec3& point, bool& valid) override;
+    vec3 outward_direction(const vec3& point) override;
 };
 
-float distance_point_sphere(const vec3& point, const Sphere& sphere);
-
-float distance_point_inf_plane(const vec3& point, const InfPlane& plane);
-
-float distance_point_fin_plane(const vec3& point, const FinPlane& plane, bool& valid);
-
-class Contact{
+class Contact : public Interaction {
     public:
-        Contact(unsigned int particle, const Sphere& sphere);
-        Contact(unsigned int particle, const InfPlane& plane);
-        Contact(unsigned int particle, const FinPlane& plane);
+        Contact(const Sphere& sphere);
+        Contact(const InfPlane& plane);
+        Contact(const FinPlane& plane);
 
         ~Contact();
 
+        void apply(Integrator &itg, ParticleSystem* sys) override;
+
+        inline void set_stiffness(double stiffness) { contact_stiffness = stiffness; }
+
+    private:
+        vec3 force(ParticleSystem* sys, const vec3& direction, const double dist);
+
+        Eigen::Matrix3d force_derivative(ParticleSystem* sys, const vec3& direction, const double dist);
+
         GEOMETRY_TYPE geometry_type;
-        void* geometry;
+        ContactGeometry* geometry;
+        double contact_stiffness = 1.0f;
 };
 #endif // CONTACT_H_

@@ -1,8 +1,10 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include <eigen3/Eigen/Dense>
 #include <math.h>
 #include <iostream>
+#include <glm/vec3.hpp>
 
 class vec3 {
     public:
@@ -20,6 +22,9 @@ class vec3 {
 
         inline double length2() const { return e[0] * e[0] + e[1] * e[1] + e[2] * e[2]; }
         inline double length() const { return sqrt(this->length2()); }
+
+        inline glm::vec3 to_glm() const { return glm::vec3(e[0], e[1], e[2]); }
+
         void make_unit_vector();
 
         // overloading
@@ -53,6 +58,7 @@ class vec3 {
             e[2] /= s;
             return *this;
         }
+
         double e[3];
 };
 
@@ -61,6 +67,10 @@ vec3 normalize(const vec3& v);
 double dot(const vec3 &v1, const vec3 &v2);
 
 vec3 cross(const vec3 &v1, const vec3 &v2);
+
+vec3 to_vec3(glm::vec3 &v);
+
+Eigen::Matrix3d outer_product(const vec3& v1, const vec3& v2);
 
 // overloading operators
 

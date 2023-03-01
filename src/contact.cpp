@@ -1,37 +1,47 @@
 #include "contact.h"
+#include "particle_system.hpp"
 
-float distance_point_sphere(const vec3& point, const Sphere& sphere){
+double Sphere::distance_point(const vec3& point, bool& valid){
     /* Distance between a point and a sphere.
      * The result is positive when the point is outside, zero when the point is on the surface,
      * and is negative when the point is inside the sphere. */
 
-    const vec3 dv = point - sphere.center;
-    return dv.length() - sphere.r;
+    valid = true;
+    const vec3 dv = point - center;
+    return dv.length() - r;
 }
 
-float distance_point_inf_plane(const vec3& point, const InfPlane& plane){
+vec3 Sphere::outward_direction(const vec3& point){
+    return normalize(point - center);
+}
+
+double InfPlane::distance_point(const vec3& point, bool& valid){
     /* Distance between a point and a plane.
      * The result is positive when the point is in the region of space where the
      * normal of the plane points to the point, zero when the point is on the surface of the
      * plane, and it is negative if the normal points to the opposite direction of where the point is */
-
-    return dot(plane.normal, plane.center - point);
+    valid = true;
+    return dot(normal, center - point);
 }
 
-float distance_point_fin_plane(const vec3& point, const FinPlane& plane, bool& valid){
+vec3 InfPlane::outward_direction(const vec3 &point){
+    return normal;
+}
+
+double FinPlane::distance_point(const vec3& point,  bool& valid){
     /* Returns the distance between a finite plane and a point.
      * The valid bool means weather or not the point is inside the finite
      * plane domain or, on the contrary, is outside of it. */
 
-    const float d = dot(plane.normal, plane.center - point);
-    const vec3& intersection = point - d * plane.normal;
-    const vec3& tangent = normalize(cross(plane.up, plane.normal));
-    const vec3& bitangent = normalize(cross(plane.normal, tangent));
-    if (abs(dot(intersection - point, tangent)) > plane.radius) {
+    const double d = dot(normal, center - point);
+    const vec3& intersection = point - d * normal;
+    const vec3& tangent = normalize(cross(up, normal));
+    const vec3& bitangent = normalize(cross(normal, tangent));
+    if (abs(dot(intersection - point, tangent)) > radius) {
         valid = false;
         return 0.0f;
     }
-    if (abs(dot(intersection - point, bitangent)) > plane.radius) {
+    if (abs(dot(intersection - point, bitangent)) > radius) {
         valid = false;
         return 0.0f;
     }
@@ -39,25 +49,76 @@ float distance_point_fin_plane(const vec3& point, const FinPlane& plane, bool& v
     return d;
 }
 
-Contact::Contact(unsigned int particle, const Sphere& sphere){
+vec3 FinPlane::outward_direction(const vec3 &point){
+    return normal;
+}
+
+Contact::Contact(const Sphere& sphere){
     geometry_type = SPHERE;
-    geometry = malloc(sizeof(Sphere));
-    memcpy(geometry, (void*) &sphere, sizeof(Sphere));
+    geometry = (ContactGeometry*) malloc(sizeof(Sphere));
+    memcpy((void*) geometry, (void*) &sphere, sizeof(Sphere));
 }
 
-Contact::Contact(unsigned int particle, const InfPlane& plane){
+Contact::Contact(const InfPlane& plane){
     geometry_type = INFPLANE;
-    geometry = malloc(sizeof(InfPlane));
-    memcpy(geometry, (void*) &plane, sizeof(InfPlane));
+    geometry = (ContactGeometry*) malloc(sizeof(InfPlane));
+    memcpy((void*) geometry, (void*) &plane, sizeof(InfPlane));
 }
 
-Contact::Contact(unsigned int particle, const FinPlane& plane){
+Contact::Contact(const FinPlane& plane){
     geometry_type = FINPLANE;
-    geometry = malloc(sizeof(InfPlane));
-    memcpy(geometry, (void*) &plane, sizeof(FinPlane));
+    geometry = (ContactGeometry*) malloc(sizeof(FinPlane));
+    memcpy((void*) geometry, (void*) &plane, sizeof(FinPlane));
 }
 
 Contact::~Contact(){
     // Destroy geometry
     free(geometry);
+}
+
+void Contact::apply(Integrator &itg, ParticleSystem* sys) {
+    vec3 miny = vec3(0,1000000000, 0);
+    int ind;
+    for (int i = 0; i < sys->get_n_particles(); i++) {
+        if (miny.y() > -sys->get_particle_position(i).y()){
+            miny = -sys->get_particle_position(i);
+            ind = i;
+        }
+    }
+    std::cout << miny <<", " << ind << std::endl;
+
+    for (int i = 0; i < sys->get_n_particles(); i++) {
+        ///////////// COLLISION DETECTION ///////////////
+        bool valid;
+        vec3 point = -sys->get_particle_position(i);
+        double dist = geometry->distance_point(point, valid);
+
+        if (!(valid && dist < 0.0)) return;
+        if (sys->is_fixed(i)) return;
+
+        std::cout << "Hello " << i << std::endl;
+        /////////////// COLLISION RESPONSE ////////////////
+        vec3 direction = geometry->outward_direction(point);
+        vec3 f = force(sys, direction, dist);
+        itg.f0(sys->index + 3*i) = f.x();
+        itg.f0(sys->index + 3*i+1) = f.y();
+        itg.f0(sys->index + 3*i+2) = f.z();
+
+        Eigen::Matrix3d df_dx = force_derivative(sys, direction, dist);
+        typedef Eigen::Triplet<double> tri;
+        for (int j = 0; j < 3; j++){
+            for (int k = 0; k < 3; k++) {
+                itg.add_df_dx_triplet(tri(sys->index + 3*i+j, sys->index + 3*i+k, df_dx(j,k)));
+            }
+        }
+    }
+
+}
+
+vec3 Contact::force(ParticleSystem* sys, const vec3& direction, const double dist) {
+    return - contact_stiffness * dist * direction;
+}
+
+Eigen::Matrix3d Contact::force_derivative(ParticleSystem* sys, const vec3& direction, const double dist) {
+    return - contact_stiffness * Eigen::Matrix3d::Identity();
 }
