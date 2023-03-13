@@ -19,9 +19,9 @@ class Simulable {
          *  - The positions and velocities x and v
          *  - The force and it's derivatives
         */
-        virtual void fill_containers() {};
+        virtual void fill_containers() = 0;
 
-        virtual void update_state() {};
+        virtual void update_state() = 0;
 
 };
 

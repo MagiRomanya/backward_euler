@@ -126,6 +126,7 @@ void MassSpring::update_mesh() {
         // glm_pos = obj->toLocal(glm_pos);
         mesh->vertices[i].Position = glm_pos;
     }
+    mesh->calculate_vertex_normals();
     mesh->updateVAO();
 }
 

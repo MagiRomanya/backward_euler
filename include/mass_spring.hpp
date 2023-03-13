@@ -7,7 +7,9 @@
 
 class MassSpring : public ParticleSystem {
     public:
+
         MassSpring(Integrator* integrator, Object* obj, double node_mass, double k_spring);
+
         ~MassSpring();
 
         void fill_containers() override;
