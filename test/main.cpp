@@ -1,36 +1,33 @@
 #include <iostream>
-#include "mesh.h"
-#include <vector>
+#include <string.h>
 
+class A{
+    public:
+        virtual void sayHello() {
+            std::cout << "hello from A" << std::endl;
+        }
+};
+
+class B : public A {
+    public:
+        double hola, que, tal;
+        void sayHello() override {
+            std::cout << "hello from B" << std::endl;
+        }
+};
 
 int main(int argc, char *argv[]) {
+    A a;
+    B b;
+    A* bptr = (A*) malloc(sizeof(B));
+    memcpy((void*) bptr, (void*) &b, sizeof(B));
 
-    SimpleMesh m;
+    a.sayHello();
+    b.sayHello();
 
-    CreateGrid(m, 2, 2, 1);
+    bptr->sayHello();
 
-    std::vector<Edge> internalEdges;
-    std::vector<Edge> externalEdges;
-
-    m.boundary(internalEdges, externalEdges);
-
-    std::cout << "Internal edges: " << std::endl;
-    for (int i = 0; i < internalEdges.size(); i+=2){
-        Edge& e1 = internalEdges[i];
-        Edge& e2 = internalEdges[i+1];
-        std::cout << e1.a <<", "<< e1.b<<", "  << e1.opposite << "\t\t"<< e2.a <<", " << e2.b <<", " << e2.opposite << std::endl;
-    }
-
-
-    std::cout << "External edges: " << std::endl;
-    for (int i = 0; i < externalEdges.size(); i++){
-        Edge& e = externalEdges[i];
-        std::cout << e.a << ", " << e.b << std::endl;
-    }
-
-    std::cout << "Internal edges size: " << internalEdges.size() << std::endl;
-    std::cout << "External edges size: " << externalEdges.size() << std::endl;
-    std::cout << "Total size: " << externalEdges.size() + internalEdges.size() << std::endl;
-
+    std::cout << "Hello World" << std::endl;
+    free(bptr);
     return 0;
 }

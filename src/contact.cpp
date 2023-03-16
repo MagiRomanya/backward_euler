@@ -21,7 +21,7 @@ double InfPlane::distance_point(const vec3& point, bool& valid){
      * normal of the plane points to the point, zero when the point is on the surface of the
      * plane, and it is negative if the normal points to the opposite direction of where the point is */
     valid = true;
-    return dot(normal, center - point);
+    return dot(normal, point - center);
 }
 
 vec3 InfPlane::outward_direction(const vec3 &point){
@@ -82,7 +82,7 @@ void Contact::apply(Integrator &itg, ParticleSystem* sys) {
     for (int i = 0; i < sys->get_n_particles(); i++) {
         ///////////// COLLISION DETECTION ///////////////
         bool valid;
-        vec3 point = -sys->get_particle_position(i);
+        vec3 point = sys->get_particle_position(i);
         double dist = geometry->distance_point(point, valid);
 
         if (!valid) continue;

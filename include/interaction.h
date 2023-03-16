@@ -10,7 +10,6 @@ class Interaction{
 /* Abstract class which represents any interaction that can apply force to a particle
  * Examples: springs, gravity, friction, etc  */
     public:
-        // virtual void apply(System &s) {}
         virtual void apply(Integrator &itg, ParticleSystem* sys) = 0;
 };
 

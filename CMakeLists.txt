@@ -9,11 +9,13 @@ set(SOURCE_FILES
   src/main.cpp
   src/particle_system.cpp
   src/mass_spring.cpp
+  src/mass_spring_gui.cpp
   src/integrator.cpp
   src/spring.cpp
   src/vec3.cpp
   src/clock.cpp
   src/contact.cpp
+  src/gravity.cpp
 )
 
 set(RENDERER_DIR ${CMAKE_SOURCE_DIR}/../renderer/)

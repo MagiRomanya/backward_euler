@@ -1,5 +1,6 @@
 #include "mass_spring.hpp"
 #include "clock.h"
+#include "gravity.hpp"
 
 MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass, double k_spring)
 {
@@ -9,8 +10,8 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass, do
 
 MassSpring::~MassSpring() {
     // The interactions were created in the heap
-    for (int i = 0; i < interactions.size(); i++){
-        delete interactions[i];
+    for (int i = 0; i < class_allocated_interactions.size(); i++){
+        delete class_allocated_interactions[i];
     }
 }
 
@@ -46,10 +47,14 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
     mesh->boundary(internalEdges, externalEdges);
 
     double L;
+    Interaction* spring = nullptr;
+
     for (size_t i=0; i < externalEdges.size(); i++){
         Edge &e = externalEdges[i];
         L = mesh->distance(e.a, e.b);
-        interactions.push_back(new Spring(e.a, e.b, k, L));
+        spring = new Spring(e.a, e.b, k, L);
+        class_allocated_interactions.push_back(spring);
+        interactions.push_back(spring);
     }
 
     for (size_t i=0; i < internalEdges.size(); i+=2){
@@ -57,15 +62,27 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
         Edge &e2 = internalEdges[i+1];
         L = mesh->distance(e1.a, e1.b);
         // Normal spring
-        interactions.push_back(new Spring(e1.a, e1.b, k, L));
+        spring = new Spring(e1.a, e1.b, k, L);
+        class_allocated_interactions.push_back(spring);
+        interactions.push_back(spring);
 
         // Flex spring
         L = mesh->distance(e1.opposite, e2.opposite);
-        interactions.push_back(new Spring(e1.opposite, e2.opposite, k_flex, L));
+        spring = new Spring(e1.opposite, e2.opposite, k_flex, L);
+        class_allocated_interactions.push_back(spring);
+        interactions.push_back(spring);
     }
+
+    // Add gravity
+    Interaction* gravity = new Gravity(mass[0] * vec3(0, -1, 0));
+    class_allocated_interactions.push_back(gravity);
+    interactions.push_back(gravity);
 }
 
 void MassSpring::fill_containers() {
+    /* Fills the force, velocity and position vectors and mass and
+     * force derivative matrices */
+
     // construct the mass matrix
     typedef Eigen::Triplet<double> tri;
     for (int i = 0; i < n_particles; i++) {
@@ -81,8 +98,10 @@ void MassSpring::fill_containers() {
         integrator->add_equation_triplet(tri(index + 3*i+2, index + 3*i+2, mass[i]));
     }
 
-    // Change to the position coordinate system
-    positions_to_world();
+    // Change to the world coordinate system
+    if (current_coordinate_system == LOCAL){
+        positions_to_world();
+    }
 
     // Fill the velocity and positions vectors
     for (int i = 0; i < nDoF; i++){
@@ -90,12 +109,6 @@ void MassSpring::fill_containers() {
         integrator->v[index+i] = v(i);
     }
 
-    // Add gravity
-    double gravity = mass[0]; // assuming all equal masses
-    for (int i = 0; i < n_particles ; i += 1) {
-        if (!fixed[i])
-            integrator->f0[3*i + 1] += gravity; // z direction
-    }
     // Fill the force and derivative vectors
     for (int i = 0; i < interactions.size(); i++){
         interactions[i]->apply(*integrator, this);
@@ -110,12 +123,16 @@ void MassSpring::update_state() {
             x[3*i+j] += integrator->getTimeStep() * v(3*i+j);
         }
     }
-    positions_to_local();
     update_mesh();
 }
 
 void MassSpring::update_mesh() {
     /* Updates the positions of the mesh with the simulated data */
+
+    if (current_coordinate_system == WORLD) {
+        positions_to_local();
+    }
+
     if (n_particles - mesh->vertices.size() != 0) {
         std::cout << "ERROR::MASS_SPRING::UPDDATE_MESH: The number of particles and the number of vertices of the mesh are different" << std::endl;
     }
@@ -123,7 +140,6 @@ void MassSpring::update_mesh() {
     for (unsigned int i = 0; i < n_particles; i++){
         const vec3& current_pos = get_particle_position(i);
         glm::vec3 glm_pos = glm::vec3(current_pos.x(), current_pos.y(), current_pos.z());
-        // glm_pos = obj->toLocal(glm_pos);
         mesh->vertices[i].Position = glm_pos;
     }
     mesh->calculate_vertex_normals();
@@ -131,7 +147,8 @@ void MassSpring::update_mesh() {
 }
 
 void MassSpring::positions_to_local() {
-    // Convert to world coordinates
+    // Convert to mesh local coordinates
+    current_coordinate_system = LOCAL;
     for (int i = 0; i < n_particles; i++){
         glm::vec3 local_pos_glm = obj->toLocal(get_particle_position(i).to_glm());
         vec3 local_pos = to_vec3(local_pos_glm);
@@ -141,6 +158,7 @@ void MassSpring::positions_to_local() {
 
 void MassSpring::positions_to_world(){
     // Convert to world coordinates
+    current_coordinate_system = WORLD;
     for (int i = 0; i < n_particles; i++){
         glm::vec3 world_pos_glm = obj->toWorld(get_particle_position(i).to_glm());
         vec3 world_pos = to_vec3(world_pos_glm);

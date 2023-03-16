@@ -34,6 +34,8 @@ class ParticleSystem : public Simulable {
 
         inline bool is_fixed(int index) const { return fixed[index]; }
 
+        inline std::vector<int> get_fixed_particles() {return fixed_particles; }
+
         inline void add_interaction(Interaction* interaction) { interactions.push_back(interaction); }
 
 

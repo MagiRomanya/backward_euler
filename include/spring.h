@@ -15,6 +15,8 @@ class Spring : public Interaction {
         Spring(unsigned int pi, unsigned int pj, double sk, double sL0)
             : i(pi), j(pj), k(sk), L0(sL0) { }
 
+        ~Spring() {};
+
         // The two particles bound by a spring (in ParticleSystem coordinates)
         unsigned int i, j;
         // The spring stiffness & the spring rest length

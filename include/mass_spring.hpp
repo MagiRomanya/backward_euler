@@ -5,6 +5,11 @@
 #include "particle_system.hpp"
 #include "spring.h"
 
+enum COORDINATE_SYSTEM {
+LOCAL,
+WORLD,
+};
+
 class MassSpring : public ParticleSystem {
     public:
 
@@ -16,15 +21,17 @@ class MassSpring : public ParticleSystem {
 
         void update_state() override;
 
+    private:
         void update_mesh();
 
-    private:
         void positions_to_local();
 
         void positions_to_world();
 
         void load_from_mesh(Object* obj, double node_mass, double k_spring);
 
+        COORDINATE_SYSTEM current_coordinate_system = LOCAL;
+        std::vector<Interaction*> class_allocated_interactions;
         SimpleMesh* mesh = nullptr;
         Object* obj = nullptr;
 };

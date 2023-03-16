@@ -39,12 +39,6 @@ void ParticleSystem::fill_containers() {
         integrator->v[index+i] = v(i);
     }
 
-    // Add gravity
-    double gravity = mass[0]; // assuming all equal masses
-    for (int i = 0; i < n_particles ; i += 1) {
-        if (!fixed[i])
-            integrator->f0[3*i + 1] += gravity; // z direction
-    }
     // Fill the force and derivative vectors
     for (int i = 0; i < interactions.size(); i++){
         interactions[i]->apply(*integrator, this);
