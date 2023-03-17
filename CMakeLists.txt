@@ -18,9 +18,10 @@ set(SOURCE_FILES
   src/gravity.cpp
 )
 
-set(RENDERER_DIR ${CMAKE_SOURCE_DIR}/../renderer/)
+set(RENDERER_DIR ${CMAKE_SOURCE_DIR}/../Renderer/)
 
 add_subdirectory(${RENDERER_DIR} ${CMAKE_SOURCE_DIR}/build/render)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11/)
 
 # set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
@@ -38,6 +39,7 @@ find_package(Eigen3 REQUIRED)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
+  ${CMAKE_CURRENT_SOURCE_DIR}/external/pybind/include/
   ${EIGEN_INCLUDE_DIR}
   ${RENDERER_DIR}/include/
 )

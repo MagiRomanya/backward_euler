@@ -41,7 +41,6 @@ int main() {
     CreateGrid(planeMesh, N, M, step);
 
     manager.loadMesh("bunny", TEXTURE_PATH"/bunny.obj");
-    manager.loadMesh("axis", TEXTURE_PATH"/3d_axis.obj");
     manager.loadMesh("cloth", mesh);
     manager.loadMesh("plane", planeMesh);
 
@@ -55,8 +54,6 @@ int main() {
 
     Object floor = manager.createObject("plane", "texture", "geo_normals");
     Object cloth = manager.createObject("cloth", "texture", "geo_normals");
-    Object axis = manager.createObject("axis", "color");
-    Object axis2 = manager.createObject("axis", "normals");
     Object bunny = manager.createObject("bunny", "normals");
 
 
@@ -75,7 +72,6 @@ int main() {
     // Add the object to the renderer
     renderer.addObject(&cloth);
     renderer.addObject(&floor);
-    renderer.addObject(&axis);
 
     ////////////////// ADD INTEGRATOR & SIMULABLES ////////////////////
     Integrator integrator(0.05f);
