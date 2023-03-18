@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/eigen.h>
 
 int add(int i, int j) {
     return i + j;
@@ -21,11 +22,18 @@ int add(int i, int j) {
 #define K_SPRING 100000
 #define NODE_MASS 100
 
+Renderer renderer;
+ObjectManager manager;
+Integrator integrator(0.05f);
+MassSpring* mass_spring;
 
-int pymain() {
+Object mfloor;
+Object cloth;
+Object bunny;
+Contact* planeContact;
+
+int initialize_scene(){
     ///////////////// CREATE RENDERER & MESHES /////////////////////
-    Renderer renderer;
-    ObjectManager manager;
 
     double step = 0.5;
     SimpleMesh mesh;
@@ -45,44 +53,47 @@ int pymain() {
     manager.loadTexture("gandalf", TEXTURE_PATH"/gandalf.png");
     manager.loadTexture("suelo", TEXTURE_PATH"/suelo.jpg");
 
-    Object floor = manager.createObject("plane", "texture", "geo_normals");
-    Object cloth = manager.createObject("cloth", "texture", "geo_normals");
-    Object bunny = manager.createObject("bunny", "normals");
+     mfloor = manager.createObject("plane", "texture", "geo_normals");
+     cloth = manager.createObject("cloth", "texture", "geo_normals");
+     bunny = manager.createObject("bunny", "normals");
 
 
     cloth.useTexture("gandalf", manager.getTextureID("gandalf"));
-    floor.useTexture("gandalf", manager.getTextureID("suelo"));
+    mfloor.useTexture("gandalf", manager.getTextureID("suelo"));
 
     // Set up model matrix for the object
     cloth.translation = glm::vec3(0.0f, 0.25 * N, -4.0f);
     // cloth.scaling = glm::vec3(3.0);
     cloth.updateModelMatrix();
 
-    floor.translation = glm::vec3(-25.0f, -1.05f, -25.0f);
-    floor.scaling = glm::vec3(5);
-    floor.updateModelMatrix();
+    mfloor.translation = glm::vec3(-25.0f, -1.05f, -25.0f);
+    mfloor.scaling = glm::vec3(5);
+    mfloor.updateModelMatrix();
 
     // Add the object to the renderer
     renderer.addObject(&cloth);
-    renderer.addObject(&floor);
+    renderer.addObject(&mfloor);
 
     ////////////////// ADD INTEGRATOR & SIMULABLES ////////////////////
-    Integrator integrator(0.05f);
-    MassSpring mass_spring = MassSpring(&integrator , &cloth, NODE_MASS, K_SPRING);
-    MassSpringGUI mass_spring_gui = MassSpringGUI(&mass_spring, &renderer);
+    mass_spring = new MassSpring(&integrator , &cloth, NODE_MASS, K_SPRING);
+    // MassSpringGUI mass_spring_gui = MassSpringGUI(mass_spring, &renderer);
 
     InfPlane plane;
     plane.normal = vec3(0, 1, 0);
     plane.center = vec3(0, -1, 0);
-    Contact planeContact(plane);
-    mass_spring.add_interaction(&planeContact);
+    planeContact = new Contact(plane);
+    mass_spring->add_interaction(planeContact);
 
 
     // Fix corners
     const int index = M * (N - 1);
-    mass_spring.fix_particle(0);
-    mass_spring.fix_particle(index);
+    mass_spring->fix_particle(0);
+    mass_spring->fix_particle(index);
 
+    return 0;
+}
+
+int pymain() {
     // RENDER LOOP
     while (!renderer.windowShouldClose()){
         // Input
@@ -99,7 +110,37 @@ int pymain() {
     }
     Clock results("result");
     results.printClocks();
+    delete mass_spring;
+    delete planeContact;
     return 0;
+}
+
+void pyFillContainers(){
+    integrator.fill_containers();
+}
+
+void pyRecieveDeltaV(Eigen::VectorXd delta_v){
+    integrator.reciveDeltaV(delta_v);
+}
+
+Eigen::SparseMatrix<double> pyGetEquationMatrix(){
+    return integrator.getEquationMatrix();
+}
+
+Eigen::VectorXd pyGetEquationVector(){
+    return integrator.getEquationVector();
+}
+
+void pyRenderState(){
+    renderer.render();
+}
+
+bool pyWindowShouldClose(){
+    return renderer.windowShouldClose();
+}
+
+void pyCameraInput() {
+    renderer.cameraInput();
 }
 
 PYBIND11_MODULE(symulathon, m) {
@@ -107,5 +148,21 @@ PYBIND11_MODULE(symulathon, m) {
 
     m.def("add", &add, "A function that adds two numbers");
 
-    m.def("main", &pymain, "testing weather or not this works");
+    m.def("initialize_scene", &initialize_scene, "Generates the context + the objects in the scene");
+
+    m.def("fill_containers", &pyFillContainers, "Fills the position, velocity, force and derivative containers");
+
+    m.def("recieve_delta_v", &pyRecieveDeltaV, "Accepts an increment of velocity and updates the system");
+
+    m.def("get_equation_matrix", &pyGetEquationMatrix, "Returns the current equation matrix");
+
+    m.def("get_equation_vector", &pyGetEquationVector, "Returns the current equation vector");
+
+    m.def("render_state", &pyRenderState, "Renders the simulation");
+
+    m.def("window_should_close", &pyWindowShouldClose, "Tells weather or not the window should close");
+
+    m.def("process_input", &pyCameraInput, "Reads and process the window's input");
+
+    m.def("mainloop", &pymain, "testing weather or not this works");
 }

@@ -43,6 +43,14 @@ class Integrator {
         inline void add_equation_triplet(tri triplet) { equation_matrix_triplets.push_back(triplet); }
         inline void add_mass_triplet(tri triplet) { mass_triplets.push_back(triplet); }
 
+        void fill_containers();
+
+        Eigen::SparseMatrix<double> getEquationMatrix();
+
+        Eigen::VectorXd getEquationVector();
+
+        void reciveDeltaV(Eigen::VectorXd delta_v);
+
         void add_simulable(Simulable* simulable);
 
     private:
