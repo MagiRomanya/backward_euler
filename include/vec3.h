@@ -1,7 +1,7 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <math.h>
 #include <iostream>
 #include <glm/vec3.hpp>

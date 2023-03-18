@@ -6,7 +6,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(BackwardEuler)
 
 set(SOURCE_FILES
-  src/main.cpp
   src/particle_system.cpp
   src/mass_spring.cpp
   src/mass_spring_gui.cpp
@@ -17,11 +16,16 @@ set(SOURCE_FILES
   src/contact.cpp
   src/gravity.cpp
 )
+set(SOURCE_FILES_MAIN
+  ${SOURCE_FILES}
+  src/main.cpp
+  )
 
 set(RENDERER_DIR ${CMAKE_SOURCE_DIR}/../Renderer/)
 
 add_subdirectory(${RENDERER_DIR} ${CMAKE_SOURCE_DIR}/build/render)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11/)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/)
 
 # set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
@@ -31,20 +35,34 @@ set(CMAKE_BUILD_TYPE Release)
 # set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -g)
 # set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -O3)
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-
-
-# External libraries
-find_package(Eigen3 REQUIRED)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES_MAIN})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
-  ${CMAKE_CURRENT_SOURCE_DIR}/external/pybind/include/
-  ${EIGEN_INCLUDE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/
   ${RENDERER_DIR}/include/
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
   renderer
-  ${EIGEN_LIBRARIES}
+)
+
+set(PYTHON_MODULE_NAME "symulathon")
+
+set(PYTHON_MODULE_SRC
+  ${SOURCE_FILES}
+  src/pybinding.cpp
+  )
+
+pybind11_add_module(${PYTHON_MODULE_NAME} MODULE ${PYTHON_MODULE_SRC})
+
+target_include_directories(${PYTHON_MODULE_NAME} PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/
+  ${CMAKE_CURRENT_SOURCE_DIR}/external/pybind/include/
+  ${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/
+  ${RENDERER_DIR}/include/
+)
+
+target_link_libraries(${PYTHON_MODULE_NAME} PUBLIC
+  renderer
 )

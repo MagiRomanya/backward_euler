@@ -1,10 +1,10 @@
 #ifndef INTEGRATOR_H_
 #define INTEGRATOR_H_
 
-#include <eigen3/Eigen/Sparse>
-#include <eigen3/Eigen/Dense>
-#include <eigen3/Eigen/Eigen>
-#include <eigen3/Eigen/IterativeLinearSolvers>
+#include <Eigen/Sparse>
+#include <Eigen/Dense>
+#include <Eigen/Eigen>
+#include <Eigen/IterativeLinearSolvers>
 
 #include <vector>
 
