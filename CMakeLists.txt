@@ -15,6 +15,8 @@ set(SOURCE_FILES
   src/clock.cpp
   src/contact.cpp
   src/gravity.cpp
+  src/rigid_body.cpp
+  src/length_constraint.cpp
 )
 set(SOURCE_FILES_MAIN
   ${SOURCE_FILES}

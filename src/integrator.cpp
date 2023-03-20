@@ -6,6 +6,7 @@ void Integrator::resize_containers() {
     x.resize(nDoF);
     v.resize(nDoF);
     delta_v.resize(nDoF);
+    constraint_value.resize(nConstraints);
 
     mass.resize(nDoF, nDoF);
     df_dv.resize(nDoF, nDoF);
@@ -14,8 +15,9 @@ void Integrator::resize_containers() {
     clear_containers();
 }
 
-void Integrator::resize_containers(unsigned int newDoF) {
+void Integrator::resize_containers(unsigned int newDoF, unsigned int newNConstraints) {
     nDoF = newDoF;
+    nConstraints = newNConstraints;
     resize_containers();
 }
 
@@ -35,11 +37,20 @@ void Integrator::clear_containers() {
 
 void Integrator::add_simulable(Simulable* simulable){
     unsigned int index = this->nDoF;
-    resize_containers(this->nDoF + simulable->nDoF);
+    resize_containers(this->nDoF + simulable->nDoF, nConstraints);
     simulable->index = index;
     simulable->integrator = this;
     simulable->initialized = true;
     simulables.push_back(simulable);
+    update_constraint_indices();
+}
+
+void Integrator::add_constraint(Constraint* constraint){
+    unsigned int index = this->nConstraints;
+    resize_containers(nDoF, nConstraints + constraint->nConstraints);
+    constraint->index = index;
+    constraint->itg = this;
+    constraints.push_back(constraint);
 }
 
 void Integrator::integration_step() {
@@ -59,9 +70,15 @@ void Integrator::implicit_euler() {
 
     df_dx.setFromTriplets(df_dx_triplets.begin(), df_dx_triplets.end());
     df_dv.setFromTriplets(df_dv_triplets.begin(), df_dv_triplets.end());
-    equation_matrix.setFromTriplets(equation_matrix_triplets.begin(), equation_matrix_triplets.end());
 
-    equation_vector = h * (f0 + h * df_dx * v);
+    if (nConstraints) {
+        generate_equation_with_constraints(equation_matrix, equation_vector);
+    }
+    else {
+        equation_matrix.setFromTriplets(equation_matrix_triplets.begin(), equation_matrix_triplets.end());
+
+        equation_vector = h * (f0 + h * df_dx * v);
+    }
 
     // Gradient conjugate solving method class
     Eigen::ConjugateGradient<Eigen::SparseMatrix<double>> cg;
@@ -81,13 +98,39 @@ void Integrator::fill_containers(){
     }
 
     // Fill containers
-    for (int i = 0; i < simulables.size(); i++){
+    for (int i = 0; i < simulables.size(); i++) {
         Simulable* sim = simulables[i];
         sim->fill_containers();
     }
 }
 
-void Integrator::reciveDeltaV(Eigen::VectorXd delta_v){
+void Integrator::generate_equation_with_constraints(Eigen::SparseMatrix<double>& equation_matrix, Eigen::VectorXd equation_vector) {
+    /* Constructs the equation matrix and equation vector assuming the  */
+    Eigen::VectorXd b = h * (f0 + h * df_dx * v);
+
+    for (size_t i = 0; i < constraint_jacobian_triplets.size(); i++) {
+        tri& t = constraint_jacobian_triplets[i];
+        equation_matrix_triplets.push_back(t);
+    }
+
+    equation_matrix.resize(nDoF + nConstraints, nDoF + nConstraints);
+    equation_matrix.setFromTriplets(equation_matrix_triplets.begin(), equation_matrix_triplets.end());
+
+    equation_vector.resize(equation_vector.size() + constraint_value.size());
+    Eigen::VectorXd constraint_term = - 1.0 / h * constraint_value;
+    equation_vector << equation_vector, constraint_term;
+}
+
+void Integrator::update_constraint_indices() {
+    /* Sets the index for the constraint jacobian matrix */
+    unsigned int ind = nDoF;
+    for (size_t i = 0; i < constraints.size(); i++) {
+        ind += constraints[i]->nConstraints;
+        constraints[i]->jindex = ind;
+    }
+}
+
+void Integrator::reciveDeltaV(Eigen::VectorXd delta_v) {
     // update simulables
     this->delta_v = delta_v;
     for (int i = 0; i < simulables.size(); i++){
@@ -95,19 +138,17 @@ void Integrator::reciveDeltaV(Eigen::VectorXd delta_v){
     }
 }
 
-Eigen::SparseMatrix<double> Integrator::getEquationMatrix(){
+Eigen::SparseMatrix<double> Integrator::getEquationMatrix() {
     Eigen::SparseMatrix<double> equation_matrix(nDoF, nDoF);
     equation_matrix.setFromTriplets(equation_matrix_triplets.begin(), equation_matrix_triplets.end());
     return equation_matrix;
 }
 
 
-Eigen::VectorXd Integrator::getEquationVector(){
+Eigen::VectorXd Integrator::getEquationVector() {
     Eigen::VectorXd equation_vector;
     df_dx.setFromTriplets(df_dx_triplets.begin(), df_dx_triplets.end());
     df_dv.setFromTriplets(df_dv_triplets.begin(), df_dv_triplets.end());
     equation_vector = h * (f0 + h * df_dx * v);
-    // std::cout << equation_vector.size() << std::endl;
-    // std::cout << equation_vector << std::endl;
     return equation_vector;
 }

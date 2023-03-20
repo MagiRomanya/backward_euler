@@ -9,6 +9,7 @@
 #include "mass_spring_gui.hpp"
 #include "renderer.h"
 #include "object_manager.hpp"
+#include "rigid_body.hpp"
 
 // DONE: Añadir sistema de aristas para crear la cuadricula y para añadir muelles de flexión
 // DONE: Muelles de flexión
@@ -40,7 +41,8 @@ int main() {
     CreateGrid(mesh, N, M, step);
     CreateGrid(planeMesh, N, M, step);
 
-    manager.loadMesh("bunny", TEXTURE_PATH"/bunny.obj");
+    // manager.loadMesh("bunny", "/home/magi/Escriptori/dani.obj");
+    manager.loadMesh("bunny", MESH_PATH"/bunny.obj");
     manager.loadMesh("cloth", mesh);
     manager.loadMesh("plane", planeMesh);
 
@@ -72,6 +74,7 @@ int main() {
     // Add the object to the renderer
     renderer.addObject(&cloth);
     renderer.addObject(&floor);
+    renderer.addObject(&bunny);
 
     ////////////////// ADD INTEGRATOR & SIMULABLES ////////////////////
     Integrator integrator(0.05f);
@@ -84,6 +87,7 @@ int main() {
     Contact planeContact(plane);
     mass_spring.add_interaction(&planeContact);
 
+    RigidBody rb = RigidBody(&integrator, &bunny, 100.0f);
 
     // Fix corners
     const int index = M * (N - 1);

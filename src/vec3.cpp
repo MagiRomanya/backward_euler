@@ -66,3 +66,19 @@ Eigen::Matrix3d outer_product(const vec3& v1, const vec3& v2){
 vec3 to_vec3(glm::vec3 &v){
     return vec3(v.x, v.y, v.z);
 }
+
+Eigen::Matrix3d skew(const vec3& v){
+    Eigen::Matrix3d result;
+    result << 0.0, -v.z(), v.y(),
+        v.z(), 0.0, -v.x(),
+        -v.y(), v.x(), 0.0;
+    return result;
+}
+
+Eigen::Vector3<double> to_eigen_vec3(const vec3 &v){
+    return Eigen::Vector3<double>(v.x(), v.y(), v.z());
+}
+
+vec3 to_vec3(const Eigen::Vector3<double> &v){
+    return vec3(v.x(), v.y(), v.z());
+}

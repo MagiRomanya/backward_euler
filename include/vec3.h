@@ -60,34 +60,40 @@ class vec3 {
         }
 
         double e[3];
-};
+    };
 
-vec3 normalize(const vec3& v);
+    vec3 normalize(const vec3& v);
 
-double dot(const vec3 &v1, const vec3 &v2);
+    double dot(const vec3 &v1, const vec3 &v2);
 
-vec3 cross(const vec3 &v1, const vec3 &v2);
+    vec3 cross(const vec3 &v1, const vec3 &v2);
 
-vec3 to_vec3(glm::vec3 &v);
+    vec3 to_vec3(glm::vec3 &v);
 
-Eigen::Matrix3d outer_product(const vec3& v1, const vec3& v2);
+    Eigen::Vector3<double> to_eigen_vec3(const vec3 &v);
 
-// overloading operators
+    vec3 to_vec3(const Eigen::Vector3<double> &v);
 
-// vector and scalar operations
-vec3 operator*(const vec3 &v, const double s);
+    Eigen::Matrix3d outer_product(const vec3& v1, const vec3& v2);
 
-vec3 operator*(const double s, const vec3 &v);
+    Eigen::Matrix3d skew(const vec3& v);
 
-vec3 operator/(const vec3 &v, const double s);
+    // overloading operators
 
-// vector vector operations
-vec3 operator+(const vec3 &v1, const vec3 &v2);
+    // vector and scalar operations
+    vec3 operator*(const vec3 &v, const double s);
 
-vec3 operator-(const vec3 &v1, const vec3 &v2);
+    vec3 operator*(const double s, const vec3 &v);
 
-double operator*(const vec3 &v1, const vec3 &v2);
+    vec3 operator/(const vec3 &v, const double s);
 
-std::ostream& operator<<(std::ostream& os, const vec3& v);
+    // vector vector operations
+    vec3 operator+(const vec3 &v1, const vec3 &v2);
 
-#endif // vec3_h
+    vec3 operator-(const vec3 &v1, const vec3 &v2);
+
+    double operator*(const vec3 &v1, const vec3 &v2);
+
+    std::ostream& operator<<(std::ostream& os, const vec3& v);
+
+    #endif // vec3_h

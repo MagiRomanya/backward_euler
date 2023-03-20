@@ -9,8 +9,11 @@
 #include <vector>
 
 #include "simulable.hpp"
+#include "constraint.hpp"
 
 class Simulable;
+
+class Constraint;
 
 class Integrator {
     typedef Eigen::Triplet<double> tri;
@@ -19,6 +22,7 @@ class Integrator {
 
         Integrator(double h) : h(h) {
             nDoF = 0;
+            nConstraints = 0;
         }
         ~Integrator() {};
 
@@ -27,10 +31,7 @@ class Integrator {
         Eigen::VectorXd v;
         Eigen::VectorXd f0;
         Eigen::VectorXd delta_v;
-
-        void resize_containers();
-
-        void resize_containers(unsigned int newDoF);
+        Eigen::VectorXd constraint_value;
 
         void clear_containers();
 
@@ -42,6 +43,7 @@ class Integrator {
         inline void add_df_dv_triplet(tri triplet) { df_dv_triplets.push_back(triplet); }
         inline void add_equation_triplet(tri triplet) { equation_matrix_triplets.push_back(triplet); }
         inline void add_mass_triplet(tri triplet) { mass_triplets.push_back(triplet); }
+        inline void add_constraint_jacobian_triplet(tri triplet) { constraint_jacobian_triplets.push_back(triplet); }
 
         void fill_containers();
 
@@ -53,12 +55,22 @@ class Integrator {
 
         void add_simulable(Simulable* simulable);
 
-    private:
-        void implicit_euler();
+        void add_constraint(Constraint* constraint);
 
     private:
+        void resize_containers();
+
+        void resize_containers(unsigned int newDoF, unsigned int newNConstraints);
+
+        void generate_equation_with_constraints(Eigen::SparseMatrix<double>& equation_matrix, Eigen::VectorXd equation_vector);
+
+        void update_constraint_indices();
+
+        void implicit_euler();
+
         double h;
         unsigned int nDoF;
+        unsigned int nConstraints;
 
         Eigen::SparseMatrix<double> mass;
         Eigen::SparseMatrix<double> df_dx;
@@ -68,8 +80,11 @@ class Integrator {
         std::vector<tri> df_dv_triplets;
         std::vector<tri> equation_matrix_triplets;
         std::vector<tri> mass_triplets;
+        std::vector<tri> constraint_jacobian_triplets;
 
         std::vector<Simulable*> simulables;
+
+        std::vector<Constraint*> constraints;
 };
 
 #endif // INTEGRATOR_H_
