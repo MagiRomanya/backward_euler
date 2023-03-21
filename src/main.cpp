@@ -10,6 +10,7 @@
 #include "renderer.h"
 #include "object_manager.hpp"
 #include "rigid_body.hpp"
+#include "utilities.h"
 
 // DONE: Añadir sistema de aristas para crear la cuadricula y para añadir muelles de flexión
 // DONE: Muelles de flexión
@@ -52,7 +53,7 @@ int main() {
     manager.loadShader("geo_normals", SHADER_PATH"/normals_geom.vert", SHADER_PATH"/normals.geom", SHADER_PATH"/color.frag");
 
     manager.loadTexture("gandalf", TEXTURE_PATH"/gandalf.png");
-    manager.loadTexture("suelo", TEXTURE_PATH"/suelo.jpg");
+    manager.loadTexture("floor", TEXTURE_PATH"/floor.jpg");
 
     Object floor = manager.createObject("plane", "texture", "geo_normals");
     Object cloth = manager.createObject("cloth", "texture", "geo_normals");
@@ -60,7 +61,7 @@ int main() {
 
 
     cloth.useTexture("gandalf", manager.getTextureID("gandalf"));
-    floor.useTexture("gandalf", manager.getTextureID("suelo"));
+    floor.useTexture("gandalf", manager.getTextureID("floor"));
 
     // Set up model matrix for the object
     cloth.translation = glm::vec3(0.0f, 0.25 * N, -4.0f);
@@ -94,12 +95,23 @@ int main() {
     mass_spring.fix_particle(0);
     mass_spring.fix_particle(index);
 
+    bool paused = true;
+    SimpleTrigger<bool> t1(false);
+
     // RENDER LOOP
     while (!renderer.windowShouldClose()){
         // Input
         renderer.cameraInput();
+        if (t1.changed_to_true(glfwGetKey(renderer.window, GLFW_KEY_SPACE) == GLFW_PRESS)){
+            if (paused)
+                std::cout << "Simulation paused." << std::endl;
+            else
+                std::cout << "Simulation continue." << std::endl;
+            paused = ! paused;
+        }
 
         // Simulation step
+        if (!paused)
         {
             Clock timer("Simulation Step");
             integrator.integration_step();
