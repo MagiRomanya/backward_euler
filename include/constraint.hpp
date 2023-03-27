@@ -1,7 +1,7 @@
 #ifndef CONSTRAINT_H_
 #define CONSTRAINT_H_
 
-#include "integrator.hpp"
+class Integrator;
 
 class Constraint {
     public:

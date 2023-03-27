@@ -11,10 +11,6 @@
 #include "simulable.hpp"
 #include "constraint.hpp"
 
-class Simulable;
-
-class Constraint;
-
 class Integrator {
     typedef Eigen::Triplet<double> tri;
 

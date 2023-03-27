@@ -1,6 +1,7 @@
 #ifndef LENGTH_CONSTRAINT_H_
 #define LENGTH_CONSTRAINT_H_
 
+#include "integrator.hpp"
 #include "constraint.hpp"
 #include "vec3.h"
 

@@ -1,6 +1,5 @@
 #ifndef SIMULABLE_H_
 #define SIMULABLE_H_
-#include "integrator.hpp"
 
 class Integrator;
 

@@ -1,7 +1,11 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
+#ifndef WIN32
 #include <sys/time.h>
+#else
+#include <chrono>
+#endif
 #include <iostream>
 #include <string>
 #include <vector>
@@ -24,8 +28,12 @@ class Clock{
 
     private:
         // Initial and final times
+        #ifndef WIN32
         timespec _itime;
         timespec _ftime;
+        #else
+        std::chrono::high_resolution_clock::time_point clock0;
+        #endif
 };
 
 #endif // CLOCK_H
