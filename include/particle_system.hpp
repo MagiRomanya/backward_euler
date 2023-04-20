@@ -10,8 +10,6 @@
 class ParticleSystem : public Simulable {
 
     public:
-        ParticleSystem() {}
-
         inline void fix_particle(int p){
             // Make a particle fixed: this particle is not affected by any interaction and will not move
             fixed[p] = true;

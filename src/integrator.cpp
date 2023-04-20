@@ -11,13 +11,15 @@ void Integrator::resize_containers() {
     mass.resize(nDoF, nDoF);
     df_dv.resize(nDoF, nDoF);
     df_dx.resize(nDoF, nDoF);
+    df_dp.resize(nDoF, nParameters);
 
     clear_containers();
 }
 
-void Integrator::resize_containers(unsigned int newDoF, unsigned int newNConstraints) {
+void Integrator::resize_containers(unsigned int newDoF, unsigned int newNConstraints, unsigned int newNParameters) {
     nDoF = newDoF;
     nConstraints = newNConstraints;
+    nParameters = newNParameters;
     resize_containers();
 }
 
@@ -37,17 +39,17 @@ void Integrator::clear_containers() {
 
 void Integrator::add_simulable(Simulable* simulable){
     unsigned int index = this->nDoF;
-    resize_containers(this->nDoF + simulable->nDoF, nConstraints);
-    simulable->index = index;
-    simulable->integrator = this;
-    simulable->initialized = true;
+    unsigned int p_index = this->nParameters;
+    resize_containers(this->nDoF + simulable->nDoF, nConstraints,
+                      nParameters + simulable->nParameters);
+    simulable->initialize(this, index, p_index);
     simulables.push_back(simulable);
     update_constraint_indices();
 }
 
 void Integrator::add_constraint(Constraint* constraint){
     unsigned int index = this->nConstraints;
-    resize_containers(nDoF, nConstraints + constraint->nConstraints);
+    resize_containers(nDoF, nConstraints + constraint->nConstraints, nParameters);
     constraint->index = index;
     constraint->itg = this;
     constraints.push_back(constraint);

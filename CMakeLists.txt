@@ -17,6 +17,8 @@ set(SOURCE_FILES
   src/gravity.cpp
   src/rigid_body.cpp
   src/length_constraint.cpp
+  src/twobody.cpp
+  include/spring_test.hpp
 )
 set(SOURCE_FILES_MAIN
   ${SOURCE_FILES}

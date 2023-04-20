@@ -1,9 +1,13 @@
 #include "mass_spring.hpp"
 #include "clock.h"
 #include "gravity.hpp"
+#include "interaction.h"
+#include "simulable.hpp"
+#include "spring_test.hpp"
 
 MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass, double k_spring)
 {
+    nParameters = 2;
     load_from_mesh(obj, node_mass, k_spring);
     integrator->add_simulable(this);
 }
@@ -47,14 +51,12 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
     mesh->boundary(internalEdges, externalEdges);
 
     double L;
-    Interaction* spring = nullptr;
 
     for (size_t i=0; i < externalEdges.size(); i++){
         Edge &e = externalEdges[i];
         L = mesh->distance(e.a, e.b);
-        spring = new Spring(e.a, e.b, k, L);
-        class_allocated_interactions.push_back(spring);
-        interactions.push_back(spring);
+        //spring = new Spring(e.a, e.b, k, L);
+        add_spring(e.a, e.b, k, L);
     }
 
     for (size_t i=0; i < internalEdges.size(); i+=2){
@@ -62,21 +64,27 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
         Edge &e2 = internalEdges[i+1];
         L = mesh->distance(e1.a, e1.b);
         // Normal spring
-        spring = new Spring(e1.a, e1.b, k, L);
-        class_allocated_interactions.push_back(spring);
-        interactions.push_back(spring);
+        // spring = new Spring(e1.a, e1.b, k, L);
+        add_spring(e1.a, e1.b, k, L);
 
         // Flex spring
         L = mesh->distance(e1.opposite, e2.opposite);
-        spring = new Spring(e1.opposite, e2.opposite, k_flex, L);
-        class_allocated_interactions.push_back(spring);
-        interactions.push_back(spring);
+        //spring = new Spring(e1.opposite, e2.opposite, k_flex, L);
+        add_spring(e1.opposite, e2.opposite, k_flex, L);
     }
 
     // Add gravity
     Interaction* gravity = new Gravity(mass[0] * vec3(0, -1, 0));
     class_allocated_interactions.push_back(gravity);
     interactions.push_back(gravity);
+}
+
+void MassSpring::add_spring(unsigned int i1, unsigned int i2, double K, double L) {
+    // Interaction* spring = new Spring(i1, i2, K, L);
+    double param[2] = {K, L};
+    Interaction* spring = new TestingSpring(i1, i2, param);
+    class_allocated_interactions.push_back(spring);
+    interactions.push_back(spring);
 }
 
 void MassSpring::fill_containers() {

@@ -1,0 +1,65 @@
+#ifndef @CLASSNAME_H_
+#define @CLASSNAME_H_
+
+#include <Eigen/Dense>
+#include "particle_system.hpp"
+#include "twobody.hpp"
+#include "vec3.h"
+#include "math.h"
+
+/* @WARNING_TEXT */
+
+class @CLASSNAME : public TwoBodyInteraction {
+    public:
+        @CLASSNAME(unsigned int pi, unsigned int pj, double* inputParameters)
+                                                    : TwoBodyInteraction(pi,pj)
+        {
+            n_parameters = @NUMBER_OF_PARAMETERS;
+            for (int i = 0; i < n_parameters; i++) {
+                parameters[i]  = inputParameters[i];
+            }
+        }
+    private:
+        double parameters[@NUMBER_OF_PARAMETERS] = {0};
+
+        double energy() const override {
+            double E = @ENERGY_CALCULATION;
+            return E;
+        }
+
+        vec3 force() const override {
+            double f[3][1] = @FORCE_CALCULATION;
+            return vec3(f[0][0], f[1][0], f[2][0]);
+        }
+
+        Eigen::Matrix3d force_position_derivative() const override {
+            double df_dx[3][3] = @FORCE_POSITION_DERIVATIVE_CALCULATION;
+            Eigen::Matrix3d result;
+            result << df_dx[0][0], df_dx[0][1], df_dx[0][2],
+                      df_dx[1][0], df_dx[1][1], df_dx[1][2],
+                      df_dx[2][0], df_dx[2][1], df_dx[2][2];
+            return result;
+        }
+
+        virtual Eigen::Matrix3d force_velocity_derivative() const override {
+            double df_dv[3][3] = @FORCE_VELOCITY_DERIVATIVE_CALCULATION;
+            Eigen::Matrix3d result;
+            result << df_dv[0][0], df_dv[0][1], df_dv[0][2],
+                      df_dv[1][0], df_dv[1][1], df_dv[1][2],
+                      df_dv[2][0], df_dv[2][1], df_dv[2][2];
+            return result;
+        }
+
+        virtual Eigen::MatrixXd force_parameters_derivative() const override {
+            Eigen::MatrixXd result(3, n_parameters);
+            double df_dp[3][@NUMBER_OF_PARAMETERS] = @FORCE_PARAMETERS_DERIVATIVE_CALCULATION;
+            for (unsigned int i = 0; i < 3; i++) {
+                for (unsigned int j = 0; j < n_parameters; j++) {
+                    result(i,j) = df_dp[i][j];
+                }
+            }
+            return result;
+        }
+};
+
+#endif // @CLASSNAME_H_

@@ -30,8 +30,12 @@ class MassSpring : public ParticleSystem {
 
         void load_from_mesh(Object* obj, double node_mass, double k_spring);
 
+        void add_spring(unsigned int i1, unsigned int i2, double K, double L);
+
         COORDINATE_SYSTEM current_coordinate_system = LOCAL;
+
         std::vector<Interaction*> class_allocated_interactions;
+
         SimpleMesh* mesh = nullptr;
         Object* obj = nullptr;
 };

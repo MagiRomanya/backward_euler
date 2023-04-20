@@ -13,6 +13,8 @@ class Gravity : public Interaction {
 
         Gravity(unsigned int index, vec3 gravity) :  index(index), gravity(gravity) { all = false; };
 
+        ~Gravity() override {}
+
         void apply(Integrator &itg, ParticleSystem *sys) override;
 
     private:

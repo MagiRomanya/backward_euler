@@ -20,6 +20,7 @@ class Integrator {
             nDoF = 0;
             nConstraints = 0;
         }
+
         ~Integrator() {};
 
 
@@ -34,12 +35,15 @@ class Integrator {
         void integration_step();
 
         inline double getTimeStep() const { return h; }
+        inline Eigen::SparseMatrix<double> getMassMatrix() const { return mass; }
 
         inline void add_df_dx_triplet(tri triplet) { df_dx_triplets.push_back(triplet); }
         inline void add_df_dv_triplet(tri triplet) { df_dv_triplets.push_back(triplet); }
         inline void add_equation_triplet(tri triplet) { equation_matrix_triplets.push_back(triplet); }
         inline void add_mass_triplet(tri triplet) { mass_triplets.push_back(triplet); }
         inline void add_constraint_jacobian_triplet(tri triplet) { constraint_jacobian_triplets.push_back(triplet); }
+
+        inline void add_df_dp_element(unsigned int i, unsigned int j, double value) { df_dp(i,j) = value; }
 
         void fill_containers();
 
@@ -56,7 +60,7 @@ class Integrator {
     private:
         void resize_containers();
 
-        void resize_containers(unsigned int newDoF, unsigned int newNConstraints);
+        void resize_containers(unsigned int newDoF, unsigned int newNConstraints, unsigned int newNParameters);
 
         void generate_equation_with_constraints(Eigen::SparseMatrix<double>& equation_matrix, Eigen::VectorXd equation_vector);
 
@@ -67,10 +71,12 @@ class Integrator {
         double h;
         unsigned int nDoF;
         unsigned int nConstraints;
+        unsigned int nParameters;
 
         Eigen::SparseMatrix<double> mass;
         Eigen::SparseMatrix<double> df_dx;
         Eigen::SparseMatrix<double> df_dv;
+        Eigen::MatrixXd df_dp;
 
         std::vector<tri> df_dx_triplets;
         std::vector<tri> df_dv_triplets;

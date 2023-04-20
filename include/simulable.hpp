@@ -11,8 +11,18 @@ class Simulable {
     public:
         unsigned int nDoF;
         unsigned int index;
+        unsigned int nParameters = 0;
+        unsigned int parameter_index = 0;
         Integrator* integrator = nullptr;
         bool initialized = false;
+
+        void initialize(Integrator* integrator, unsigned int index, unsigned int p_index)
+        {
+            initialized = true;
+            this->index = index;
+            this->parameter_index = p_index;
+            this->integrator = integrator;
+        }
 
         /*
          * Fill containers MUST fill the following containers
