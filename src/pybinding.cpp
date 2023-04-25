@@ -143,6 +143,14 @@ Eigen::VectorXd pyGetVelocity() {
     return integrator.v;
 }
 
+float pyGetTimeStep() {
+    return integrator.getTimeStep();
+}
+
+Eigen::SparseMatrix<double> pyGetForcePositionJacobian() {
+    return integrator.getForcePositionJacobian();
+}
+
 void pyRenderState(){
     renderer.render();
 }
@@ -168,6 +176,8 @@ PYBIND11_MODULE(symulathon, m) {
 
     m.def("get_equation_vector", &pyGetEquationVector, "Returns the current equation vector. Needs a call to fill_containers first to have the current forces and derivatives.");
 
+    m.def("get_force_position_jacobian", &pyGetForcePositionJacobian, "Returns the current dfdx. Needs a call to fill_containers first to have the current forces and derivatives.");
+
     m.def("get_parameter_jacobian", &pyGetParametersJacobian, "Returns the current df/dp jacobian. Needs a call to fill_containers first to be updated.");
 
     m.def("get_mass_matrix", &pyGetMassMatrix, "Returns the mass matrix. (nDoF x nDoF dimensionality)");
@@ -175,6 +185,8 @@ PYBIND11_MODULE(symulathon, m) {
     m.def("get_position", &pyGetPosition, "Returns the position vector in the current state");
 
     m.def("get_velocity", &pyGetVelocity, "Returns the velocity vector in the current state");
+
+    m.def("get_time_step", &pyGetTimeStep, "Returns the timestep of the simultaion");
 
     m.def("render_state", &pyRenderState, "Render call");
 

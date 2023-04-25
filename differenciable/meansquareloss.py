@@ -20,12 +20,12 @@ class MeanSquareLoss:
     def evaluate(self) -> float:
         result = 0
         for i in range(len(self.x)):
-            result += (self.x - self.x_)**2
-            result += (self.v - self.v_)**2
+            result += (self.x[i] - self.x_s[i])**2
+            result += (self.v[i] - self.v_s[i])**2
         return result
 
     def get_position_derivative(self) -> np.array:
-        return 2 * ( self.x - self.x_ )
+        return 2 * ( self.x - self.x_s )
 
-    def get_velocity_derivative() -> np.array:
-        return 2 * ( self.v - self.v_ )
+    def get_velocity_derivative(self) -> np.array:
+        return 2 * ( self.v - self.v_s )
