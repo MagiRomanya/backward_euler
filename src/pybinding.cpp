@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 
+#include "Eigen/src/Core/Matrix.h"
 #include "mass_spring.hpp"
 #include "integrator.hpp"
 #include "clock.h"
@@ -126,6 +127,22 @@ Eigen::VectorXd pyGetEquationVector(){
     return integrator.getEquationVector();
 }
 
+Eigen::MatrixXd pyGetParametersJacobian() {
+    return integrator.getParameterJacobian();
+}
+
+Eigen::SparseMatrix<double> pyGetMassMatrix() {
+    return integrator.getMassMatrix();
+}
+
+Eigen::VectorXd pyGetPosition() {
+    return integrator.x;
+}
+
+Eigen::VectorXd pyGetVelocity() {
+    return integrator.v;
+}
+
 void pyRenderState(){
     renderer.render();
 }
@@ -147,9 +164,17 @@ PYBIND11_MODULE(symulathon, m) {
 
     m.def("recieve_delta_v", &pyRecieveDeltaV, "Accepts an increment of velocity and updates the system accordingly");
 
-    m.def("get_equation_matrix", &pyGetEquationMatrix, "Returns the current equation matrix. Needs a call to fill_containers first to have the current forces and derivatives");
+    m.def("get_equation_matrix", &pyGetEquationMatrix, "Returns the current equation matrix. Needs a call to fill_containers first to have the current forces and derivatives.");
 
-    m.def("get_equation_vector", &pyGetEquationVector, "Returns the current equation vector. Needs a call to fill_containers first to have the current forces and derivatives");
+    m.def("get_equation_vector", &pyGetEquationVector, "Returns the current equation vector. Needs a call to fill_containers first to have the current forces and derivatives.");
+
+    m.def("get_parameter_jacobian", &pyGetParametersJacobian, "Returns the current df/dp jacobian. Needs a call to fill_containers first to be updated.");
+
+    m.def("get_mass_matrix", &pyGetMassMatrix, "Returns the mass matrix. (nDoF x nDoF dimensionality)");
+
+    m.def("get_position", &pyGetPosition, "Returns the position vector in the current state");
+
+    m.def("get_velocity", &pyGetVelocity, "Returns the velocity vector in the current state");
 
     m.def("render_state", &pyRenderState, "Render call");
 

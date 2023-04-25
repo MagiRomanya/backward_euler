@@ -16,6 +16,8 @@ class ParticleSystem : public Simulable {
             fixed_particles.push_back(p);
         }
 
+        ~ParticleSystem();
+
         void resize_containers(unsigned int nDoF);
 
         void fill_containers() override;
@@ -34,11 +36,16 @@ class ParticleSystem : public Simulable {
 
         inline std::vector<int> get_fixed_particles() {return fixed_particles; }
 
-        inline void add_interaction(Interaction* interaction) { interactions.push_back(interaction); }
-
+        inline void add_interaction(Interaction *interaction) {
+            interactions.push_back(interaction);
+            class_allocated_interactions.push_back(interaction);
+        }
 
     protected:
         std::vector<Interaction*> interactions;
+
+        std::vector<Interaction*> class_allocated_interactions;
+
         Eigen::VectorXd x;
         Eigen::VectorXd v;
 

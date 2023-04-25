@@ -6,7 +6,7 @@
 // class System;
 class ParticleSystem;
 
-class Interaction{
+class Interaction {
 /* Abstract class which represents any interaction that can apply force to a particle
  * Examples: springs, gravity, friction, etc  */
     public:

@@ -35,6 +35,8 @@ void Integrator::clear_containers() {
     df_dv_triplets.clear();
     mass_triplets.clear();
     equation_matrix_triplets.clear();
+
+    df_dp.setZero(nDoF, nParameters);
 }
 
 void Integrator::add_simulable(Simulable* simulable){

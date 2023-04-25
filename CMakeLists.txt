@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(BackwardEuler)
+project(simulation_cpp)
 
 set(SOURCE_FILES
   src/particle_system.cpp

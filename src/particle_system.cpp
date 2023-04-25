@@ -1,5 +1,12 @@
 #include "particle_system.hpp"
 
+ParticleSystem::~ParticleSystem() {
+    // The interactions were created in the heap
+    for (int i = 0; i < class_allocated_interactions.size(); i++){
+        delete class_allocated_interactions[i];
+    }
+}
+
 void ParticleSystem::resize_containers(unsigned int nDoF){
     n_particles = nDoF / 3;
     x.resize(nDoF);

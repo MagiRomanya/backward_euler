@@ -15,8 +15,6 @@ class MassSpring : public ParticleSystem {
 
         MassSpring(Integrator* integrator, Object* obj, double node_mass, double k_spring);
 
-        ~MassSpring();
-
         void fill_containers() override;
 
         void update_state() override;
@@ -33,8 +31,6 @@ class MassSpring : public ParticleSystem {
         void add_spring(unsigned int i1, unsigned int i2, double K, double L);
 
         COORDINATE_SYSTEM current_coordinate_system = LOCAL;
-
-        std::vector<Interaction*> class_allocated_interactions;
 
         SimpleMesh* mesh = nullptr;
         Object* obj = nullptr;

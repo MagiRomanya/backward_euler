@@ -12,13 +12,6 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass, do
     integrator->add_simulable(this);
 }
 
-MassSpring::~MassSpring() {
-    // The interactions were created in the heap
-    for (int i = 0; i < class_allocated_interactions.size(); i++){
-        delete class_allocated_interactions[i];
-    }
-}
-
 void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) {
     /* Reads a mesh and treats the vertices as particles and the
      * edges as springs */
@@ -83,8 +76,7 @@ void MassSpring::add_spring(unsigned int i1, unsigned int i2, double K, double L
     // Interaction* spring = new Spring(i1, i2, K, L);
     double param[2] = {K, L};
     Interaction* spring = new TestingSpring(i1, i2, param);
-    class_allocated_interactions.push_back(spring);
-    interactions.push_back(spring);
+    add_interaction(spring);
 }
 
 void MassSpring::fill_containers() {

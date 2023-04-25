@@ -15,7 +15,6 @@ class Integrator {
     typedef Eigen::Triplet<double> tri;
 
     public:
-
         Integrator(double h) : h(h) {
             nDoF = 0;
             nConstraints = 0;
@@ -43,13 +42,15 @@ class Integrator {
         inline void add_mass_triplet(tri triplet) { mass_triplets.push_back(triplet); }
         inline void add_constraint_jacobian_triplet(tri triplet) { constraint_jacobian_triplets.push_back(triplet); }
 
-        inline void add_df_dp_element(unsigned int i, unsigned int j, double value) { df_dp(i,j) = value; }
+        inline void add_to_df_dp_element(unsigned int i, unsigned int j, double value) { df_dp(i,j) += value; }
 
         void fill_containers();
 
         Eigen::SparseMatrix<double> getEquationMatrix();
 
         Eigen::VectorXd getEquationVector();
+
+        inline Eigen::MatrixXd getParameterJacobian() { return df_dp; }
 
         void reciveDeltaV(Eigen::VectorXd delta_v);
 

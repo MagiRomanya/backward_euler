@@ -112,7 +112,8 @@ void TwoBodyInteraction::add_parameters_derivative(Integrator &itg, ParticleSyst
 
     for (unsigned int i = 0; i < 3; i++) {
         for (unsigned int p = 0; p < n_parameters; p++) {
-            itg.add_df_dp_element(itg_p1 + i, parameter_index + p, df_dp(i, p));
+            itg.add_to_df_dp_element(itg_p1 + i, parameter_index + p, df_dp(i, p));
+            itg.add_to_df_dp_element(itg_p2 + i, parameter_index + p, -df_dp(i, p));
         }
     }
 }
