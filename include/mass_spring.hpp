@@ -34,6 +34,9 @@ class MassSpring : public ParticleSystem {
 
         SimpleMesh* mesh = nullptr;
         Object* obj = nullptr;
+
+        double k_spring;
+        double k_bend;
 };
 
 #endif // MASS_SPRING_H_

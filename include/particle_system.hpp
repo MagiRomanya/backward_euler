@@ -38,7 +38,6 @@ class ParticleSystem : public Simulable {
 
         inline void add_interaction(Interaction *interaction) {
             interactions.push_back(interaction);
-            class_allocated_interactions.push_back(interaction);
         }
 
     protected:

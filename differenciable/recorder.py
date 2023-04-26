@@ -32,3 +32,10 @@ class SimulationReader:
         x = np.array(row[:nDoF])
         v = np.array(row[nDoF:])
         return (x, v)
+
+    def from_the_start(self):
+        print("Reset simulation")
+        del self.reader
+        self.rfile.close()
+        self.rfile = open(self.filename, 'r')
+        self.reader = csv.reader(self.rfile, delimiter=',', quoting = csv.QUOTE_NONNUMERIC)

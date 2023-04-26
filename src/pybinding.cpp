@@ -8,6 +8,7 @@
 #include "contact.h"
 
 #include "mass_spring_gui.hpp"
+#include "mesh.h"
 #include "renderer.h"
 #include "object_manager.hpp"
 
@@ -29,10 +30,10 @@ Object cloth;
 Object bunny;
 Contact* planeContact;
 
-int initialize_scene(){
+int initialize_scene() {
     ///////////////// CREATE RENDERER & MESHES /////////////////////
 
-    double step = 0.5;
+    const double step = 0.5;
     SimpleMesh mesh;
     SimpleMesh planeMesh;
     CreateGrid(mesh, N, M, step);
@@ -50,10 +51,9 @@ int initialize_scene(){
     manager.loadTexture("gandalf", TEXTURE_PATH"/gandalf.png");
     manager.loadTexture("floor", TEXTURE_PATH"/floor.jpg");
 
-     mfloor = manager.createObject("plane", "texture", "geo_normals");
-     cloth = manager.createObject("cloth", "normals", "geo_normals");
-     bunny = manager.createObject("bunny", "normals");
-
+    mfloor = manager.createObject("plane", "texture", "geo_normals");
+    cloth = manager.createObject("cloth", "normals", "geo_normals");
+    bunny = manager.createObject("bunny", "normals");
 
     cloth.useTexture("gandalf", manager.getTextureID("gandalf"));
     mfloor.useTexture("gandalf", manager.getTextureID("floor"));
@@ -87,6 +87,24 @@ int initialize_scene(){
     mass_spring->fix_particle(index);
 
     return 0;
+}
+
+void pyResetSimulation(double k) {
+    const double step = 0.5;
+    SimpleMesh mesh;
+    CreateGrid(mesh, N, M, step);
+    manager.loadMesh("cloth", mesh);
+
+    integrator.clear_simulables();
+    delete mass_spring;
+    mass_spring = new MassSpring(&integrator , &cloth, NODE_MASS, k);
+
+    mass_spring->add_interaction(planeContact);
+
+    // Fix corners
+    const int index = M * (N - 1);
+    mass_spring->fix_particle(0);
+    mass_spring->fix_particle(index);
 }
 
 int pymain() {
@@ -167,6 +185,8 @@ PYBIND11_MODULE(symulathon, m) {
     m.doc() = "Simple simulation interface"; // optional module docstring
 
     m.def("initialize_scene", &initialize_scene, "Generates the context + the objects in the scene");
+
+    m.def("restart_simulation", &pyResetSimulation, "Resets the simulables in the scene with new parameters");
 
     m.def("fill_containers", &pyFillContainers, "Fills the position, velocity, force and derivative containers");
 

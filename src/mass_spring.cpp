@@ -7,6 +7,7 @@
 
 MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass, double k_spring)
 {
+    this->k_spring = k_spring;
     nParameters = 2;
     load_from_mesh(obj, node_mass, k_spring);
     integrator->add_simulable(this);
@@ -20,7 +21,7 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
     this->obj = obj;
 
     const double k = k_spring;
-    const double k_flex = k/ 100;
+    k_bend = k/ 100;
 
     const unsigned int n_coord = 3 * mesh->vertices.size();
     n_particles = mesh->vertices.size();
@@ -44,11 +45,12 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
     mesh->boundary(internalEdges, externalEdges);
 
     double L;
+    const unsigned int springs_index = interactions.size();
+    const unsigned int n_springs = externalEdges.size() + 2 * internalEdges.size();
 
     for (size_t i=0; i < externalEdges.size(); i++){
         Edge &e = externalEdges[i];
         L = mesh->distance(e.a, e.b);
-        //spring = new Spring(e.a, e.b, k, L);
         add_spring(e.a, e.b, k, L);
     }
 
@@ -57,14 +59,13 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
         Edge &e2 = internalEdges[i+1];
         L = mesh->distance(e1.a, e1.b);
         // Normal spring
-        // spring = new Spring(e1.a, e1.b, k, L);
         add_spring(e1.a, e1.b, k, L);
 
         // Flex spring
         L = mesh->distance(e1.opposite, e2.opposite);
-        //spring = new Spring(e1.opposite, e2.opposite, k_flex, L);
-        add_spring(e1.opposite, e2.opposite, k_flex, L);
+        add_spring(e1.opposite, e2.opposite, k_bend, L);
     }
+
 
     // Add gravity
     Interaction* gravity = new Gravity(mass[0] * vec3(0, -1, 0));
@@ -77,6 +78,7 @@ void MassSpring::add_spring(unsigned int i1, unsigned int i2, double K, double L
     double param[2] = {K, L};
     Interaction* spring = new TestingSpring(i1, i2, param);
     add_interaction(spring);
+    class_allocated_interactions.push_back(spring);
 }
 
 void MassSpring::fill_containers() {
@@ -97,7 +99,6 @@ void MassSpring::fill_containers() {
         integrator->add_equation_triplet(tri(index + 3*i+1, index + 3*i+1, mass[i]));
         integrator->add_equation_triplet(tri(index + 3*i+2, index + 3*i+2, mass[i]));
     }
-
     // Change to the world coordinate system
     if (current_coordinate_system == LOCAL){
         positions_to_world();

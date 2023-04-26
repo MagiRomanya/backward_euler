@@ -6,6 +6,7 @@
 #include <Eigen/Eigen>
 #include <Eigen/IterativeLinearSolvers>
 
+#include <iostream>
 #include <vector>
 
 #include "simulable.hpp"
@@ -20,7 +21,7 @@ class Integrator {
             nConstraints = 0;
         }
 
-        ~Integrator() {};
+        ~Integrator() { }
 
 
         Eigen::VectorXd x;
@@ -58,6 +59,8 @@ class Integrator {
         void add_simulable(Simulable* simulable);
 
         void add_constraint(Constraint* constraint);
+
+        void clear_simulables();
 
     private:
         void resize_containers();

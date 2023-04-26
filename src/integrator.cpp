@@ -156,3 +156,10 @@ Eigen::VectorXd Integrator::getEquationVector() {
     equation_vector = h * (f0 + h * df_dx * v);
     return equation_vector;
 }
+
+void Integrator::clear_simulables() {
+    simulables.clear();
+    nDoF = 0;
+    nParameters = 0;
+    clear_containers();
+}
