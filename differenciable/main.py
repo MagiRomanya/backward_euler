@@ -40,27 +40,17 @@ def main():
     print(f"nParameters = {nParameters}")
     print(f"TimeStep = {TimeStep}")
 
-    dif = DifferenciableCore(TimeStep, nDoF, nParameters);
+    dif = DifferenciableCore(100, TimeStep, nDoF, nParameters);
     symulathon.restart_simulation(dif.k)
 
     read = SimulationReader(nDoF)
 
-    FrameCount = 0
-    IterationCount = 0
-
     while not symulathon.window_should_close():
-        FrameCount+=1
-
         simulation_step(dif, read)
 
-        if (FrameCount == 100):
-            IterationCount+=1
-            FrameCount = 0
-
-            dif.update_parameters()
+        if dif.is_done():
             symulathon.restart_simulation(dif.k)
             read.from_the_start()
-            print(f"Iteration : {IterationCount}")
 
 
 

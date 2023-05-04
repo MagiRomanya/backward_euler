@@ -34,7 +34,6 @@ class SimulationReader:
         return (x, v)
 
     def from_the_start(self):
-        print("Reset simulation")
         del self.reader
         self.rfile.close()
         self.rfile = open(self.filename, 'r')

@@ -129,19 +129,19 @@ int pymain() {
     return 0;
 }
 
-void pyFillContainers(){
+void pyFillContainers() {
     integrator.fill_containers();
 }
 
-void pyRecieveDeltaV(Eigen::VectorXd delta_v){
+void pyRecieveDeltaV(Eigen::VectorXd delta_v) {
     integrator.reciveDeltaV(delta_v);
 }
 
-Eigen::SparseMatrix<double> pyGetEquationMatrix(){
+Eigen::SparseMatrix<double> pyGetEquationMatrix() {
     return integrator.getEquationMatrix();
 }
 
-Eigen::VectorXd pyGetEquationVector(){
+Eigen::VectorXd pyGetEquationVector() {
     return integrator.getEquationVector();
 }
 
@@ -169,11 +169,11 @@ Eigen::SparseMatrix<double> pyGetForcePositionJacobian() {
     return integrator.getForcePositionJacobian();
 }
 
-void pyRenderState(){
+void pyRenderState() {
     renderer.render();
 }
 
-bool pyWindowShouldClose(){
+bool pyWindowShouldClose() {
     return renderer.windowShouldClose();
 }
 
