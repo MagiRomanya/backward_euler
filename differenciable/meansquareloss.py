@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import numpy as np
 
 # g = \sum_i |q_i - q_i*|² with q = x, v -> scalar
@@ -7,9 +5,6 @@ import numpy as np
 # dgdv = 2 (v_i -v_i*) -> nDoF vector
 
 class MeanSquareLoss:
-    # def __init__(self, x : np.array, v : np.array, x_s : np.array, v_s : np.array):
-    #     update_containers(x, v, x_s, v_s)
-
     def update_containers(self, x : np.array, v : np.array, x_s : np.array, v_s : np.array):
         self.x = x
         self.v = v

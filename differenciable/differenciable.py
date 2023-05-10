@@ -53,12 +53,6 @@ class DifferenciableCore:
 
         self.mass_matrix = mass_matrix;
 
-        # Update the jacobians
-        # REVIEW: la matriz mass y df_dx son sparse, el operador * puede que no esté haciendo lo que deberia
-        # self.dg_dx.append( system_solve * (TimeStep * df_dx) + dg_dx_new.reshape(1,-1) )
-        # self.dg_dv.append( system_solve * mass_matrix )
-        # self.dg_dp.append( np.matmul(system_solve , (TimeStep * df_dp)) )
-
         self.dg_dx.append(dg_dx_new)
         self.dg_dv.append(dg_dv_new)
         self.df_dx.append(df_dx)
@@ -87,8 +81,8 @@ class DifferenciableCore:
             dg_dp += np.matmul(sys_solve , (self.TimeStep * self.df_dp[i+1]))
             # print(f"sys shape: {sys_solve.shape}, dg_dx shape : {dg_dx.shape}, dg_dv shape : {dg_dv.shape}, dg_dp shape : {dg_dp.shape}")
 
-
         return dg_dp
+
 
     def update_parameters(self):
         dg_dp = self.backpropagation()

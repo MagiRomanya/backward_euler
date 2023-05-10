@@ -11,7 +11,7 @@
 
 class @CLASSNAME : public TwoBodyInteraction {
     public:
-        @CLASSNAME(unsigned int pi, unsigned int pj, double* inputParameters)
+        @CLASSNAME(unsigned int pi, unsigned int pj, double** inputParameters)
                                                     : TwoBodyInteraction(pi,pj)
         {
             n_parameters = @NUMBER_OF_PARAMETERS;
@@ -20,7 +20,7 @@ class @CLASSNAME : public TwoBodyInteraction {
             }
         }
     private:
-        double parameters[@NUMBER_OF_PARAMETERS] = {0};
+        double* parameters[@NUMBER_OF_PARAMETERS] = {nullptr};
 
         double energy() const override {
             double E = @ENERGY_CALCULATION;

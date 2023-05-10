@@ -7,21 +7,21 @@
 
 MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass, double k_spring)
 {
-    this->k_spring = k_spring;
+    k_flex = k_spring;
+    k_bend = k_flex/ 100;
     nParameters = 2;
-    load_from_mesh(obj, node_mass, k_spring);
+    load_from_mesh(obj, node_mass);
+    gravity_vec = vec3(mass[0] * vec3(0, -1, 0));
     integrator->add_simulable(this);
 }
 
-void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) {
+void MassSpring::load_from_mesh(Object* obj, double node_mass) {
     /* Reads a mesh and treats the vertices as particles and the
      * edges as springs */
     this->mesh = obj->mesh;
     this->mesh->isDynamic = true;
     this->obj = obj;
 
-    const double k = k_spring;
-    k_bend = k/ 100;
 
     const unsigned int n_coord = 3 * mesh->vertices.size();
     n_particles = mesh->vertices.size();
@@ -43,7 +43,6 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
     std::vector<Edge> externalEdges;
 
     mesh->boundary(internalEdges, externalEdges);
-
     double L;
     const unsigned int springs_index = interactions.size();
     const unsigned int n_springs = externalEdges.size() + 2 * internalEdges.size();
@@ -51,7 +50,7 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
     for (size_t i=0; i < externalEdges.size(); i++){
         Edge &e = externalEdges[i];
         L = mesh->distance(e.a, e.b);
-        add_spring(e.a, e.b, k, L);
+        add_spring(e.a, e.b, FLEX, L);
     }
 
     for (size_t i=0; i < internalEdges.size(); i+=2){
@@ -59,24 +58,32 @@ void MassSpring::load_from_mesh(Object* obj, double node_mass, double k_spring) 
         Edge &e2 = internalEdges[i+1];
         L = mesh->distance(e1.a, e1.b);
         // Normal spring
-        add_spring(e1.a, e1.b, k, L);
+        add_spring(e1.a, e1.b, FLEX, L);
 
-        // Flex spring
+        // Bend spring
         L = mesh->distance(e1.opposite, e2.opposite);
-        add_spring(e1.opposite, e2.opposite, k_bend, L);
+        add_spring(e1.opposite, e2.opposite, BEND, L);
     }
 
-
     // Add gravity
-    Interaction* gravity = new Gravity(mass[0] * vec3(0, -1, 0));
+    Interaction* gravity = new Gravity(&gravity_vec);
+    add_interaction(gravity);
     class_allocated_interactions.push_back(gravity);
-    interactions.push_back(gravity);
 }
 
-void MassSpring::add_spring(unsigned int i1, unsigned int i2, double K, double L) {
+void MassSpring::add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, double L) {
     // Interaction* spring = new Spring(i1, i2, K, L);
-    double param[2] = {K, L};
-    Interaction* spring = new TestingSpring(i1, i2, param);
+    lengths.push_back(L);
+    Interaction* spring;
+    if  (type == FLEX) {
+        double* param[2] = {&k_flex, &lengths.back()};
+        spring = new TestingSpring(i1, i2, param);
+    }
+    else {
+        double* param[2] = {&k_bend, &lengths.back()};
+        spring = new TestingSpring(i1, i2, param);
+    }
+
     add_interaction(spring);
     class_allocated_interactions.push_back(spring);
 }

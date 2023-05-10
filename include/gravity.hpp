@@ -9,9 +9,9 @@
 class Gravity : public Interaction {
     public:
         // Applies gravity to all the particles in the particle system
-        Gravity(vec3 gravity) :  gravity(gravity) { all = true; };
+        Gravity(vec3* gravity) :  gravity(gravity) { all = true; };
 
-        Gravity(unsigned int index, vec3 gravity) :  index(index), gravity(gravity) { all = false; };
+        Gravity(unsigned int index, vec3* gravity) :  index(index), gravity(gravity) { all = false; };
 
         ~Gravity() override {}
 
@@ -19,7 +19,7 @@ class Gravity : public Interaction {
 
     private:
         bool all;
-        vec3 gravity;
+        vec3* gravity;
         unsigned int index;
 };
 
