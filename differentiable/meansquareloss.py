@@ -6,16 +6,13 @@ import numpy as np
 # dgdx = 2 (x_i -x_i*) -> nDoF vector
 # dgdv = 2 (v_i -v_i*) -> nDoF vector
 
-class MeanSquareLoss:
-    # def __init__(self, x : np.array, v : np.array, x_s : np.array, v_s : np.array):
-    #     update_containers(x, v, x_s, v_s)
 
-    def update_containers(self, x : np.array, v : np.array, x_s : np.array, v_s : np.array):
+class MeanSquareLoss:
+    def update_containers(self, x: np.array, v: np.array, x_s: np.array, v_s: np.array):
         self.x = x
         self.v = v
         self.x_s = x_s
         self.v_s = v_s
-
 
     def evaluate(self) -> float:
         result = 0
@@ -25,7 +22,7 @@ class MeanSquareLoss:
         return result
 
     def get_position_derivative(self) -> np.array:
-        return 2 * ( self.x - self.x_s )
+        return 2 * (self.x - self.x_s)
 
     def get_velocity_derivative(self) -> np.array:
-        return 2 * ( self.v - self.v_s )
+        return 2 * (self.v - self.v_s)

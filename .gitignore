@@ -172,3 +172,5 @@ cython_debug/
 
 imgui.ini
 /differenciable/*.csv
+*.org
+*.csv

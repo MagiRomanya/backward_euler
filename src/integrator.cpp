@@ -106,6 +106,9 @@ void Integrator::fill_containers(){
         Simulable* sim = simulables[i];
         sim->fill_containers();
     }
+
+    // Create mass matrix
+    mass.setFromTriplets(mass_triplets.begin(), mass_triplets.end());
 }
 
 void Integrator::generate_equation_with_constraints(Eigen::SparseMatrix<double>& equation_matrix, Eigen::VectorXd equation_vector) {
@@ -155,6 +158,10 @@ Eigen::VectorXd Integrator::getEquationVector() {
     df_dv.setFromTriplets(df_dv_triplets.begin(), df_dv_triplets.end());
     equation_vector = h * (f0 + h * df_dx * v);
     return equation_vector;
+}
+
+Eigen::VectorXd Integrator::getForceVector() {
+    return f0;
 }
 
 void Integrator::clear_simulables() {

@@ -33,7 +33,10 @@ class TestingSpring : public TwoBodyInteraction {
         }
 
         vec3 force() const override {
-            double f[3][1] = {{-parameters[0]*(L - parameters[1])*(x1 - x2)/L}, {-parameters[0]*(L - parameters[1])*(y1 - y2)/L}, {-parameters[0]*(L - parameters[1])*(z1 - z2)/L}};
+            double f[3][1] = {
+                {-parameters[0] * (L - parameters[1]) * (x1 - x2) / L},
+                {-parameters[0] * (L - parameters[1]) * (y1 - y2) / L},
+                {-parameters[0] * (L - parameters[1]) * (z1 - z2) / L}};
             return vec3(f[0][0], f[1][0], f[2][0]);
         }
 
@@ -57,7 +60,9 @@ class TestingSpring : public TwoBodyInteraction {
 
         virtual Eigen::MatrixXd force_parameters_derivative() const override {
             Eigen::MatrixXd result(3, n_parameters);
-            double df_dp[3][2] = {{-(L - parameters[1])*(x1 - x2)/L, parameters[0]*(x1 - x2)/L}, {-(L - parameters[1])*(y1 - y2)/L, parameters[0]*(y1 - y2)/L}, {-(L - parameters[1])*(z1 - z2)/L, parameters[0]*(z1 - z2)/L}};
+            double df_dp[3][2] = {{-(L - parameters[1]) * (x1 - x2) / L, parameters[0] * (x1 - x2) / L},
+                                  {-(L - parameters[1]) * (y1 - y2) / L, parameters[0] * (y1 - y2) / L},
+                                  {-(L - parameters[1]) * (z1 - z2) / L, parameters[0] * (z1 - z2) / L}};
             for (unsigned int i = 0; i < 3; i++) {
                 for (unsigned int j = 0; j < n_parameters; j++) {
                     result(i,j) = df_dp[i][j];

@@ -12,8 +12,8 @@
 #include "renderer.h"
 #include "object_manager.hpp"
 
-#define N 20
-#define M 20
+#define N 5
+#define M 5
 
 
 // Define physical parameters of the simulation
@@ -69,7 +69,7 @@ int initialize_scene() {
 
     // Add the object to the renderer
     renderer.addObject(&cloth);
-    renderer.addObject(&mfloor);
+    // renderer.addObject(&mfloor);
 
     ////////////////// ADD INTEGRATOR & SIMULABLES ////////////////////
     mass_spring = new MassSpring(&integrator , &cloth, NODE_MASS, K_SPRING);
@@ -78,7 +78,7 @@ int initialize_scene() {
     plane.normal = vec3(0, 1, 0);
     plane.center = vec3(0, -1, 0);
     planeContact = new Contact(plane);
-    mass_spring->add_interaction(planeContact);
+    // mass_spring->add_interaction(planeContact);
 
 
     // Fix corners
@@ -99,7 +99,7 @@ void pyResetSimulation(double k) {
     delete mass_spring;
     mass_spring = new MassSpring(&integrator , &cloth, NODE_MASS, k);
 
-    mass_spring->add_interaction(planeContact);
+    // mass_spring->add_interaction(planeContact);
 
     // Fix corners
     const int index = M * (N - 1);
@@ -143,6 +143,10 @@ Eigen::SparseMatrix<double> pyGetEquationMatrix() {
 
 Eigen::VectorXd pyGetEquationVector() {
     return integrator.getEquationVector();
+}
+
+Eigen::VectorXd pyGetForceVector() {
+    return integrator.getForceVector();
 }
 
 Eigen::MatrixXd pyGetParametersJacobian() {
@@ -205,6 +209,8 @@ PYBIND11_MODULE(symulathon, m) {
     m.def("get_position", &pyGetPosition, "Returns the position vector in the current state");
 
     m.def("get_velocity", &pyGetVelocity, "Returns the velocity vector in the current state");
+
+    m.def("get_force", &pyGetForceVector, "Returns the force vector in the current state. Needs to call fill_containers first.");
 
     m.def("get_time_step", &pyGetTimeStep, "Returns the timestep of the simultaion");
 

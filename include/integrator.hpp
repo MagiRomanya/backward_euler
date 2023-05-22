@@ -51,6 +51,8 @@ class Integrator {
 
         Eigen::VectorXd getEquationVector();
 
+        Eigen::VectorXd getForceVector();
+
         inline Eigen::MatrixXd getParameterJacobian() { return df_dp; }
         inline Eigen::SparseMatrix<double> getForcePositionJacobian() { return df_dx; }
 
