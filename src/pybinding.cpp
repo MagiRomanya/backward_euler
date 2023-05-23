@@ -107,6 +107,14 @@ void pyResetSimulation(double k) {
     mass_spring->fix_particle(index);
 }
 
+void pySetNewK(double k) {
+    mass_spring->set_k(k);
+}
+
+double pyGetK() {
+    return mass_spring->get_k();
+}
+
 int pymain() {
     // RENDER LOOP
     while (!renderer.windowShouldClose()){
@@ -221,4 +229,8 @@ PYBIND11_MODULE(symulathon, m) {
     m.def("process_input", &pyCameraInput, "Reads and process the window's input");
 
     m.def("mainloop", &pymain, "The mainloop from main.cpp");
+
+    m.def("set_new_k", &pySetNewK, "Recieves ands updates the spring constant");
+
+    m.def("get_k", &pyGetK, "Returns current spring constant");
 }
