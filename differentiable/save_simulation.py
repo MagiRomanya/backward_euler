@@ -3,7 +3,7 @@
 import symulathon
 import scipy
 from recorder import SimulationRecorder
-from differenciable import check_cg_convergence
+from differentiable import check_cg_convergence
 
 
 def simulation_step(rec: SimulationRecorder):
