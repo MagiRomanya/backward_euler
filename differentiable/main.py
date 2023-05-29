@@ -1,64 +1,79 @@
 #!/usr/bin/env python3
 
-import symulathon
-import scipy
-import sys
+from solve_system import solve_system
 from recorder import SimulationReader
-from differentiable import check_cg_convergence
-from differentiable import DifferenciableCore
+from backpropagation import Backpropagation
+import symulathon
+import numpy as np
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 
-def simulation_step(dif: DifferenciableCore, read: SimulationReader):
-    symulathon.process_input()
-    symulathon.fill_containers()
+def simulate():
+    reader = SimulationReader(nDoF)
+    backpropagation = Backpropagation(mass, h)
+    symulathon.restart_simulation(K_GUESS)
+    for i in range(DIFF_FRAMES+1):
+        if (symulathon.window_should_close()):
+            break
+        ##################################
+        # ALWAYS fill containers first!
+        symulathon.fill_containers()
+        ##################################
 
-    eq_mat = symulathon.get_equation_matrix()
-    eq_vec = symulathon.get_equation_vector()
-    df_dp = symulathon.get_parameter_jacobian()
-    df_dx = symulathon.get_force_position_jacobian()
-    mass = symulathon.get_mass_matrix()
-    x = symulathon.get_position()
-    v = symulathon.get_velocity()
-    if (not df_dp.any()):
-        print("df/dp is all zeros!")
+        x = symulathon.get_position()
+        v = symulathon.get_velocity()
+        x_t, v_t = reader.get_next_state()
 
-    x_, v_ = read.get_next_state()  # desired positions and velocities
-    dif.step(x, v, x_, v_, eq_mat, df_dx, df_dp, mass)
+        A = symulathon.get_equation_matrix()
+        b = symulathon.get_equation_vector()
 
-    # Solve the sparse linear system with conjugate gradient method
-    delta_v, convergence = scipy.sparse.linalg.cg(eq_mat, eq_vec)
-    check_cg_convergence(convergence)
+        dfdp = symulathon.get_parameter_jacobian()
+        dfdx = symulathon.get_force_position_jacobian()
+        backpropagation.step(x, v, x_t, v_t, A, dfdp, dfdx)
 
-    symulathon.recieve_delta_v(delta_v)
-    symulathon.render_state()
+        delta_v = solve_system(A, b)
 
+        symulathon.recieve_delta_v(delta_v)
+        # symulathon.process_input()
+        # symulathon.render_state()
 
-def main():
-    symulathon.initialize_scene()
-    nDoF = symulathon.get_position().size
-    nParameters = symulathon.get_parameter_jacobian().shape[1]
-    TimeStep = symulathon.get_time_step()
-    print(f"nDoF = {nDoF}")
-    print(f"nParameters = {nParameters}")
-    print(f"TimeStep = {TimeStep}")
-
-    START_K = 100
-    if (len(sys.argv) > 1):
-        START_K = float(sys.argv[1])
-    dif = DifferenciableCore(4, TimeStep, nDoF, nParameters, start_k=START_K)
-    symulathon.restart_simulation(dif.k)
-
-    read = SimulationReader(nDoF)
-
-    while not symulathon.window_should_close():
-        simulation_step(dif, read)
-
-        if dif.is_done():
-            simulation_step(dif, read)
-            dif.update_parameters()
-            symulathon.restart_simulation(dif.k)
-            read.from_the_start()
+    dgdp = backpropagation.get_dgdp()
+    g = backpropagation.get_g()
+    return (g, dgdp)
 
 
 if __name__ == "__main__":
-    main()
+    symulathon.initialize_scene()
+    symulathon.disable_rendering()
+    nDoF = symulathon.get_nDoF()
+    mass = symulathon.get_mass_matrix()
+    h = symulathon.get_time_step()
+    K_GUESS = 0.1
+    DIFF_FRAMES = 2
+
+    k_values = np.linspace(0.01, 2, 1000)
+    g_values = []
+    dgdp_values = []
+    for k in tqdm(k_values):
+        K_GUESS = k
+        g, dgdp = simulate()
+        g_values.append(g)
+        dgdp_values.append(dgdp[0])
+
+    # Calculate finite differences
+    dgdp_finite = []
+    for i in range(len(g_values)-1):
+        value = (g_values[i+1]-g_values[i]) / (k_values[i+1] - k_values[i])
+        dgdp_finite.append(value)
+    dgdp_finite.append(dgdp_finite[-1])
+
+    print(len(k_values), len(dgdp_finite), len(g_values), len(dgdp_values))
+    plt.plot(k_values, g_values, "-", label="Loss Function")
+    plt.plot(k_values, dgdp_finite, ".", label="Finite dgdp")
+    plt.plot(k_values, dgdp_values, "x", label="Backpropagation dgdp")
+    # plt.ylim(-0.2e6, 0.1e6)
+    plt.legend()
+    plt.grid()
+    plt.show()
+    print("Finished succesfully")

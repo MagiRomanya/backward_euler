@@ -1,6 +1,7 @@
 #ifndef PARTICLE_SYSTEM_H_
 #define PARTICLE_SYSTEM_H_
 
+#include <system_error>
 #include <vector>
 
 #include "vec3.h"
@@ -12,8 +13,12 @@ class ParticleSystem : public Simulable {
     public:
         inline void fix_particle(int p){
             // Make a particle fixed: this particle is not affected by any interaction and will not move
-            fixed[p] = true;
-            fixed_particles.push_back(p);
+            if (p < n_particles) {
+                fixed[p] = true;
+                fixed_particles.push_back(p);
+            }
+            else
+                std::cout << "WARNING::Particle " << p << ", is outside bounds and has not been fixed." << std::endl;
         }
 
         ~ParticleSystem();

@@ -55,6 +55,7 @@ class Integrator {
 
         inline Eigen::MatrixXd getParameterJacobian() { return df_dp; }
         inline Eigen::SparseMatrix<double> getForcePositionJacobian() { return df_dx; }
+        inline int getDoF() { return nDoF; }
 
         void reciveDeltaV(Eigen::VectorXd delta_v);
 

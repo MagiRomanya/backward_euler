@@ -43,3 +43,8 @@ class SimulationReader:
         self.rfile = open(self.filename, 'r')
         self.reader = csv.reader(self.rfile, delimiter=',',
                                  quoting=csv.QUOTE_NONNUMERIC)
+
+    def get_all_history(self):
+        self.from_the_start()
+        data = list(self.reader)
+        return list(np.array(data).T)

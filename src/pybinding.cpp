@@ -12,17 +12,21 @@
 #include "renderer.h"
 #include "object_manager.hpp"
 
-#define N 5
-#define M 5
+#define N 2
+#define M 2
 
+// #define SIMPLE_CASE
+#ifndef SIMPLE_CASE
+#define GRID_CASE
+#endif
 
 // Define physical parameters of the simulation
-#define K_SPRING 100000
-#define NODE_MASS 100
+#define K_SPRING 1
+#define NODE_MASS 1
 
-Renderer renderer;
+Renderer* renderer = new Renderer();
 ObjectManager manager;
-Integrator integrator(0.05f);
+Integrator integrator(0.1f);
 MassSpring* mass_spring;
 
 Object mfloor;
@@ -68,11 +72,16 @@ int initialize_scene() {
     mfloor.updateModelMatrix();
 
     // Add the object to the renderer
-    renderer.addObject(&cloth);
+    renderer->addObject(&cloth);
     // renderer.addObject(&mfloor);
 
     ////////////////// ADD INTEGRATOR & SIMULABLES ////////////////////
+    #ifdef GRID_CASE
     mass_spring = new MassSpring(&integrator , &cloth, NODE_MASS, K_SPRING);
+    #endif
+    #ifdef SIMPLE_CASE
+    mass_spring = new MassSpring(&integrator, NODE_MASS, K_SPRING);
+    #endif
 
     InfPlane plane;
     plane.normal = vec3(0, 1, 0);
@@ -84,8 +93,11 @@ int initialize_scene() {
     // Fix corners
     const int index = M * (N - 1);
     mass_spring->fix_particle(0);
+    #ifdef GRID_CASE
     mass_spring->fix_particle(index);
+    #endif
 
+    integrator.fill_containers();
     return 0;
 }
 
@@ -97,14 +109,22 @@ void pyResetSimulation(double k) {
 
     integrator.clear_simulables();
     delete mass_spring;
+    #ifdef GRID_CASE
     mass_spring = new MassSpring(&integrator , &cloth, NODE_MASS, k);
+    #endif
+    #ifdef SIMPLE_CASE
+    mass_spring = new MassSpring(&integrator , NODE_MASS, k);
+    #endif
 
     // mass_spring->add_interaction(planeContact);
 
     // Fix corners
     const int index = M * (N - 1);
     mass_spring->fix_particle(0);
+    #ifdef GRID_CASE
     mass_spring->fix_particle(index);
+    #endif
+    integrator.fill_containers();
 }
 
 void pySetNewK(double k) {
@@ -113,28 +133,6 @@ void pySetNewK(double k) {
 
 double pyGetK() {
     return mass_spring->get_k();
-}
-
-int pymain() {
-    // RENDER LOOP
-    while (!renderer.windowShouldClose()){
-        // Input
-        renderer.cameraInput();
-
-        // Simulation step
-        {
-            Clock timer("Simulation Step");
-            integrator.integration_step();
-        }
-
-        // Render
-        renderer.render();
-    }
-    Clock results("result");
-    results.printClocks();
-    delete mass_spring;
-    delete planeContact;
-    return 0;
 }
 
 void pyFillContainers() {
@@ -182,15 +180,23 @@ Eigen::SparseMatrix<double> pyGetForcePositionJacobian() {
 }
 
 void pyRenderState() {
-    renderer.render();
+    renderer->render();
 }
 
 bool pyWindowShouldClose() {
-    return renderer.windowShouldClose();
+    return renderer->windowShouldClose();
 }
 
 void pyCameraInput() {
-    renderer.cameraInput();
+    renderer->cameraInput();
+}
+
+int pyGetDoF() {
+    return integrator.getDoF();
+}
+
+void pyDisableRendering() {
+    delete renderer;
 }
 
 PYBIND11_MODULE(symulathon, m) {
@@ -228,9 +234,11 @@ PYBIND11_MODULE(symulathon, m) {
 
     m.def("process_input", &pyCameraInput, "Reads and process the window's input");
 
-    m.def("mainloop", &pymain, "The mainloop from main.cpp");
-
     m.def("set_new_k", &pySetNewK, "Recieves ands updates the spring constant");
 
     m.def("get_k", &pyGetK, "Returns current spring constant");
+
+    m.def("get_nDoF", &pyGetDoF, "Returns number of degrees of freedom of the system");
+
+    m.def("disable_rendering", &pyDisableRendering, "Destroys renderer to simulate not graphically");
 }

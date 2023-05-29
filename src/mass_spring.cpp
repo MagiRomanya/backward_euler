@@ -15,13 +15,37 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass, do
     integrator->add_simulable(this);
 }
 
+MassSpring::MassSpring(Integrator* integrator, double node_mass, double k_spring)
+{
+    k_flex = k_spring;
+    k_bend = k_flex/ 100;
+    nParameters = 2;
+
+    // Set up two particles with a spring
+    n_particles = 2;
+    nDoF = 3 * n_particles;
+    mass.resize(n_particles, node_mass);
+    resize_containers(nDoF);
+    gravity_vec = vec3(node_mass * vec3(0, -1, 0));
+
+    x[0] = 0; x[1] = 0; x[2] = 0;
+    x[3] = 1; x[4] = 0; x[5] = 0;
+    add_spring(0, 1, FLEX, 0);
+
+    // Add gravity
+    Interaction* gravity = new Gravity(&gravity_vec);
+    add_interaction(gravity);
+    class_allocated_interactions.push_back(gravity);
+
+    integrator->add_simulable(this);
+}
+
 void MassSpring::load_from_mesh(Object* obj, double node_mass) {
     /* Reads a mesh and treats the vertices as particles and the
      * edges as springs */
     this->mesh = obj->mesh;
     this->mesh->isDynamic = true;
     this->obj = obj;
-
 
     const unsigned int n_coord = 3 * mesh->vertices.size();
     n_particles = mesh->vertices.size();
@@ -76,11 +100,11 @@ void MassSpring::add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, 
     lengths.push_back(L);
     Interaction* spring;
     if  (type == FLEX) {
-        double* param[2] = {&k_flex, &lengths.back()};
+        double param[2] = {k_flex, lengths.back()};
         spring = new TestingSpring(i1, i2, param);
     }
     else {
-        double* param[2] = {&k_bend, &lengths.back()};
+        double param[2] = {k_bend, lengths.back()};
         spring = new TestingSpring(i1, i2, param);
     }
 
@@ -107,7 +131,8 @@ void MassSpring::fill_containers() {
         integrator->add_equation_triplet(tri(index + 3*i+2, index + 3*i+2, mass[i]));
     }
     // Change to the world coordinate system
-    if (current_coordinate_system == LOCAL){
+    // (only when we deal with meshes)
+    if (current_coordinate_system == LOCAL && mesh != nullptr){
         positions_to_world();
     }
 
@@ -136,7 +161,7 @@ void MassSpring::update_state() {
 
 void MassSpring::update_mesh() {
     /* Updates the positions of the mesh with the simulated data */
-
+    if (mesh == nullptr) return;
     if (current_coordinate_system == WORLD) {
         positions_to_local();
     }
