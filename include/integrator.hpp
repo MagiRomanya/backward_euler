@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 
+#include "Eigen/src/Core/Matrix.h"
 #include "simulable.hpp"
 #include "constraint.hpp"
 
@@ -44,6 +45,8 @@ class Integrator {
         inline void add_constraint_jacobian_triplet(tri triplet) { constraint_jacobian_triplets.push_back(triplet); }
 
         inline void add_to_df_dp_element(unsigned int i, unsigned int j, double value) { df_dp(i,j) += value; }
+
+        void set_state(Eigen::VectorXd xi, Eigen::VectorXd vi);
 
         void fill_containers();
 

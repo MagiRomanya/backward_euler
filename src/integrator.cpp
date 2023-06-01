@@ -170,3 +170,15 @@ void Integrator::clear_simulables() {
     nParameters = 0;
     clear_containers();
 }
+
+void Integrator::set_state(Eigen::VectorXd xi, Eigen::VectorXd vi) {
+    if (xi.size() != vi.size() && xi.size() != x.size()) {
+        std::cout << "WARNING::INTEGRATOR::SET_STATE: new state dimensions do not match" << std::endl;
+        return;
+    }
+    x = xi;
+    v = vi;
+    for (int i = 0; i < simulables.size(); i++) {
+        simulables[i]->set_state();
+    }
+}

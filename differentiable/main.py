@@ -1,21 +1,57 @@
 #!/usr/bin/env python3
 
-from solve_system import solve_system
-from recorder import SimulationReader
-from backpropagation import Backpropagation
-import symulathon
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import symulathon
+from solve_system import solve_system
+from recorder import SimulationReader
+from backpropagation import Backpropagation
+
+
+def newton_iteration(x0, v0, xi, vi):
+    symulathon.fill_containers()
+    A = symulathon.get_equation_matrix()
+    # b = symulathon.get_equation_vector()
+    dfdx = symulathon.get_force_position_jacobian()
+    f = symulathon.get_force()
+    b = mass * v0 + h * f + h * dfdx @ (x0 - xi) - (mass - h**2 * dfdx) @ vi
+    delta_v = solve_system(A, b)
+    # M v0 + h fi + h df/dx (x0 – xi) - (M – h² df/dx) vi
+    v1 = vi + delta_v
+    x1 = x0 + h * v1
+
+    symulathon.set_state(x1, v1)
+
+    # Check newton iteration
+    symulathon.fill_containers()
+    f = symulathon.get_force()
+    # print(f"2nd iteration check = {(mass @ (v1-v0) - h * f)[3:]}")
+    return x1, v1
+
+
+def newton_iterations(x0, v0, n=3):
+    A = symulathon.get_equation_matrix()
+    b = symulathon.get_equation_vector()
+
+    delta_v = solve_system(A, b)
+
+    v1 = v0 + delta_v
+    x1 = x0 + h * v1
+    symulathon.set_state(x1, v1)
+    symulathon.fill_containers()
+    f = symulathon.get_force()
+    # print(f"1st iteration check = {(mass @ delta_v - h * f)[3:]}")
+
+    for i in range(n-1):
+        x1, v1 = newton_iteration(x0, v0, x1, v1)
 
 
 def simulate():
     reader = SimulationReader(nDoF)
     backpropagation = Backpropagation(mass, h)
     symulathon.restart_simulation(K_GUESS)
-    for i in range(DIFF_FRAMES+1):
-        if (symulathon.window_should_close()):
-            break
+    for _ in range(DIFF_FRAMES+1):
         ##################################
         # ALWAYS fill containers first!
         symulathon.fill_containers()
@@ -26,21 +62,16 @@ def simulate():
         x_t, v_t = reader.get_next_state()
 
         A = symulathon.get_equation_matrix()
-        b = symulathon.get_equation_vector()
 
         dfdp = symulathon.get_parameter_jacobian()
         dfdx = symulathon.get_force_position_jacobian()
         backpropagation.step(x, v, x_t, v_t, A, dfdp, dfdx)
 
-        delta_v = solve_system(A, b)
-
-        symulathon.recieve_delta_v(delta_v)
+        newton_iterations(x, v)
         # symulathon.process_input()
         # symulathon.render_state()
 
-    dgdp = backpropagation.get_dgdp()
-    g = backpropagation.get_g()
-    return (g, dgdp)
+    return backpropagation
 
 
 if __name__ == "__main__":
@@ -50,16 +81,19 @@ if __name__ == "__main__":
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()
     K_GUESS = 0.1
-    DIFF_FRAMES = 2
+    DIFF_FRAMES = 100
 
-    k_values = np.linspace(0.01, 2, 1000)
+    k_values = np.linspace(0.01, 10, 1000)
+    # k_values = [0.1,0.2]
     g_values = []
     dgdp_values = []
     for k in tqdm(k_values):
         K_GUESS = k
-        g, dgdp = simulate()
-        g_values.append(g)
-        dgdp_values.append(dgdp[0])
+        bp = simulate()
+        g_values.append(bp.get_g())
+        dgdp_values.append(bp.get_dgdp()[0])
+        # plt.plot(bp.x_array)
+        # plt.show()
 
     # Calculate finite differences
     dgdp_finite = []
@@ -72,8 +106,10 @@ if __name__ == "__main__":
     plt.plot(k_values, g_values, "-", label="Loss Function")
     plt.plot(k_values, dgdp_finite, ".", label="Finite dgdp")
     plt.plot(k_values, dgdp_values, "x", label="Backpropagation dgdp")
-    # plt.ylim(-0.2e6, 0.1e6)
+    # plt.ylim(-0.1e5, 0.1e5)
+    print(sum(np.array(dgdp_finite) - np.array(dgdp_values)) / len(dgdp_finite))
     plt.legend()
+    plt.xlabel("K values")
     plt.grid()
     plt.show()
     print("Finished succesfully")

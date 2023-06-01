@@ -4,14 +4,26 @@ from solve_system import solve_system
 from recorder import SimulationRecorder
 import symulathon
 
+def newton_step():
+    symulathon.fill_containers()
+    A = symulathon.get_equation_matrix()
+    b = symulathon.get_equation_vector()
+
+    delta_v = solve_system(A, b)
+
+    v2 = v + delta_v
+    x2 = x + h * v2
+
+    symulathon.set_state(x2, v2)
+
 
 if __name__ == "__main__":
     rec = SimulationRecorder()
     symulathon.initialize_scene()
     K_VALUE = 1
-    RECORD_FRAMES = 200
+    RECORD_FRAMES = 300
     symulathon.restart_simulation(K_VALUE)
-
+    h = symulathon.get_time_step()
     frames_count = 0
     while (not symulathon.window_should_close()) and (frames_count <= RECORD_FRAMES):
         frames_count += 1
@@ -26,7 +38,12 @@ if __name__ == "__main__":
 
         delta_v = solve_system(A, b)
 
-        symulathon.recieve_delta_v(delta_v)
+        v1 = v + delta_v
+        x1 = x + h * v1
+        symulathon.set_state(x1, v1)
+
+        # newton_step()
+
         symulathon.process_input()
         symulathon.render_state()
 

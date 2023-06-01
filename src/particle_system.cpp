@@ -26,6 +26,9 @@ vec3 ParticleSystem::get_particle_velocity(int index) {
 }
 
 void ParticleSystem::fill_containers() {
+    /* Fills the force, velocity and position vectors and mass and
+     * force derivative matrices */
+
     // construct the mass matrix
     typedef Eigen::Triplet<double> tri;
     for (int i = 0; i < n_particles; i++) {
@@ -67,4 +70,14 @@ void ParticleSystem::set_particle_position(int index, vec3& pos){
     x(3 * index) = pos.x();
     x(3 * index + 1) = pos.y();
     x(3 * index + 2) = pos.z();
+}
+
+
+void ParticleSystem::set_state() {
+    for (int i=0; i < n_particles; i++) {
+        for (int j=0; j <3; j++) {
+            v[3*i+j] = integrator->v(index + 3*i+j);
+            x[3*i+j] = integrator->x(index + 3*i+j);
+        }
+    }
 }

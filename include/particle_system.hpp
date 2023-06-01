@@ -29,6 +29,8 @@ class ParticleSystem : public Simulable {
 
         void update_state() override;
 
+        void set_state() override;
+
         void set_particle_position(int index, vec3& pos);
 
         vec3 get_particle_position(int index);

@@ -11,7 +11,8 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass, do
     k_bend = k_flex/ 100;
     nParameters = 2;
     load_from_mesh(obj, node_mass);
-    gravity_vec = vec3(mass[0] * vec3(0, -1, 0));
+    gravity_vec = mass[0] * vec3(0, -1, 0);
+    // gravity_vec = 0.0f * vec3(0, -1, 0);
     integrator->add_simulable(this);
 }
 
@@ -112,54 +113,18 @@ void MassSpring::add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, 
     class_allocated_interactions.push_back(spring);
 }
 
-void MassSpring::fill_containers() {
-    /* Fills the force, velocity and position vectors and mass and
-     * force derivative matrices */
-
-    // construct the mass matrix
-    typedef Eigen::Triplet<double> tri;
-    for (int i = 0; i < n_particles; i++) {
-        // Mass identity matrix
-        integrator->add_mass_triplet(tri(index + 3*i, index + 3*i, mass[i]));
-        integrator->add_mass_triplet(tri(index + 3*i+1, index + 3*i+1, mass[i]));
-        integrator->add_mass_triplet(tri(index + 3*i+2, index + 3*i+2, mass[i]));
-
-        // Mass contribution to the equation matrix
-        // equation_matrix = Mass_s - h * df_dv_s - h * h * df_dx_s;
-        integrator->add_equation_triplet(tri(index + 3*i, index + 3*i, mass[i]));
-        integrator->add_equation_triplet(tri(index + 3*i+1, index + 3*i+1, mass[i]));
-        integrator->add_equation_triplet(tri(index + 3*i+2, index + 3*i+2, mass[i]));
-    }
-    // Change to the world coordinate system
-    // (only when we deal with meshes)
-    if (current_coordinate_system == LOCAL && mesh != nullptr){
-        positions_to_world();
-    }
-
-    // Fill the velocity and positions vectors
-    for (int i = 0; i < nDoF; i++){
-        integrator->x[index+i] = x(i);
-        integrator->v[index+i] = v(i);
-    }
-
-    // Fill the force and derivative vectors
-    for (int i = 0; i < interactions.size(); i++){
-        interactions[i]->apply(*integrator, this);
-    }
+void MassSpring::update_state() {
+    ParticleSystem::update_state();
+    update_mesh();
 }
 
-void MassSpring::update_state() {
-    /* Update of the position & velocity vectors */
-    for (int i=0; i < n_particles; i++) {
-        for (int j=0; j <3; j++) {
-            v[3*i+j] += integrator->delta_v(index + 3*i+j);
-            x[3*i+j] += integrator->getTimeStep() * v(3*i+j);
-        }
-    }
+void MassSpring::set_state() {
+    ParticleSystem::set_state();
     update_mesh();
 }
 
 void MassSpring::update_mesh() {
+    // BUG: Careful with the model matrix is wrong
     /* Updates the positions of the mesh with the simulated data */
     if (mesh == nullptr) return;
     if (current_coordinate_system == WORLD) {
@@ -177,6 +142,9 @@ void MassSpring::update_mesh() {
     }
     mesh->calculate_vertex_normals();
     mesh->updateVAO();
+    if (current_coordinate_system == LOCAL) {
+        positions_to_world();
+    }
 }
 
 void MassSpring::positions_to_local() {

@@ -36,6 +36,8 @@ class Simulable {
 
         virtual void update_state() = 0;
 
+        virtual void set_state() = 0;
+
 };
 
 #endif // SIMULABLE_H_

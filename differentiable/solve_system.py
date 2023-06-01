@@ -4,8 +4,12 @@ import scipy
 
 
 def check_cg_convergence(convergence: int):
-    """ Checks weather the conjugate gradient method has converged
-    or not and prints a warning with this info."""
+    """
+    Check weather the conjugate gradient method has converged or not.
+
+    Helper function which outputs a warning to the console when the conjugate
+    gradient method has had some kind of problem.
+    """
     if convergence > 0:
         print(f"Warning: conjugate gradient did not converge\
         with {convergence} iterations")
@@ -13,7 +17,16 @@ def check_cg_convergence(convergence: int):
         print("Warning: conjugate gradient illegal input")
 
 
-def solve_system(eq_mat, eq_vec, threshold=1e-8):
-    result, convergence = scipy.sparse.linalg.cg(eq_mat, eq_vec, tol=threshold)
+def solve_system(eq_mat, eq_vec, threshold=1e-8, maxiter=200):
+    """
+    Solves the sparse linear system defined by one eq_mat & eq_vec.
+
+    The function uses scipy's conjugate gradient method to approximate
+    the results. The user can adjust the threshold & maximum iterations.
+    """
+    result, convergence = scipy.sparse.linalg.cg(eq_mat,
+                                                 eq_vec,
+                                                 tol=threshold,
+                                                 maxiter=maxiter)
     check_cg_convergence(convergence)
     return result

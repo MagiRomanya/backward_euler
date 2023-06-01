@@ -29,6 +29,9 @@ class Backpropagation:
         self.dgdx_array = []
         self.dgdv_array = []
 
+        self.x_array = []
+        self.v_array = []
+
     def step(self, x, v, x_t, v_t, equation_matrix, dfdp, dfdx):
         """ Stores information in forward propagation which is needed
         in backward propagation """
@@ -40,6 +43,8 @@ class Backpropagation:
         self.g_array.append(self.loss.evaluate())
         self.dgdx_array.append(self.loss.get_position_derivative())
         self.dgdv_array.append(self.loss.get_velocity_derivative())
+        self.x_array.append(x)
+        self.v_array.append(v)
 
     def get_dgdp(self):
         """ Does the backpropagation to calculate the loss gradient"""

@@ -16,6 +16,7 @@
 #define M 2
 
 // #define SIMPLE_CASE
+
 #ifndef SIMPLE_CASE
 #define GRID_CASE
 #endif
@@ -63,7 +64,8 @@ int initialize_scene() {
     mfloor.useTexture("gandalf", manager.getTextureID("floor"));
 
     // Set up model matrix for the object
-    cloth.translation = glm::vec3(0.0f, 0.25 * N, -4.0f);
+    // BUG: Careful with the model matrix is wrong
+    // cloth.translation = glm::vec3(0.0f, 0.25 * N, -4.0f);
     // cloth.scaling = glm::vec3(3.0);
     cloth.updateModelMatrix();
 
@@ -199,6 +201,10 @@ void pyDisableRendering() {
     delete renderer;
 }
 
+void pySetState(Eigen::VectorXd xi, Eigen::VectorXd vi) {
+    integrator.set_state(xi, vi);
+}
+
 PYBIND11_MODULE(symulathon, m) {
     m.doc() = "Simple simulation interface"; // optional module docstring
 
@@ -241,4 +247,6 @@ PYBIND11_MODULE(symulathon, m) {
     m.def("get_nDoF", &pyGetDoF, "Returns number of degrees of freedom of the system");
 
     m.def("disable_rendering", &pyDisableRendering, "Destroys renderer to simulate not graphically");
+
+    m.def("set_state", &pySetState, "Sets positions and velocities");
 }

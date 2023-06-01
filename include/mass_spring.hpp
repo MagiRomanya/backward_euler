@@ -22,9 +22,9 @@ class MassSpring : public ParticleSystem {
 
         MassSpring(Integrator* integrator, double node_mass, double k_spring);
 
-        void fill_containers() override;
-
         void update_state() override;
+
+        void set_state() override;
 
         inline double get_k() { return k_flex; }
         inline void set_k(double k) { k_flex = k; }

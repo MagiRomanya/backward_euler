@@ -22,6 +22,8 @@ class RigidBody : public Simulable {
 
         void update_state() override;
 
+        void set_state() override;
+
     private:
         void calculate_COM();
 
@@ -38,6 +40,7 @@ class RigidBody : public Simulable {
         vec3 coriolis_torque();
 
         vec3 m_COM;
+
         // Center of mass position
         vec3 m_com_x;
         vec3 m_com_v;

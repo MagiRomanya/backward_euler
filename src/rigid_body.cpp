@@ -116,3 +116,17 @@ void RigidBody::update_state() {
     update_inertia_tensor();
     update_mesh_model();
 }
+
+void RigidBody::set_state() {
+    for (size_t i = 0; i < 3; i++) {
+        m_com_v.e[i] = integrator->v(index + i);
+        m_w.e[i] = integrator->v(index + 3 + i);
+        m_com_x.e[i] = integrator->x(index + i);
+        m_theta.e[i] = integrator->x(index + 3 + i);
+    }
+
+    update_rotation_tensor();
+    update_inertia_tensor();
+    update_mesh_model();
+
+}
