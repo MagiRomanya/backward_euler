@@ -26,11 +26,11 @@ def newton_iteration(x0, v0, xi, vi):
     # Check newton iteration
     symulathon.fill_containers()
     f = symulathon.get_force()
-    # print(f"2nd iteration check = {(mass @ (v1-v0) - h * f)[3:]}")
+    print(f"2nd iteration check = {(mass @ (v1-v0) - h * f)[3:]}")
     return x1, v1
 
 
-def newton_iterations(x0, v0, n=3):
+def newton_iterations(x0, v0, n=2):
     A = symulathon.get_equation_matrix()
     b = symulathon.get_equation_vector()
 
@@ -41,7 +41,7 @@ def newton_iterations(x0, v0, n=3):
     symulathon.set_state(x1, v1)
     symulathon.fill_containers()
     f = symulathon.get_force()
-    # print(f"1st iteration check = {(mass @ delta_v - h * f)[3:]}")
+    print(f"1st iteration check = {(mass @ delta_v - h * f)[3:]}")
 
     for i in range(n-1):
         x1, v1 = newton_iteration(x0, v0, x1, v1)
@@ -81,10 +81,8 @@ if __name__ == "__main__":
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()
     K_GUESS = 0.1
-    DIFF_FRAMES = 100
-
-    k_values = np.linspace(0.01, 10, 1000)
-    # k_values = [0.1,0.2]
+    DIFF_FRAMES = 1
+    k_values = np.linspace(0.01, 10, 100)
     g_values = []
     dgdp_values = []
     for k in tqdm(k_values):
@@ -92,8 +90,6 @@ if __name__ == "__main__":
         bp = simulate()
         g_values.append(bp.get_g())
         dgdp_values.append(bp.get_dgdp()[0])
-        # plt.plot(bp.x_array)
-        # plt.show()
 
     # Calculate finite differences
     dgdp_finite = []

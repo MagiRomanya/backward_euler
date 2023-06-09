@@ -18,7 +18,7 @@
 //  - Punto <-> plano
 //  - Punto <-> esfera
 // DONE Añadir luz phong al renderer
-// TODO Hacer que el simulador sea cómo un servidor -> pybind
+// DONE Hacer que el simulador sea cómo un servidor -> pybind
 // TODO Introducir muelles de flexión basados en los angulos
 
 // Dimensions of the particles grid

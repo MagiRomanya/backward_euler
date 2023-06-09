@@ -34,8 +34,16 @@ class Simulable {
         */
         virtual void fill_containers() = 0;
 
+        /*
+         * Update state modifies the simulable's state from the
+         * integrator's delta v
+         */
         virtual void update_state() = 0;
 
+        /*
+         * Set state modifies the simulable's state setting the positions
+         * and velocities from the ones stored in the integrator.
+         */
         virtual void set_state() = 0;
 
 };

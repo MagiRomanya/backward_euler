@@ -6,11 +6,6 @@
 #include "spring.h"
 #include "spring_test.hpp"
 
-enum COORDINATE_SYSTEM {
-LOCAL,
-WORLD,
-};
-
 enum SPRING_TYPE {
 FLEX,
 BEND,
@@ -39,8 +34,6 @@ class MassSpring : public ParticleSystem {
         void load_from_mesh(Object* obj, double node_mass);
 
         void add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, double L);
-
-        COORDINATE_SYSTEM current_coordinate_system = LOCAL;
 
         SimpleMesh* mesh = nullptr;
         Object* obj = nullptr;
