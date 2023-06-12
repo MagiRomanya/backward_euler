@@ -29,7 +29,7 @@ void ParticleSystem::fill_containers() {
     /* Fills the force, velocity and position vectors and mass and
      * force derivative matrices */
 
-    // construct the mass matrix
+    // construct the mass matrix from triplets
     typedef Eigen::Triplet<double> tri;
     for (int i = 0; i < n_particles; i++) {
         // Mass identity matrix

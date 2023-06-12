@@ -35,7 +35,7 @@ MassSpring::MassSpring(Integrator *integrator, double node_mass, double k_spring
     x[3] = 1;
     x[4] = 0;
     x[5] = 0;
-    add_spring(0, 1, FLEX, 0);
+    add_spring(0, 1, FLEX, 0.5);
 
     // Add gravity
     Interaction *gravity = new Gravity(&gravity_vec);

@@ -43,10 +43,7 @@ class Integrator {
         inline void add_equation_triplet(tri triplet) { equation_matrix_triplets.push_back(triplet); }
         inline void add_mass_triplet(tri triplet) { mass_triplets.push_back(triplet); }
         inline void add_constraint_jacobian_triplet(tri triplet) { constraint_jacobian_triplets.push_back(triplet); }
-
         inline void add_to_df_dp_element(unsigned int i, unsigned int j, double value) { df_dp(i,j) += value; }
-
-        void set_state(Eigen::VectorXd xi, Eigen::VectorXd vi);
 
         void fill_containers();
 
@@ -60,7 +57,12 @@ class Integrator {
         inline Eigen::SparseMatrix<double> getForcePositionJacobian() { return df_dx; }
         inline int getDoF() { return nDoF; }
 
+        /* Recieve DeltaV and Set State are the only ways to change the state of
+         * the simulation.
+         */
         void reciveDeltaV(Eigen::VectorXd delta_v);
+
+        void set_state(Eigen::VectorXd xi, Eigen::VectorXd vi);
 
         void add_simulable(Simulable* simulable);
 

@@ -15,7 +15,7 @@
 #define N 2
 #define M 2
 
-// #define SIMPLE_CASE
+#define SIMPLE_CASE
 
 #ifndef SIMPLE_CASE
 #define GRID_CASE

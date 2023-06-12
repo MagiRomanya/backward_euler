@@ -1,6 +1,5 @@
 import meansquareloss
 from solve_system import solve_system
-import numpy as np
 
 
 def check_cg_convergence(convergence: int):
@@ -29,10 +28,12 @@ class Backpropagation:
         self.dgdx_array = []
         self.dgdv_array = []
 
+        # Some non essential quantites
         self.x_array = []
         self.v_array = []
+        self.f_array = []
 
-    def step(self, x, v, x_t, v_t, equation_matrix, dfdp, dfdx):
+    def step(self, x, v, x_t, v_t, equation_matrix, dfdp, dfdx, f=0):
         """ Stores information in forward propagation which is needed
         in backward propagation """
         self.loss.update_containers(x, v, x_t, v_t)
@@ -45,6 +46,7 @@ class Backpropagation:
         self.dgdv_array.append(self.loss.get_velocity_derivative())
         self.x_array.append(x)
         self.v_array.append(v)
+        self.f_array.append(f)
 
     def get_dgdp(self):
         """ Does the backpropagation to calculate the loss gradient"""

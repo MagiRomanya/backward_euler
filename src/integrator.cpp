@@ -107,8 +107,10 @@ void Integrator::fill_containers(){
         sim->fill_containers();
     }
 
-    // Create mass matrix
+    // Create sparse matrices from triplets
     mass.setFromTriplets(mass_triplets.begin(), mass_triplets.end());
+    df_dx.setFromTriplets(df_dx_triplets.begin(), df_dx_triplets.end());
+    df_dv.setFromTriplets(df_dv_triplets.begin(), df_dv_triplets.end());
 }
 
 void Integrator::generate_equation_with_constraints(Eigen::SparseMatrix<double>& equation_matrix, Eigen::VectorXd equation_vector) {
@@ -153,11 +155,9 @@ Eigen::SparseMatrix<double> Integrator::getEquationMatrix() {
 
 
 Eigen::VectorXd Integrator::getEquationVector() {
-    Eigen::VectorXd equation_vector;
-    df_dx.setFromTriplets(df_dx_triplets.begin(), df_dx_triplets.end());
-    df_dv.setFromTriplets(df_dv_triplets.begin(), df_dv_triplets.end());
-    equation_vector = h * (f0 + h * df_dx * v);
-    return equation_vector;
+    // df_dx.setFromTriplets(df_dx_triplets.begin(), df_dx_triplets.end());
+    // df_dv.setFromTriplets(df_dv_triplets.begin(), df_dv_triplets.end());
+    return h * (f0 + h * df_dx * v);
 }
 
 Eigen::VectorXd Integrator::getForceVector() {
