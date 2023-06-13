@@ -80,7 +80,7 @@ if __name__ == "__main__":
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()
     K_GUESS = 0.1
-    DIFF_FRAMES = 100
+    DIFF_FRAMES = 1
     print(f"Test with {DIFF_FRAMES} step[s] and {DIFF_FRAMES+1} states")
     k_values = np.linspace(0.01, 2, 100)
     g_values = []

@@ -22,7 +22,8 @@ class MassSpring : public ParticleSystem {
         void set_state() override;
 
         inline double get_k() { return k_flex; }
-        inline void set_k(double k) { k_flex = k; }
+        inline double get_k_bend() { return k_bend; }
+        inline void set_k(double k) { k_flex = k; k_bend = compute_k_bend(); }
 
     private:
         void update_mesh();
@@ -34,6 +35,8 @@ class MassSpring : public ParticleSystem {
         void load_from_mesh(Object* obj, double node_mass);
 
         void add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, double L);
+
+        inline double compute_k_bend() { return k_flex / 100; }
 
         SimpleMesh* mesh = nullptr;
         Object* obj = nullptr;

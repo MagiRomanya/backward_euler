@@ -64,9 +64,10 @@ if __name__ == "__main__":
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()
     K_GUESS = 0.1
-    DIFF_FRAMES = 100
+    DIFF_FRAMES = 10
 
     k_values = np.linspace(0.01, 10, 200)
+    # k_values = np.linspace(6, 8, 2000)
     g_values = []
     dgdp_values = []
     for k in tqdm(k_values):

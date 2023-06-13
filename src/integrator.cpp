@@ -24,17 +24,21 @@ void Integrator::resize_containers(unsigned int newDoF, unsigned int newNConstra
 }
 
 void Integrator::clear_containers() {
-    f0.setZero();
     x.setZero();
     v.setZero();
+    f0.setZero();
+    delta_v.setZero();
+    constraint_value.setZero();
 
     df_dx.setZero();
     df_dv.setZero();
+    mass.setZero();
 
     df_dx_triplets.clear();
     df_dv_triplets.clear();
     mass_triplets.clear();
     equation_matrix_triplets.clear();
+    constraint_jacobian_triplets.clear();
 
     df_dp.setZero(nDoF, nParameters);
 }
@@ -166,6 +170,7 @@ Eigen::VectorXd Integrator::getForceVector() {
 
 void Integrator::clear_simulables() {
     simulables.clear();
+    constraints.clear();
     nDoF = 0;
     nParameters = 0;
     clear_containers();

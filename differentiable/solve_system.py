@@ -28,5 +28,6 @@ def solve_system(eq_mat, eq_vec, threshold=1e-8, maxiter=200):
                                                  eq_vec,
                                                  tol=threshold,
                                                  maxiter=maxiter)
+    # result = scipy.sparse.linalg.spsolve(eq_mat, eq_vec)
     check_cg_convergence(convergence)
     return result

@@ -15,7 +15,7 @@
 #define N 2
 #define M 2
 
-#define SIMPLE_CASE
+// #define SIMPLE_CASE
 
 #ifndef SIMPLE_CASE
 #define GRID_CASE
@@ -24,10 +24,11 @@
 // Define physical parameters of the simulation
 #define K_SPRING 1
 #define NODE_MASS 1
+#define TimeStep 0.1f
 
 Renderer *renderer = new Renderer();
 ObjectManager manager;
-Integrator integrator(0.1f);
+Integrator* integrator = new Integrator(TimeStep);
 MassSpring *mass_spring;
 
 Object mfloor;
@@ -82,10 +83,10 @@ int initialize_scene() {
 
 ////////////////// ADD INTEGRATOR & SIMULABLES ////////////////////
 #ifdef GRID_CASE
-  mass_spring = new MassSpring(&integrator, &cloth, NODE_MASS, K_SPRING);
+  mass_spring = new MassSpring(integrator, &cloth, NODE_MASS, K_SPRING);
 #endif
 #ifdef SIMPLE_CASE
-  mass_spring = new MassSpring(&integrator, NODE_MASS, K_SPRING);
+  mass_spring = new MassSpring(integrator, NODE_MASS, K_SPRING);
 #endif
 
   InfPlane plane;
@@ -96,12 +97,12 @@ int initialize_scene() {
 
   // Fix corners
   const int index = M * (N - 1);
-  mass_spring->fix_particle(0);
 #ifdef GRID_CASE
+  mass_spring->fix_particle(0);
   mass_spring->fix_particle(index);
 #endif
 
-  integrator.fill_containers();
+  integrator->fill_containers();
   return 0;
 }
 
@@ -111,13 +112,14 @@ void pyResetSimulation(double k) {
   CreateGrid(mesh, N, M, step);
   manager.loadMesh("cloth", mesh);
 
-  integrator.clear_simulables();
   delete mass_spring;
+  // BUG: Deleting and creating a new Integrator does not reset it properly
+  integrator->clear_simulables();
 #ifdef GRID_CASE
-  mass_spring = new MassSpring(&integrator, &cloth, NODE_MASS, k);
+  mass_spring = new MassSpring(integrator, &cloth, NODE_MASS, k);
 #endif
 #ifdef SIMPLE_CASE
-  mass_spring = new MassSpring(&integrator, NODE_MASS, k);
+  mass_spring = new MassSpring(integrator, NODE_MASS, k);
 #endif
 
   // mass_spring->add_interaction(planeContact);
@@ -128,43 +130,45 @@ void pyResetSimulation(double k) {
 #ifdef GRID_CASE
   mass_spring->fix_particle(index);
 #endif
-  integrator.fill_containers();
+  integrator->fill_containers();
+  // std::cout << "Mass spring k = " << mass_spring->get_k() << std::endl;
+  // std::cout << "Mass spring k bend = " << mass_spring->get_k_bend() << std::endl;
 }
 
 void pySetNewK(double k) { mass_spring->set_k(k); }
 
 double pyGetK() { return mass_spring->get_k(); }
 
-void pyFillContainers() { integrator.fill_containers(); }
+void pyFillContainers() { integrator->fill_containers(); }
 
 void pyRecieveDeltaV(Eigen::VectorXd delta_v) {
-  integrator.reciveDeltaV(delta_v);
+  integrator->reciveDeltaV(delta_v);
 }
 
 Eigen::SparseMatrix<double> pyGetEquationMatrix() {
-  return integrator.getEquationMatrix();
+  return integrator->getEquationMatrix();
 }
 
-Eigen::VectorXd pyGetEquationVector() { return integrator.getEquationVector(); }
+Eigen::VectorXd pyGetEquationVector() { return integrator->getEquationVector(); }
 
-Eigen::VectorXd pyGetForceVector() { return integrator.getForceVector(); }
+Eigen::VectorXd pyGetForceVector() { return integrator->getForceVector(); }
 
 Eigen::MatrixXd pyGetParametersJacobian() {
-  return integrator.getParameterJacobian();
+  return integrator->getParameterJacobian();
 }
 
 Eigen::SparseMatrix<double> pyGetMassMatrix() {
-  return integrator.getMassMatrix();
+  return integrator->getMassMatrix();
 }
 
-Eigen::VectorXd pyGetPosition() { return integrator.x; }
+Eigen::VectorXd pyGetPosition() { return integrator->x; }
 
-Eigen::VectorXd pyGetVelocity() { return integrator.v; }
+Eigen::VectorXd pyGetVelocity() { return integrator->v; }
 
-float pyGetTimeStep() { return integrator.getTimeStep(); }
+float pyGetTimeStep() { return integrator->getTimeStep(); }
 
 Eigen::SparseMatrix<double> pyGetForcePositionJacobian() {
-  return integrator.getForcePositionJacobian();
+  return integrator->getForcePositionJacobian();
 }
 
 void pyRenderState() { renderer->render(); }
@@ -173,12 +177,12 @@ bool pyWindowShouldClose() { return renderer->windowShouldClose(); }
 
 void pyCameraInput() { renderer->cameraInput(); }
 
-int pyGetDoF() { return integrator.getDoF(); }
+int pyGetDoF() { return integrator->getDoF(); }
 
 void pyDisableRendering() { delete renderer; }
 
 void pySetState(Eigen::VectorXd xi, Eigen::VectorXd vi) {
-  integrator.set_state(xi, vi);
+  integrator->set_state(xi, vi);
 }
 
 PYBIND11_MODULE(symulathon, m) {

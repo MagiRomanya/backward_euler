@@ -22,9 +22,6 @@ class Integrator {
             nConstraints = 0;
         }
 
-        ~Integrator() { }
-
-
         Eigen::VectorXd x;
         Eigen::VectorXd v;
         Eigen::VectorXd f0;
