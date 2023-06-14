@@ -44,8 +44,6 @@ class MassSpring : public ParticleSystem {
         double k_flex;
         double k_bend;
 
-        std::list<double> lengths;
-
         vec3 gravity_vec;
 };
 

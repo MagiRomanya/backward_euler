@@ -41,7 +41,7 @@ def simulate():
         ##################################
         # Newton Iterations
         ##################################
-        iterations = 1
+        iterations = 2
         xi = x
         vi = v
         for it in range(iterations):
@@ -64,10 +64,11 @@ if __name__ == "__main__":
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()
     K_GUESS = 0.1
-    DIFF_FRAMES = 10
+    DIFF_FRAMES = 100
 
-    k_values = np.linspace(0.01, 10, 200)
-    # k_values = np.linspace(6, 8, 2000)
+    k_values = np.linspace(0.01, 10, 100)
+    # np.random.shuffle(k_values)
+    # k_values = np.linspace(6.9, 7.1, 20)
     g_values = []
     dgdp_values = []
     for k in tqdm(k_values):
@@ -89,6 +90,7 @@ if __name__ == "__main__":
     plt.plot(k_values, dgdp_values, "x", label="Backpropagation dgdp")
     # plt.ylim(-0.2e6, 0.1e6)
     plt.legend()
+    plt.xlabel("k value")
     plt.grid()
     plt.show()
     print("Finished succesfully")

@@ -3,7 +3,6 @@
 
 #include "integrator.hpp"
 
-// class System;
 class ParticleSystem;
 
 class Interaction {

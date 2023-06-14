@@ -1,8 +1,5 @@
 #include "mass_spring.hpp"
-#include "clock.h"
 #include "gravity.hpp"
-#include "interaction.h"
-#include "simulable.hpp"
 #include "spring_test.hpp"
 
 MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, double k_spring) {
@@ -94,20 +91,20 @@ void MassSpring::load_from_mesh(Object *obj, double node_mass) {
 
     for (size_t i = 0; i < externalEdges.size(); i++) {
         Edge &e = externalEdges[i];
-        L = mesh->distance(e.a, e.b);
+        L = mesh->distance(e.a, e.b, obj->model);
         add_spring(e.a, e.b, FLEX, L);
     }
 
     for (size_t i = 0; i < internalEdges.size(); i += 2) {
         Edge &e1 = internalEdges[i];
         Edge &e2 = internalEdges[i + 1];
-        L = mesh->distance(e1.a, e1.b);
+        L = mesh->distance(e1.a, e1.b, obj->model);
         // Normal spring
         add_spring(e1.a, e1.b, FLEX, L);
 
         // Bend spring
-        L = mesh->distance(e1.opposite, e2.opposite);
-        add_spring(e1.opposite, e2.opposite, BEND, L);
+        L = mesh->distance(e1.opposite, e2.opposite, obj->model);
+        // add_spring(e1.opposite, e2.opposite, BEND, L);
     }
 
     // Add gravity
@@ -117,16 +114,14 @@ void MassSpring::load_from_mesh(Object *obj, double node_mass) {
 
 }
 
-void MassSpring::add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type,
-                            double L) {
+void MassSpring::add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, double L) {
     // Interaction* spring = new Spring(i1, i2, K, L);
-    lengths.push_back(L);
     Interaction *spring;
     if (type == FLEX) {
-        double param[2] = {k_flex, lengths.back()};
+        double param[2] = {k_flex, L};
         spring = new TestingSpring(i1, i2, param);
     } else {
-        double param[2] = {k_bend, lengths.back()};
+        double param[2] = {k_bend, L};
         spring = new TestingSpring(i1, i2, param);
     }
 

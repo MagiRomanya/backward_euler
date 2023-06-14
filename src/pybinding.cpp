@@ -12,8 +12,8 @@
 #include "object_manager.hpp"
 #include "renderer.h"
 
-#define N 2
-#define M 2
+#define N 20
+#define M 20
 
 // #define SIMPLE_CASE
 
@@ -69,7 +69,7 @@ int initialize_scene() {
   mfloor.useTexture("gandalf", manager.getTextureID("floor"));
 
   // Set up model matrix for the object
-  cloth.translation = glm::vec3(0.0f, 0.25 * N, -4.0f);
+  cloth.translation = glm::vec3(-0.5 * N, 0.0f, -4.0f*N);
   cloth.scaling = glm::vec3(3.0);
   cloth.updateModelMatrix();
 

@@ -20,10 +20,13 @@ class TwoBodyInteraction : public Interaction {
         // Indices wrt Integrator
         unsigned int itg_p1, itg_p2;
 
+        // Relative distance
         double L;
+        // Positions
         double x1, y1, z1;
         double x2, y2, z2;
 
+        // Velocities
         double vx1, vy1, vz1;
         double vx2, vy2, vz2;
 

@@ -2,6 +2,7 @@
 
 from solve_system import solve_system
 from recorder import SimulationRecorder
+import numpy as np
 import symulathon
 
 
@@ -30,6 +31,9 @@ if __name__ == "__main__":
     rec = SimulationRecorder()
     symulathon.initialize_scene()
     K_VALUE = 1
+    # K_VALUE = 6.96030151
+    # K_VALUE = 20
+    # K_VALUE = 6.99
     RECORD_FRAMES = 500
     symulathon.restart_simulation(K_VALUE)
     h = symulathon.get_time_step()
