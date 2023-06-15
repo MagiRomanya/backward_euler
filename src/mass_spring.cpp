@@ -3,57 +3,53 @@
 #include "spring_test.hpp"
 
 MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, double k_spring) {
-    k_flex = k_spring;
-    k_bend = compute_k_bend();
-    nParameters = 2;
+    spring_stiffness = k_spring;
+    nParameters = 3;
     load_from_mesh(obj, node_mass);
     gravity_vec = mass[0] * vec3(0, -1, 0);
-    // gravity_vec = 0.0f * vec3(0, -1, 0);
     integrator->add_simulable(this);
 }
 
-MassSpring::MassSpring(Integrator *integrator, double node_mass, double k_spring) {
-    k_flex = k_spring;
-    k_bend = compute_k_bend();
-    nParameters = 2;
+// MassSpring::MassSpring(Integrator *integrator, double node_mass, double k_spring) {
+//     spring_stiffness = k_spring;
+//     nParameters = 3;
 
-    // Set up two particles with a spring
-    n_particles = 4;
-    nDoF = 3 * n_particles;
-    mass.resize(n_particles, node_mass);
-    resize_containers(nDoF);
-    gravity_vec = vec3(node_mass * vec3(0, -1, 0));
-    // gravity_vec = 0.0f * vec3(0, -1, 0);
+//     // Set up two particles with a spring
+//     n_particles = 4;
+//     nDoF = 3 * n_particles;
+//     mass.resize(n_particles, node_mass);
+//     resize_containers(nDoF);
+//     gravity_vec = vec3(node_mass * vec3(0, -1, 0));
 
-    x[0] = 0;
-    x[1] = 0.5;
-    x[2] = -4;
+//     x[0] = 0;
+//     x[1] = 0.5;
+//     x[2] = -4;
 
-    x[3] = 0;
-    x[4] = 0.5;
-    x[5] = -2.5;
+//     x[3] = 0;
+//     x[4] = 0.5;
+//     x[5] = -2.5;
 
-    x[6] = 1.5;
-    x[7] = 0.5;
-    x[8] = -4;
+//     x[6] = 1.5;
+//     x[7] = 0.5;
+//     x[8] = -4;
 
-    x[9] = 1.5;
-    x[10] = 0.5;
-    x[11] = -2.5;
-    add_spring(0, 2, FLEX, (get_particle_position(0) - get_particle_position(2)).length());
-    add_spring(2, 3, FLEX, (get_particle_position(2) - get_particle_position(3)).length());
-    add_spring(3, 1, FLEX, (get_particle_position(3) - get_particle_position(1)).length());
-    // add_spring(2, 1, BEND, (get_particle_position(2) - get_particle_position(1)).length());
-    fix_particle(0);
-    fix_particle(1);
+//     x[9] = 1.5;
+//     x[10] = 0.5;
+//     x[11] = -2.5;
+//     add_spring(0, 2, FLEX, (get_particle_position(0) - get_particle_position(2)).length());
+//     add_spring(2, 3, FLEX, (get_particle_position(2) - get_particle_position(3)).length());
+//     add_spring(3, 1, FLEX, (get_particle_position(3) - get_particle_position(1)).length());
+//     // add_spring(2, 1, BEND, (get_particle_position(2) - get_particle_position(1)).length());
+//     fix_particle(0);
+//     fix_particle(1);
 
-    // Add gravity
-    Interaction *gravity = new Gravity(&gravity_vec);
-    add_interaction(gravity);
-    class_allocated_interactions.push_back(gravity);
+//     // Add gravity
+//     Interaction *gravity = new Gravity(&gravity_vec);
+//     add_interaction(gravity);
+//     class_allocated_interactions.push_back(gravity);
 
-    integrator->add_simulable(this);
-}
+//     integrator->add_simulable(this);
+// }
 
 void MassSpring::load_from_mesh(Object *obj, double node_mass) {
     /* Reads a mesh and treats the vertices as particles and the
@@ -104,7 +100,7 @@ void MassSpring::load_from_mesh(Object *obj, double node_mass) {
 
         // Bend spring
         L = mesh->distance(e1.opposite, e2.opposite, obj->model);
-        // add_spring(e1.opposite, e2.opposite, BEND, L);
+        add_spring(e1.opposite, e2.opposite, BEND, L);
     }
 
     // Add gravity
@@ -115,13 +111,12 @@ void MassSpring::load_from_mesh(Object *obj, double node_mass) {
 }
 
 void MassSpring::add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, double L) {
-    // Interaction* spring = new Spring(i1, i2, K, L);
     Interaction *spring;
     if (type == FLEX) {
-        double param[2] = {k_flex, L};
+        std::vector<double> param = {spring_stiffness, L, 1.0};
         spring = new TestingSpring(i1, i2, param);
     } else {
-        double param[2] = {k_bend, L};
+        std::vector<double> param = {spring_stiffness, L, bend_multiplyer};
         spring = new TestingSpring(i1, i2, param);
     }
 

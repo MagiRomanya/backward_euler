@@ -15,15 +15,15 @@ class MassSpring : public ParticleSystem {
     public:
         MassSpring(Integrator* integrator, Object* obj, double node_mass, double k_spring);
 
-        MassSpring(Integrator* integrator, double node_mass, double k_spring);
+        // MassSpring(Integrator* integrator, double node_mass, double k_spring);
 
         void update_state() override;
 
         void set_state() override;
 
-        inline double get_k() { return k_flex; }
-        inline double get_k_bend() { return k_bend; }
-        inline void set_k(double k) { k_flex = k; k_bend = compute_k_bend(); }
+        inline double get_k() { return spring_stiffness; }
+        inline double get_k_bend() { return spring_stiffness * bend_multiplyer; }
+        inline void set_k(double k) { spring_stiffness = k; }
 
     private:
         void update_mesh();
@@ -36,13 +36,11 @@ class MassSpring : public ParticleSystem {
 
         void add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, double L);
 
-        inline double compute_k_bend() { return k_flex / 100; }
-
         SimpleMesh* mesh = nullptr;
         Object* obj = nullptr;
 
-        double k_flex;
-        double k_bend;
+        double spring_stiffness;
+        const double bend_multiplyer = 1.0f/100.0f;
 
         vec3 gravity_vec;
 };

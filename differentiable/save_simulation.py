@@ -31,11 +31,8 @@ if __name__ == "__main__":
     rec = SimulationRecorder()
     symulathon.initialize_scene()
     K_VALUE = 1
-    # K_VALUE = 6.96030151
-    # K_VALUE = 20
-    # K_VALUE = 6.99
     RECORD_FRAMES = 500
-    symulathon.restart_simulation(K_VALUE)
+    symulathon.restart_simulation([K_VALUE])
     h = symulathon.get_time_step()
     frames_count = 0
     while (not symulathon.window_should_close()) and (frames_count <= RECORD_FRAMES):
@@ -55,7 +52,6 @@ if __name__ == "__main__":
         v1 = v + delta_v
         x1 = x + h * v1
         symulathon.set_state(x1, v1)
-
         # x2, v2 = newton_iteration(x, v, x1, v1)
         # symulathon.set_state(x2, v2)
 

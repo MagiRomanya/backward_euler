@@ -2,6 +2,7 @@
 #define @CLASSNAME_H_
 
 #include <Eigen/Dense>
+#include <vector>
 #include "particle_system.hpp"
 #include "twobody.hpp"
 #include "vec3.h"
@@ -11,16 +12,19 @@
 
 class @CLASSNAME : public TwoBodyInteraction {
     public:
-        @CLASSNAME(unsigned int pi, unsigned int pj, double** inputParameters)
+        @CLASSNAME(unsigned int pi, unsigned int pj, std::vector<double> inputParameters)
                                                     : TwoBodyInteraction(pi,pj)
         {
             n_parameters = @NUMBER_OF_PARAMETERS;
+            if (inputParameters.size() != n_parameters) {
+                std::cout << "ERROR::@CLASSNAME::@CLASSNAME: Wrong number of initial parameters" << std::endl;
+            }
             for (int i = 0; i < n_parameters; i++) {
                 parameters[i]  = inputParameters[i];
             }
         }
     private:
-        double* parameters[@NUMBER_OF_PARAMETERS] = {nullptr};
+        double parameters[@NUMBER_OF_PARAMETERS] = {0};
 
         double energy() const override {
             double E = @ENERGY_CALCULATION;

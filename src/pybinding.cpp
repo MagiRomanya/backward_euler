@@ -1,5 +1,6 @@
-#include <pybind11/eigen.h>
+#include <pybind11/eigen.h> // for sparse and dense matrices
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h> // for std::vector as argument
 
 #include "Eigen/src/Core/Matrix.h"
 #include "clock.h"
@@ -14,12 +15,6 @@
 
 #define N 20
 #define M 20
-
-// #define SIMPLE_CASE
-
-#ifndef SIMPLE_CASE
-#define GRID_CASE
-#endif
 
 // Define physical parameters of the simulation
 #define K_SPRING 1
@@ -82,12 +77,7 @@ int initialize_scene() {
 // renderer.addObject(&mfloor);
 
 ////////////////// ADD INTEGRATOR & SIMULABLES ////////////////////
-#ifdef GRID_CASE
   mass_spring = new MassSpring(integrator, &cloth, NODE_MASS, K_SPRING);
-#endif
-#ifdef SIMPLE_CASE
-  mass_spring = new MassSpring(integrator, NODE_MASS, K_SPRING);
-#endif
 
   InfPlane plane;
   plane.normal = vec3(0, 1, 0);
@@ -97,16 +87,15 @@ int initialize_scene() {
 
   // Fix corners
   const int index = M * (N - 1);
-#ifdef GRID_CASE
   mass_spring->fix_particle(0);
   mass_spring->fix_particle(index);
-#endif
 
   integrator->fill_containers();
   return 0;
 }
 
-void pyResetSimulation(double k) {
+void pyResetSimulation(std::vector<double> parameters) {
+  const double k = parameters[0];
   const double step = 0.5;
   SimpleMesh mesh;
   CreateGrid(mesh, N, M, step);
@@ -115,21 +104,14 @@ void pyResetSimulation(double k) {
   delete mass_spring;
   // BUG: Deleting and creating a new Integrator does not reset it properly
   integrator->clear_simulables();
-#ifdef GRID_CASE
   mass_spring = new MassSpring(integrator, &cloth, NODE_MASS, k);
-#endif
-#ifdef SIMPLE_CASE
-  mass_spring = new MassSpring(integrator, NODE_MASS, k);
-#endif
 
   // mass_spring->add_interaction(planeContact);
 
   // Fix corners
   const int index = M * (N - 1);
   mass_spring->fix_particle(0);
-#ifdef GRID_CASE
   mass_spring->fix_particle(index);
-#endif
   integrator->fill_containers();
   // std::cout << "Mass spring k = " << mass_spring->get_k() << std::endl;
   // std::cout << "Mass spring k bend = " << mass_spring->get_k_bend() << std::endl;

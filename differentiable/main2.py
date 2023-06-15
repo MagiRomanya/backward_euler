@@ -24,7 +24,7 @@ def newton_iteration(x0, v0, xi, vi):
 def simulate():
     reader = SimulationReader(nDoF)
     backpropagation = Backpropagation(mass, h)
-    symulathon.restart_simulation(K_GUESS)
+    symulathon.restart_simulation([K_GUESS])
     symulathon.fill_containers()
     for i in range(DIFF_FRAMES+1):
         ##################################
@@ -64,9 +64,9 @@ if __name__ == "__main__":
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()
     K_GUESS = 0.1
-    DIFF_FRAMES = 100
+    DIFF_FRAMES = 30
 
-    k_values = np.linspace(0.01, 10, 100)
+    k_values = np.linspace(0.01, 10, 200)
     # np.random.shuffle(k_values)
     # k_values = np.linspace(6.9, 7.1, 20)
     g_values = []
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     plt.plot(k_values, g_values, "-", label="Loss Function")
     plt.plot(k_values, dgdp_finite, ".", label="Finite dgdp")
     plt.plot(k_values, dgdp_values, "x", label="Backpropagation dgdp")
-    # plt.ylim(-0.2e6, 0.1e6)
+
     plt.legend()
     plt.xlabel("k value")
     plt.grid()
