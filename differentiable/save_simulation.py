@@ -29,7 +29,9 @@ def newton_iteration(x0, v0, xi, vi):
 
 if __name__ == "__main__":
     rec = SimulationRecorder()
-    symulathon.initialize_scene()
+    print("Initializing")
+    symulathon.initialize_scene(True)
+    print("Initializing done")
     K_VALUE = 1
     RECORD_FRAMES = 500
     symulathon.restart_simulation([K_VALUE])

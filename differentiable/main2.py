@@ -58,8 +58,7 @@ def simulate():
 
 
 if __name__ == "__main__":
-    symulathon.initialize_scene()
-    symulathon.disable_rendering()
+    symulathon.initialize_scene(False)
     nDoF = symulathon.get_nDoF()
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()

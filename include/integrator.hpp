@@ -79,9 +79,9 @@ class Integrator {
         void implicit_euler();
 
         double h;
-        unsigned int nDoF;
-        unsigned int nConstraints;
-        unsigned int nParameters;
+        unsigned int nDoF = 0;
+        unsigned int nConstraints = 0;
+        unsigned int nParameters = 0;
 
         Eigen::SparseMatrix<double> mass;
         Eigen::SparseMatrix<double> df_dx;
