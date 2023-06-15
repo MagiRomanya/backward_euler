@@ -11,8 +11,12 @@
 ** DONE Fijación
 ** DONE Test dejando valancear la tela
 ** DONE Arreglar diferéncias finitas
-** TODO Pulir diferenciabilidad
+** DONE Pulir diferenciabilidad
 Observaciones:
 - En el caso sencillo de un sólo muelle, backpropagation funciona con un sólo step y se distancia cada vez más a medida que augmentas el número de steps.
 - En el caso no lineal backpropagation no coincide con diferéncias finitas ni en el caso de un sólo step.
 - La segundada iteración de Newton parece que no aporta mucho. Mejora un poco el resultado del caso no lineal pero es casi despreciable.
+** DONE Hacer que se pueda simular sin render
+** TODO Probar diferenciabilidad con más de un parámetro:
+*** TODO Probar con 2 parámetros (muelles de tracción y flexión)
+*** TODO Probar con N parámetros (cada K de cada muelle se trata cómo un parámetro distinto)
