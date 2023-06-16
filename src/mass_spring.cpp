@@ -21,11 +21,12 @@ MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, do
 
 MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, double k_spring, double k_bend) {
     // Parameters
-    ParameterList normalSpringParameters;
+    /// Normal Spring Parameters
     normalSpringParameters.addParameter(&integrator->diff_manager, k_spring);
     normalSpringParameters.addParameter(1.0f);
     normalSpringParameters.addParameter(1.0f);
-    ParameterList bendSpringParameters;
+
+    /// Bend Spring Parameters
     bendSpringParameters.addParameter(&integrator->diff_manager, k_bend);
     bendSpringParameters.addParameter(1.0f);
     bendSpringParameters.addParameter(1.0f);

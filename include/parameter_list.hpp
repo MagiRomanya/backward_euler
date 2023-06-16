@@ -16,7 +16,7 @@ class ParameterList {
         inline unsigned int getTotalParameters() { return total_parameters; }
         inline unsigned int getDiffParameters() { return diff_parameters; }
         inline unsigned int getNonDiffParameters() { return non_diff_parameters; }
-        inline void updateParameter(size_t index, double value) { parameters[index].update(value); }
+        inline void updateParameter(size_t index, double value) { parameters.at(index).update(value); }
 
         double operator[](int index) const;
 

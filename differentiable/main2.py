@@ -21,10 +21,10 @@ def newton_iteration(x0, v0, xi, vi):
     return x1, v1
 
 
-def simulate():
+def simulate(k, k_bend):
     reader = SimulationReader(nDoF)
     backpropagation = Backpropagation(mass, h)
-    symulathon.restart_simulation([K_GUESS])
+    symulathon.restart_simulation([k, k_bend])
     symulathon.fill_containers()
     for i in range(DIFF_FRAMES+1):
         ##################################
@@ -52,9 +52,7 @@ def simulate():
             # f = symulathon.get_force()
             # print(f"{it+1}th iteration convergence check = {sum(mass @ delta_v - h * f)}")
 
-    dgdp = backpropagation.get_dgdp()
-    g = backpropagation.get_g()
-    return (g, dgdp)
+    return backpropagation
 
 
 if __name__ == "__main__":
@@ -62,36 +60,27 @@ if __name__ == "__main__":
     nDoF = symulathon.get_nDoF()
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()
-    K_GUESS = 0.1
     DIFF_FRAMES = 10
 
-    k_values = np.linspace(0.01, 10, 200)
-    # np.random.shuffle(k_values)
-    # k_values = np.linspace(6.9, 7.1, 20)
-    g_values = []
-    dgdp_values = []
-    for k in tqdm(k_values):
-        K_GUESS = k
-        g, dgdp = simulate()
-        g_values.append(g)
-        dgdp_values.append(dgdp[0])
+    n_points = 20
+    k_values = np.linspace(0.01, 10, n_points)
+    k_bend_values = np.linspace(-10, 500, n_points - 5) / 100
+    X, Y = np.meshgrid(k_values, k_bend_values)
+    g_values = X.tolist()
+    dgdp_values = X.tolist()
+    for i in tqdm(range(len(k_values))):
+        for j in range(len(k_bend_values)):
+            bp = simulate(k_values[i], k_bend_values[j])
+            dgdp_values[j][i] = bp.get_dgdp()
+            g_values[j][i] = bp.get_g()
 
-    # Calculate finite differences
-    dgdp_finite = []
-    for i in range(len(g_values)-1):
-        value = (g_values[i+1]-g_values[i]) / (k_values[i+1] - k_values[i])
-        dgdp_finite.append(value)
-    dgdp_finite.append(dgdp_finite[-1])
-
-    print(len(k_values), len(dgdp_finite), len(g_values), len(dgdp_values))
-    plt.plot(k_values, g_values, "-", label="Loss Function")
-    plt.plot(k_values, dgdp_finite, ".", label="Finite dgdp")
-    plt.plot(k_values, dgdp_values, "x", label="Backpropagation dgdp")
-
-    plt.legend()
-    plt.xlabel("k value")
-    plt.grid()
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    g_values = np.array(g_values)
+    surf = ax.plot_surface(X, Y, g_values)
+    ax.set(
+        xlabel="k values",
+        ylabel="k bend values",
+        zlabel="loss",
+    )
     plt.show()
-    print("Finished succesfully")
-
     symulathon.terminate()

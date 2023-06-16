@@ -34,7 +34,7 @@ if __name__ == "__main__":
     print("Initializing done")
     K_VALUE = 1
     RECORD_FRAMES = 500
-    symulathon.restart_simulation([K_VALUE])
+    symulathon.restart_simulation([K_VALUE, K_VALUE / 100])
     h = symulathon.get_time_step()
     frames_count = 0
     while (not symulathon.window_should_close()) and (frames_count <= RECORD_FRAMES):

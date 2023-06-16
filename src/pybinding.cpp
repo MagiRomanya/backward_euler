@@ -104,6 +104,8 @@ int initialize_scene(bool withGraphics) {
 
 void pyResetSimulation(std::vector<double> parameters) {
     const double k = parameters[0];
+    const double k_bend = parameters[1];
+    // std::cout << "K bend = " << k_bend << std::endl;
     const double step = 0.5;
     SimpleMesh mesh;
     CreateGrid(mesh, N, M, step);
@@ -112,7 +114,7 @@ void pyResetSimulation(std::vector<double> parameters) {
     delete mass_spring;
     // BUG: Deleting and creating a new Integrator does not reset it properly
     integrator->clear_simulables();
-    mass_spring = new MassSpring(integrator, &cloth, NODE_MASS, k);
+    mass_spring = new MassSpring(integrator, &cloth, NODE_MASS, k, k_bend);
 
     // mass_spring->add_interaction(planeContact);
 

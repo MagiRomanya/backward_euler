@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 
-import numpy as np
-import matplotlib.pyplot as plt
-from tqdm import tqdm
-import symulathon
 from solve_system import solve_system
 from recorder import SimulationReader
 from backpropagation import Backpropagation
+import symulathon
+import numpy as np
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 
 def newton_iteration(x0, v0, xi, vi):
-    symulathon.fill_containers()
     A = symulathon.get_equation_matrix()
     dfdx = symulathon.get_force_position_jacobian()
     f = symulathon.get_force()
@@ -19,77 +18,63 @@ def newton_iteration(x0, v0, xi, vi):
     delta_v = solve_system(A, b)
     v1 = vi + delta_v
     x1 = x0 + h * v1
-
-    symulathon.set_state(x1, v1)
-
-    # Check newton iteration
-    symulathon.fill_containers()
-    f = symulathon.get_force()
-    print(f"2nd iteration check = {(mass @ (v1-v0) - h * f)[3:]}")
     return x1, v1
-
-
-def newton_iterations(x0, v0, n=1):
-    A = symulathon.get_equation_matrix()
-    b = symulathon.get_equation_vector()
-
-    delta_v = solve_system(A, b)
-
-    v1 = v0 + delta_v
-    x1 = x0 + h * v1
-    # symulathon.recieve_delta_v(delta_v)
-    symulathon.set_state(x1, v1)
-    symulathon.fill_containers()
-    f = symulathon.get_force()
-    print(f"1st iteration check = {(mass @ delta_v - h * f)[3:]}")
-
-    for i in range(n-1):
-        x1, v1 = newton_iteration(x0, v0, x1, v1)
 
 
 def simulate():
     reader = SimulationReader(nDoF)
     backpropagation = Backpropagation(mass, h)
-    symulathon.restart_simulation(K_GUESS)
-    for _ in range(DIFF_FRAMES+1):
+    symulathon.restart_simulation([K_GUESS, K_GUESS/100])
+    symulathon.fill_containers()
+    for i in range(DIFF_FRAMES+1):
         ##################################
-        # ALWAYS fill containers first!
-        symulathon.fill_containers()
+        # Record step for backpropagation
         ##################################
-
         x = symulathon.get_position()
         v = symulathon.get_velocity()
         x_t, v_t = reader.get_next_state()
-
         A = symulathon.get_equation_matrix()
-
         dfdp = symulathon.get_parameter_jacobian()
         dfdx = symulathon.get_force_position_jacobian()
-        f = symulathon.get_force()
-        backpropagation.step(x, v, x_t, v_t, A, dfdp, dfdx, f)
+        backpropagation.step(x, v, x_t, v_t, A, dfdp, dfdx)
 
-        newton_iterations(x, v)
+        ##################################
+        # Newton Iterations
+        ##################################
+        iterations = 2
+        xi = x
+        vi = v
+        for it in range(iterations):
+            xi, vi = newton_iteration(x, v, xi, vi)
+            symulathon.set_state(xi, vi)
+            symulathon.fill_containers()
+            # delta_v = vi - v
+            # f = symulathon.get_force()
+            # print(f"{it+1}th iteration convergence check = {sum(mass @ delta_v - h * f)}")
 
-    return backpropagation
+    dgdp = backpropagation.get_dgdp()
+    g = backpropagation.get_g()
+    return (g, dgdp)
 
 
 if __name__ == "__main__":
-    symulathon.initialize_scene()
-    symulathon.disable_rendering()
+    symulathon.initialize_scene(False)
     nDoF = symulathon.get_nDoF()
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()
     K_GUESS = 0.1
-    DIFF_FRAMES = 1
-    print(f"Test with {DIFF_FRAMES} step[s] and {DIFF_FRAMES+1} states")
-    k_values = np.linspace(0.01, 2, 100)
+    DIFF_FRAMES = 10
+
+    k_values = np.linspace(0.01, 10, 200)
+    # np.random.shuffle(k_values)
+    # k_values = np.linspace(6.9, 7.1, 20)
     g_values = []
     dgdp_values = []
     for k in tqdm(k_values):
         K_GUESS = k
-        bp = simulate()
-        g_values.append(bp.get_g())
-        dgdp_values.append(bp.get_dgdp()[0])
+        g, dgdp = simulate()
+        g_values.append(g)
+        dgdp_values.append(dgdp[0])
 
     # Calculate finite differences
     dgdp_finite = []
@@ -102,10 +87,11 @@ if __name__ == "__main__":
     plt.plot(k_values, g_values, "-", label="Loss Function")
     plt.plot(k_values, dgdp_finite, ".", label="Finite dgdp")
     plt.plot(k_values, dgdp_values, "x", label="Backpropagation dgdp")
-    # plt.ylim(-0.1e5, 0.1e5)
-    print(sum(np.array(dgdp_finite) - np.array(dgdp_values)) / len(dgdp_finite))
+
     plt.legend()
-    plt.xlabel("K values")
+    plt.xlabel("k value")
     plt.grid()
     plt.show()
     print("Finished succesfully")
+
+    symulathon.terminate()
