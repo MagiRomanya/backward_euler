@@ -60,4 +60,5 @@ if __name__ == "__main__":
         symulathon.process_input()
         symulathon.render_state()
 
+    symulathon.terminate()
     print("Done")

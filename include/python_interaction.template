@@ -3,7 +3,9 @@
 
 #include <Eigen/Dense>
 #include <vector>
+
 #include "particle_system.hpp"
+#include "parameter_list.hpp"
 #include "twobody.hpp"
 #include "vec3.h"
 #include "math.h"
@@ -12,19 +14,22 @@
 
 class @CLASSNAME : public TwoBodyInteraction {
     public:
-        @CLASSNAME(unsigned int pi, unsigned int pj, std::vector<double> inputParameters)
-                                                    : TwoBodyInteraction(pi,pj)
+        @CLASSNAME(unsigned int pi, unsigned int pj, ParameterList pList)
+            : TwoBodyInteraction(pi,pj)
         {
-            n_parameters = @NUMBER_OF_PARAMETERS;
-            if (inputParameters.size() != n_parameters) {
-                std::cout << "ERROR::@CLASSNAME::@CLASSNAME: Wrong number of initial parameters" << std::endl;
+            if (pList.getTotalParameters() != n_param) {
+                std::cerr << "ERROR::@CLASSNAME::@CLASSNAME: Wrong number of initial parameters" << std::endl;
             }
-            for (int i = 0; i < n_parameters; i++) {
-                parameters[i]  = inputParameters[i];
+            if (pList.getDiffParameters() != n_diff_param) {
+                std::cerr << "ERROR::@CLASSNAME::@CLASSNAME: Wrong number of diff parameters" << std::endl;
             }
+            allParameters = pList;
+            parameter_indexs = pList.getIndexVector();
         }
     private:
-        double parameters[@NUMBER_OF_PARAMETERS] = {0};
+        int n_diff_param = @NUMBER_OF_DIFF_PARAMETERS;
+        int n_param = @NUMBER_OF_PARAMETERS;
+        ParameterList allParameters;
 
         double energy() const override {
             double E = @ENERGY_CALCULATION;
@@ -55,10 +60,10 @@ class @CLASSNAME : public TwoBodyInteraction {
         }
 
         virtual Eigen::MatrixXd force_parameters_derivative() const override {
-            Eigen::MatrixXd result(3, n_parameters);
-            double df_dp[3][@NUMBER_OF_PARAMETERS] = @FORCE_PARAMETERS_DERIVATIVE_CALCULATION;
+            Eigen::MatrixXd result(3, n_diff_param);
+            double df_dp[3][@NUMBER_OF_DIFF_PARAMETERS] = @FORCE_PARAMETERS_DERIVATIVE_CALCULATION;
             for (unsigned int i = 0; i < 3; i++) {
-                for (unsigned int j = 0; j < n_parameters; j++) {
+                for (unsigned int j = 0; j < n_diff_param; j++) {
                     result(i,j) = df_dp[i][j];
                 }
             }

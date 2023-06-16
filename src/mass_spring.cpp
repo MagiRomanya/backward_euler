@@ -1,11 +1,36 @@
 #include "mass_spring.hpp"
 #include "gravity.hpp"
+#include "mesh.h"
+#include "parameter_list.hpp"
 #include "spring_test.hpp"
 
 MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, double k_spring) {
-    spring_stiffness = k_spring;
-    nParameters = 3;
-    load_from_mesh(obj, node_mass);
+    double bend_multiplyer = 1.0/100.0;
+    // Parameters
+    normalSpringParameters.addParameter(&integrator->diff_manager, k_spring); // k
+    normalSpringParameters.addParameter(1.0f); // L
+    normalSpringParameters.addParameter(1.0f); // alpha
+    bendSpringParameters = normalSpringParameters;
+    bendSpringParameters.updateParameter(2, bend_multiplyer); // alpha
+
+
+    load_from_mesh(obj, node_mass, integrator);
+    gravity_vec = mass[0] * vec3(0, -1, 0);
+    integrator->add_simulable(this);
+}
+
+MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, double k_spring, double k_bend) {
+    // Parameters
+    ParameterList normalSpringParameters;
+    normalSpringParameters.addParameter(&integrator->diff_manager, k_spring);
+    normalSpringParameters.addParameter(1.0f);
+    normalSpringParameters.addParameter(1.0f);
+    ParameterList bendSpringParameters;
+    bendSpringParameters.addParameter(&integrator->diff_manager, k_bend);
+    bendSpringParameters.addParameter(1.0f);
+    bendSpringParameters.addParameter(1.0f);
+
+    load_from_mesh(obj, node_mass, integrator);
     gravity_vec = mass[0] * vec3(0, -1, 0);
     integrator->add_simulable(this);
 }
@@ -51,11 +76,11 @@ MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, do
 //     integrator->add_simulable(this);
 // }
 
-void MassSpring::load_from_mesh(Object *obj, double node_mass) {
+void MassSpring::load_from_mesh(Object *obj, double node_mass, Integrator* itg) {
     /* Reads a mesh and treats the vertices as particles and the
      * edges as springs */
-    this->mesh = obj->mesh;
-    this->mesh->isDynamic = true;
+    SimpleMesh* mesh = obj->mesh;
+    mesh->isDynamic = true;
     this->obj = obj;
 
     const unsigned int n_coord = 3 * mesh->vertices.size();
@@ -113,11 +138,11 @@ void MassSpring::load_from_mesh(Object *obj, double node_mass) {
 void MassSpring::add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, double L) {
     Interaction *spring;
     if (type == FLEX) {
-        std::vector<double> param = {spring_stiffness, L, 1.0};
-        spring = new TestingSpring(i1, i2, param);
+        normalSpringParameters.updateParameter(1, L);
+        spring = new TestingSpring(i1, i2, normalSpringParameters);
     } else {
-        std::vector<double> param = {spring_stiffness, L, bend_multiplyer};
-        spring = new TestingSpring(i1, i2, param);
+        bendSpringParameters.updateParameter(1, L);
+        spring = new TestingSpring(i1, i2, bendSpringParameters);
     }
 
     add_interaction(spring);
@@ -136,14 +161,16 @@ void MassSpring::set_state() {
 
 void MassSpring::update_mesh() {
     /* Updates the positions of the mesh with the simulated data */
-    if (mesh == nullptr)
+    if (obj == nullptr)
         return;
+
+    SimpleMesh* mesh = obj->mesh;
 
     // We need local frame to update the mesh model matrix
     positions_to_local();
 
     if (n_particles - mesh->vertices.size() != 0) {
-        std::cout << "ERROR::MASS_SPRING::UPDDATE_MESH: The number of particles "
+        std::cerr << "ERROR::MASS_SPRING::UPDDATE_MESH: The number of particles "
             "and the number of vertices of the mesh are different"
                   << std::endl;
     }

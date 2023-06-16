@@ -30,7 +30,8 @@ class TwoBodyInteraction : public Interaction {
         double vx1, vy1, vz1;
         double vx2, vy2, vz2;
 
-        unsigned int n_parameters;
+        // Parameter indexs
+        std::vector<size_t> parameter_indexs;
 
         /* Fills L, x1 and x2 */
         void get_state(ParticleSystem* sys);

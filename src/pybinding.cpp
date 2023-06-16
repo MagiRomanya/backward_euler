@@ -21,15 +21,15 @@
 #define NODE_MASS 1
 #define TimeStep 0.1f
 
-Renderer *renderer;
+Renderer *renderer = nullptr;
 ObjectManager manager;
 Integrator* integrator = new Integrator(TimeStep);
-MassSpring *mass_spring;
+MassSpring *mass_spring = nullptr;
 
 Object mfloor;
 Object cloth;
 Object bunny;
-Contact *planeContact;
+Contact *planeContact = nullptr;
 
 bool HAS_GRAPHICS = true;
 
@@ -123,10 +123,6 @@ void pyResetSimulation(std::vector<double> parameters) {
     integrator->fill_containers();
 }
 
-void pySetNewK(double k) { mass_spring->set_k(k); }
-
-double pyGetK() { return mass_spring->get_k(); }
-
 void pyFillContainers() { integrator->fill_containers(); }
 
 void pyRecieveDeltaV(Eigen::VectorXd delta_v) {
@@ -171,6 +167,12 @@ void pyDisableRendering() { delete renderer; }
 
 void pySetState(Eigen::VectorXd xi, Eigen::VectorXd vi) {
     integrator->set_state(xi, vi);
+}
+
+void pyTerminate() {
+    if (renderer != nullptr) delete renderer;
+    delete integrator;
+    if (mass_spring != nullptr) delete mass_spring;
 }
 
 PYBIND11_MODULE(symulathon, m) {
@@ -228,10 +230,6 @@ PYBIND11_MODULE(symulathon, m) {
     m.def("process_input", &pyCameraInput,
           "Reads and process the window's input");
 
-    m.def("set_new_k", &pySetNewK, "Recieves ands updates the spring constant");
-
-    m.def("get_k", &pyGetK, "Returns current spring constant");
-
     m.def("get_nDoF", &pyGetDoF,
           "Returns number of degrees of freedom of the system");
 
@@ -239,4 +237,6 @@ PYBIND11_MODULE(symulathon, m) {
           "Destroys renderer to simulate not graphically");
 
     m.def("set_state", &pySetState, "Sets positions and velocities");
+
+    m.def("terminate", &pyTerminate, "Correctly ends and deletes all the necessary allocations.");
 }

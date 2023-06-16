@@ -108,12 +108,11 @@ void TwoBodyInteraction::add_parameters_derivative(Integrator &itg, ParticleSyst
     typedef Eigen::Triplet<double> tri;
 
     Eigen::MatrixXd df_dp = force_parameters_derivative();
-    unsigned int parameter_index = sys->parameter_index;
 
     for (unsigned int i = 0; i < 3; i++) {
-        for (unsigned int p = 0; p < n_parameters; p++) {
-            itg.add_to_df_dp_element(itg_p1 + i, parameter_index + p, df_dp(i, p));
-            itg.add_to_df_dp_element(itg_p2 + i, parameter_index + p, -df_dp(i, p));
+        for (unsigned int p = 0; p < parameter_indexs.size(); p++) {
+            itg.add_to_df_dp_element(itg_p1 + i, parameter_indexs[p], df_dp(i, p));
+            itg.add_to_df_dp_element(itg_p2 + i, parameter_indexs[p], -df_dp(i, p));
         }
     }
 }

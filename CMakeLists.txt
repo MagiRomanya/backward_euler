@@ -19,6 +19,7 @@ set(SOURCE_FILES
   src/length_constraint.cpp
   src/twobody.cpp
   include/spring_test.hpp
+  src/parameter_list.cpp
 )
 set(SOURCE_FILES_MAIN
   ${SOURCE_FILES}

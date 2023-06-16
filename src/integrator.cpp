@@ -11,15 +11,14 @@ void Integrator::resize_containers() {
     mass.resize(nDoF, nDoF);
     df_dv.resize(nDoF, nDoF);
     df_dx.resize(nDoF, nDoF);
-    df_dp.resize(nDoF, nParameters);
+    df_dp.resize(nDoF, diff_manager.get_size());
 
     clear_containers();
 }
 
-void Integrator::resize_containers(unsigned int newDoF, unsigned int newNConstraints, unsigned int newNParameters) {
+void Integrator::resize_containers(unsigned int newDoF, unsigned int newNConstraints) {
     nDoF = newDoF;
     nConstraints = newNConstraints;
-    nParameters = newNParameters;
     resize_containers();
 }
 
@@ -40,22 +39,20 @@ void Integrator::clear_containers() {
     equation_matrix_triplets.clear();
     constraint_jacobian_triplets.clear();
 
-    df_dp.setZero(nDoF, nParameters);
+    df_dp.setZero(nDoF, diff_manager.get_size());
 }
 
 void Integrator::add_simulable(Simulable* simulable){
     unsigned int index = this->nDoF;
-    unsigned int p_index = this->nParameters;
-    resize_containers(this->nDoF + simulable->nDoF, nConstraints,
-                      nParameters + simulable->nParameters);
-    simulable->initialize(this, index, p_index);
+    resize_containers(this->nDoF + simulable->nDoF, nConstraints);
+    simulable->initialize(this, index);
     simulables.push_back(simulable);
     update_constraint_indices();
 }
 
 void Integrator::add_constraint(Constraint* constraint){
     unsigned int index = this->nConstraints;
-    resize_containers(nDoF, nConstraints + constraint->nConstraints, nParameters);
+    resize_containers(nDoF, nConstraints + constraint->nConstraints);
     constraint->index = index;
     constraint->itg = this;
     constraints.push_back(constraint);
@@ -101,7 +98,7 @@ void Integrator::fill_containers(){
     clear_containers();
 
     if (simulables.size() == 0){
-        std::cout << "ERROR::INTEGRATOR::INTEGRATION_STEP: No simulables added!" << std::endl;
+        std::cerr << "ERROR::INTEGRATOR::INTEGRATION_STEP: No simulables added!" << std::endl;
         exit(-1);
     }
 
@@ -172,13 +169,13 @@ void Integrator::clear_simulables() {
     simulables.clear();
     constraints.clear();
     nDoF = 0;
-    nParameters = 0;
+    diff_manager.clear();
     clear_containers();
 }
 
 void Integrator::set_state(Eigen::VectorXd xi, Eigen::VectorXd vi) {
     if (xi.size() != vi.size() && xi.size() != x.size()) {
-        std::cout << "WARNING::INTEGRATOR::SET_STATE: new state dimensions do not match" << std::endl;
+        std::cerr << "WARNING::INTEGRATOR::SET_STATE: new state dimensions do not match" << std::endl;
         return;
     }
     x = xi;

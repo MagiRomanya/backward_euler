@@ -63,7 +63,7 @@ if __name__ == "__main__":
     mass = symulathon.get_mass_matrix()
     h = symulathon.get_time_step()
     K_GUESS = 0.1
-    DIFF_FRAMES = 30
+    DIFF_FRAMES = 10
 
     k_values = np.linspace(0.01, 10, 200)
     # np.random.shuffle(k_values)
@@ -93,3 +93,5 @@ if __name__ == "__main__":
     plt.grid()
     plt.show()
     print("Finished succesfully")
+
+    symulathon.terminate()

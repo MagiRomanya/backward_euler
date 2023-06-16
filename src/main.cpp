@@ -52,10 +52,10 @@ int main() {
     manager.loadShader("normals",SHADER_PATH"/test.v0.vert", SHADER_PATH"/normals.frag");
     manager.loadShader("geo_normals", SHADER_PATH"/normals_geom.vert", SHADER_PATH"/normals.geom", SHADER_PATH"/color.frag");
 
-    manager.loadTexture("gandalf", TEXTURE_PATH"/gandalf.png");
-    manager.loadTexture("floor", TEXTURE_PATH"/floor.jpg");
+    manager.loadTexture("gandalf", TEXTURE_PATH"/fabric/FabricPlainGreyFlat015_COL_2K.jpg");
+    manager.loadTexture("floor", TEXTURE_PATH"/cobblestone/GroundCobblestone001_COL_2K.jpg");
 
-    Object floor = manager.createObject("plane", "texture", "geo_normals");
+    Object floor = manager.createObject("plane", "texture");
     Object cloth = manager.createObject("cloth", "texture", "geo_normals");
     Object bunny = manager.createObject("bunny", "normals");
 

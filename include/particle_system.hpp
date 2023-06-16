@@ -18,7 +18,7 @@ class ParticleSystem : public Simulable {
                 fixed_particles.push_back(p);
             }
             else
-                std::cout << "WARNING::Particle " << p << ", is outside bounds and has not been fixed." << std::endl;
+                std::cerr << "WARNING::PARTICLESYSTEM::FIX_PARTICLE: Particle " << p << ", is outside bounds and has not been fixed." << std::endl;
         }
 
         ~ParticleSystem();

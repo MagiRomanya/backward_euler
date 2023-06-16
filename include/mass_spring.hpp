@@ -3,6 +3,7 @@
 
 #include "object.h"
 #include "particle_system.hpp"
+#include "simulable.hpp"
 #include "spring.h"
 #include "spring_test.hpp"
 
@@ -15,15 +16,13 @@ class MassSpring : public ParticleSystem {
     public:
         MassSpring(Integrator* integrator, Object* obj, double node_mass, double k_spring);
 
+        MassSpring(Integrator* integrator, Object* obj, double node_mass, double k_spring, double k_bend);
+
         // MassSpring(Integrator* integrator, double node_mass, double k_spring);
 
         void update_state() override;
 
         void set_state() override;
-
-        inline double get_k() { return spring_stiffness; }
-        inline double get_k_bend() { return spring_stiffness * bend_multiplyer; }
-        inline void set_k(double k) { spring_stiffness = k; }
 
     private:
         void update_mesh();
@@ -32,17 +31,16 @@ class MassSpring : public ParticleSystem {
 
         void positions_to_world();
 
-        void load_from_mesh(Object* obj, double node_mass);
+        void load_from_mesh(Object* obj, double node_mass, Integrator* itg);
 
         void add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, double L);
 
-        SimpleMesh* mesh = nullptr;
         Object* obj = nullptr;
 
-        double spring_stiffness;
-        const double bend_multiplyer = 1.0f/100.0f;
-
         vec3 gravity_vec;
+
+        ParameterList normalSpringParameters;
+        ParameterList bendSpringParameters;
 };
 
 #endif // MASS_SPRING_H_

@@ -12,6 +12,7 @@
 #include "Eigen/src/Core/Matrix.h"
 #include "simulable.hpp"
 #include "constraint.hpp"
+#include "differentiable_manager.hpp"
 
 class Integrator {
     typedef Eigen::Triplet<double> tri;
@@ -27,6 +28,8 @@ class Integrator {
         Eigen::VectorXd f0;
         Eigen::VectorXd delta_v;
         Eigen::VectorXd constraint_value;
+
+        DifferentiableManager diff_manager;
 
         void clear_containers();
 
@@ -70,7 +73,7 @@ class Integrator {
     private:
         void resize_containers();
 
-        void resize_containers(unsigned int newDoF, unsigned int newNConstraints, unsigned int newNParameters);
+        void resize_containers(unsigned int newDoF, unsigned int newNConstraints);
 
         void generate_equation_with_constraints(Eigen::SparseMatrix<double>& equation_matrix, Eigen::VectorXd equation_vector);
 
@@ -81,7 +84,6 @@ class Integrator {
         double h;
         unsigned int nDoF = 0;
         unsigned int nConstraints = 0;
-        unsigned int nParameters = 0;
 
         Eigen::SparseMatrix<double> mass;
         Eigen::SparseMatrix<double> df_dx;
