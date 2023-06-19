@@ -11,7 +11,9 @@ PYBIND11_MODULE(symulathon, m) {
 
     // Main simulation interface
     py::class_<PySimulation>(m, "Simulation")
-        .def(py::init<std::vector<double>>())
+        .def(py::init<std::vector<double>, bool>(),
+             py::arg("parameters"),
+             py::arg("graphics") = false)
         .def("fill_containers", &PySimulation::fill_containers)
         .def("set_state", &PySimulation::set_state)
         .def("getEquationMatrix", &PySimulation::getEquationMatrix)
@@ -24,5 +26,6 @@ PYBIND11_MODULE(symulathon, m) {
         .def("getForcePositionJacobian", &PySimulation::getForcePositionJacobian)
         .def("getDoF", &PySimulation::getDoF)
         .def("getTimeStep", &PySimulation::getTimeStep)
+        .def("render_state", &PySimulation::render_state)
         ;
 }

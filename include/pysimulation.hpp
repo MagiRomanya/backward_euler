@@ -6,6 +6,8 @@
 
 #include "integrator.hpp"
 #include "mass_spring.hpp"
+#include "object_manager.hpp"
+#include "renderer.h"
 
 /* Simulation class exposed to python for the client to do the neccesary
  * computations. */
@@ -19,7 +21,7 @@
 
 class PySimulation {
     public:
-        PySimulation(std::vector<double> parameters);
+        PySimulation(std::vector<double> parameters, bool graphics=false);
 
         void fill_containers() {integrator->fill_containers();}
 
@@ -48,6 +50,8 @@ class PySimulation {
         double getTimeStep() {return integrator->getTimeStep();}
         // Eigen::SparseMatrix<double> getForceVelocityJacobian() {return integrator->getForceVelocityJacobian();}
 
+        void render_state();
+
     private:
         void setUpCloth();
 
@@ -55,6 +59,11 @@ class PySimulation {
         Object cloth;
         std::unique_ptr<Integrator> integrator;
         std::unique_ptr<MassSpring> mass_spring;
+
+        // Weather or not to display the simulation graphically
+        bool graphical;
+        std::unique_ptr<Renderer> renderer;
+        ObjectManager omanager;
 
 };
 
