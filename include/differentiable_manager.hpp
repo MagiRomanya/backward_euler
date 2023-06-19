@@ -8,7 +8,7 @@ class DifferentiableManager {
     public:
         DifferentiableManager() {}
         ~DifferentiableManager() {
-            std::cout << "Number of differentiable parameters: " << parameters.size() << std::endl;
+            // std::cout << "Number of differentiable parameters: " << parameters.size() << std::endl;
         }
 
         inline int add_parameter(double p) {

@@ -20,6 +20,7 @@ set(SOURCE_FILES
   src/twobody.cpp
   include/spring_test.hpp
   src/parameter_list.cpp
+  src/pysimulation.cpp
 )
 set(SOURCE_FILES_MAIN
   ${SOURCE_FILES}
@@ -56,7 +57,7 @@ set(PYTHON_MODULE_NAME "symulathon")
 
 set(PYTHON_MODULE_SRC
   ${SOURCE_FILES}
-  src/pybinding.cpp
+  src/pybinding_class.cpp
   )
 
 pybind11_add_module(${PYTHON_MODULE_NAME} MODULE ${PYTHON_MODULE_SRC})

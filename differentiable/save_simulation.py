@@ -32,7 +32,7 @@ if __name__ == "__main__":
     print("Initializing")
     symulathon.initialize_scene(True)
     print("Initializing done")
-    K_VALUE = 1
+    K_VALUE = 3
     RECORD_FRAMES = 500
     symulathon.restart_simulation([K_VALUE, K_VALUE / 100])
     h = symulathon.get_time_step()
