@@ -71,7 +71,7 @@ if __name__ == "__main__":
     h = sim.getTimeStep()
     DIFF_FRAMES = 10
 
-    n_points = 10
+    n_points = 30
     k_values = np.linspace(0.01, 10, n_points)
     k_bend_values = np.linspace(-10, 500, n_points-1) / 100
     X, Y = np.meshgrid(k_values, k_bend_values)

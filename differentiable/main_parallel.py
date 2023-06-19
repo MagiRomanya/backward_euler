@@ -7,6 +7,7 @@ from symulathon import Simulation
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from joblib import Parallel, delayed
 
 
 def newton_iteration(sim: Simulation, x0, v0, xi, vi):
@@ -62,15 +63,13 @@ if __name__ == "__main__":
     nDoF = sim.getDoF()
     mass = sim.getMassMatrix()
     h = sim.getTimeStep()
-    DIFF_FRAMES = 10
+    DIFF_FRAMES = 30
 
     k_values = np.linspace(0.01, 10, 200)
-    g_values = []
-    dgdp_values = []
-    for k in tqdm(k_values):
-        g, dgdp = simulate(k)
-        g_values.append(g)
-        dgdp_values.append(dgdp[0])
+
+    results = Parallel(n_jobs=8)(delayed(simulate)(k) for k in tqdm(k_values))
+    g_values = [results[i][0] for i in range(len(results))]
+    dgdp_values = [results[i][1][0] for i in range(len(results))]
 
     # Calculate finite differences
     dgdp_finite = []
