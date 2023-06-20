@@ -21,7 +21,9 @@
 
 class PySimulation {
     public:
-        PySimulation(std::vector<double> parameters, bool graphics=false);
+        PySimulation(double k, double k_bend, bool graphics=false);
+
+        PySimulation(std::vector<double> k, std::vector<double> k_bend, bool graphics=false);
 
         void fill_containers() {integrator->fill_containers();}
 

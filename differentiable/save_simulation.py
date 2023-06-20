@@ -31,7 +31,7 @@ if __name__ == "__main__":
     rec = SimulationRecorder()
     K_VALUE = 3
     RECORD_FRAMES = 500
-    sim = Simulation([K_VALUE, K_VALUE / 100], True)
+    sim = Simulation(K_VALUE, K_VALUE / 100, True)
     h = sim.getTimeStep()
     frames_count = 0
     while (frames_count <= RECORD_FRAMES):

@@ -25,7 +25,7 @@ def newton_iteration(sim: Simulation, x0, v0, xi, vi):
 def simulate(k, k_bend):
     reader = SimulationReader(nDoF)
     backpropagation = Backpropagation(mass, h)
-    sim = Simulation([k, k_bend])
+    sim = Simulation(k, k_bend)
     sim.fill_containers()
     for i in range(DIFF_FRAMES+1):
         ##################################
@@ -55,7 +55,7 @@ def simulate(k, k_bend):
 
 if __name__ == "__main__":
     # Initialize important constant variables
-    sim = Simulation([1, 1])
+    sim = Simulation(1, 1)
     nDoF = sim.getDoF()
     mass = sim.getMassMatrix()
     h = sim.getTimeStep()

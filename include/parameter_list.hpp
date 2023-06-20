@@ -5,8 +5,11 @@
 #include <parameter.hpp>
 
 class ParameterList {
-    public:
+    /* Simple class to handle a set of paramters.
+     * It is useful to manage differentiable and non differentiable paramters at the same time,
+     * making it seemless to work with either kind. */
 
+    public:
         void addParameter(DifferentiableManager* diff, double value);
 
         void addParameter(double value);

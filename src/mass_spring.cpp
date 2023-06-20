@@ -1,5 +1,6 @@
 #include "mass_spring.hpp"
 #include "gravity.hpp"
+#include "integrator.hpp"
 #include "mesh.h"
 #include "parameter_list.hpp"
 #include "spring_test.hpp"
@@ -7,14 +8,13 @@
 MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, double k_spring) {
     double bend_multiplyer = 1.0/100.0;
     // Parameters
-    normalSpringParameters.addParameter(&integrator->diff_manager, k_spring); // k
+    normalSpringParameters.addParameter(&integrator->diff_manager, k_spring); // k (diff)
     normalSpringParameters.addParameter(1.0f); // L
     normalSpringParameters.addParameter(1.0f); // alpha
     bendSpringParameters = normalSpringParameters;
     bendSpringParameters.updateParameter(2, bend_multiplyer); // alpha
 
-
-    load_from_mesh(obj, node_mass, integrator);
+    load_from_mesh(integrator, obj, node_mass);
     gravity_vec = mass[0] * vec3(0, -1, 0);
     integrator->add_simulable(this);
 }
@@ -22,62 +22,32 @@ MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, do
 MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, double k_spring, double k_bend) {
     // Parameters
     /// Normal Spring Parameters
-    normalSpringParameters.addParameter(&integrator->diff_manager, k_spring);
+    normalSpringParameters.addParameter(&integrator->diff_manager, k_spring); // diff
     normalSpringParameters.addParameter(1.0f);
     normalSpringParameters.addParameter(1.0f);
 
     /// Bend Spring Parameters
-    bendSpringParameters.addParameter(&integrator->diff_manager, k_bend);
+    bendSpringParameters.addParameter(&integrator->diff_manager, k_bend); // diff
     bendSpringParameters.addParameter(1.0f);
     bendSpringParameters.addParameter(1.0f);
 
-    load_from_mesh(obj, node_mass, integrator);
+    load_from_mesh(integrator, obj, node_mass);
     gravity_vec = mass[0] * vec3(0, -1, 0);
     integrator->add_simulable(this);
 }
 
-// MassSpring::MassSpring(Integrator *integrator, double node_mass, double k_spring) {
-//     spring_stiffness = k_spring;
-//     nParameters = 3;
+MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass,
+                       std::vector<double> k_spring, std::vector<double> k_bend) {
+    vector_paramters = true;
+    k_springs = k_spring.begin();
+    k_bends = k_bend.begin();
 
-//     // Set up two particles with a spring
-//     n_particles = 4;
-//     nDoF = 3 * n_particles;
-//     mass.resize(n_particles, node_mass);
-//     resize_containers(nDoF);
-//     gravity_vec = vec3(node_mass * vec3(0, -1, 0));
+    load_from_mesh(integrator, obj, node_mass);
+    gravity_vec = mass[0] * vec3(0, -1, 0);
+    integrator->add_simulable(this);
+}
 
-//     x[0] = 0;
-//     x[1] = 0.5;
-//     x[2] = -4;
-
-//     x[3] = 0;
-//     x[4] = 0.5;
-//     x[5] = -2.5;
-
-//     x[6] = 1.5;
-//     x[7] = 0.5;
-//     x[8] = -4;
-
-//     x[9] = 1.5;
-//     x[10] = 0.5;
-//     x[11] = -2.5;
-//     add_spring(0, 2, FLEX, (get_particle_position(0) - get_particle_position(2)).length());
-//     add_spring(2, 3, FLEX, (get_particle_position(2) - get_particle_position(3)).length());
-//     add_spring(3, 1, FLEX, (get_particle_position(3) - get_particle_position(1)).length());
-//     // add_spring(2, 1, BEND, (get_particle_position(2) - get_particle_position(1)).length());
-//     fix_particle(0);
-//     fix_particle(1);
-
-//     // Add gravity
-//     Interaction *gravity = new Gravity(&gravity_vec);
-//     add_interaction(gravity);
-//     class_allocated_interactions.push_back(gravity);
-
-//     integrator->add_simulable(this);
-// }
-
-void MassSpring::load_from_mesh(Object *obj, double node_mass, Integrator* itg) {
+void MassSpring::load_from_mesh(Integrator* itg, Object *obj, double node_mass) {
     /* Reads a mesh and treats the vertices as particles and the
      * edges as springs */
     SimpleMesh* mesh = obj->mesh;
@@ -108,13 +78,11 @@ void MassSpring::load_from_mesh(Object *obj, double node_mass, Integrator* itg) 
 
     mesh->boundary(internalEdges, externalEdges);
     double L;
-    const unsigned int springs_index = interactions.size();
-    const unsigned int n_springs = externalEdges.size() + 2 * internalEdges.size();
 
     for (size_t i = 0; i < externalEdges.size(); i++) {
         Edge &e = externalEdges[i];
         L = mesh->distance(e.a, e.b, obj->model);
-        add_spring(e.a, e.b, FLEX, L);
+        add_spring(itg, e.a, e.b, FLEX, L);
     }
 
     for (size_t i = 0; i < internalEdges.size(); i += 2) {
@@ -122,11 +90,11 @@ void MassSpring::load_from_mesh(Object *obj, double node_mass, Integrator* itg) 
         Edge &e2 = internalEdges[i + 1];
         L = mesh->distance(e1.a, e1.b, obj->model);
         // Normal spring
-        add_spring(e1.a, e1.b, FLEX, L);
+        add_spring(itg, e1.a, e1.b, FLEX, L);
 
         // Bend spring
         L = mesh->distance(e1.opposite, e2.opposite, obj->model);
-        add_spring(e1.opposite, e2.opposite, BEND, L);
+        add_spring(itg, e1.opposite, e2.opposite, BEND, L);
     }
 
     // Add gravity
@@ -136,14 +104,31 @@ void MassSpring::load_from_mesh(Object *obj, double node_mass, Integrator* itg) 
 
 }
 
-void MassSpring::add_spring(unsigned int i1, unsigned int i2, SPRING_TYPE type, double L) {
+void MassSpring::add_spring(Integrator* itg, unsigned int i1, unsigned int i2, SPRING_TYPE type, double L) {
     Interaction *spring;
-    if (type == FLEX) {
-        normalSpringParameters.updateParameter(1, L);
-        spring = new TestingSpring(i1, i2, normalSpringParameters);
-    } else {
-        bendSpringParameters.updateParameter(1, L);
-        spring = new TestingSpring(i1, i2, bendSpringParameters);
+    if (!vector_paramters) {
+        if (type == FLEX) {
+            normalSpringParameters.updateParameter(1, L);
+            spring = new TestingSpring(i1, i2, normalSpringParameters);
+        } else {
+            bendSpringParameters.updateParameter(1, L);
+            spring = new TestingSpring(i1, i2, bendSpringParameters);
+        }
+    }
+    else {
+        if (type == FLEX) {
+            ParameterList pl;
+            pl.addParameter(&itg->diff_manager, *(k_springs++)); // k
+            pl.addParameter(L); // L
+            pl.addParameter(1.0f); // alpha
+            spring = new TestingSpring(i1, i2, pl);
+        } else {
+            ParameterList pl;
+            pl.addParameter(&itg->diff_manager, *(k_bends++)); // k
+            pl.addParameter(L); // L
+            pl.addParameter(1.0f); // alpha
+            spring = new TestingSpring(i1, i2, pl);
+        }
     }
 
     add_interaction(spring);
@@ -183,6 +168,7 @@ void MassSpring::update_mesh() {
         mesh->vertices[i].Position = glm_pos;
     }
     mesh->calculate_vertex_normals();
+    // update graphics
     mesh->updateVAO();
 
     // Now that the mesh has been updated we need to go back to world frame to properlly simulate

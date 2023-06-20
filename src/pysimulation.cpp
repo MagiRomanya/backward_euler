@@ -1,16 +1,31 @@
 #include "pysimulation.hpp"
 #include "object_manager.hpp"
 #include <memory>
+#include <vector>
 
-PySimulation::PySimulation(std::vector<double> parameters, bool graphics) {
+PySimulation::PySimulation(double k, double k_bend, bool graphics) {
     graphical=graphics;
 
     integrator = std::make_unique<Integrator>(TimeStep);
 
     // Create simulable
     setUpCloth();
-    double k = parameters[0];
-    double k_bend = parameters[1];
+    mass_spring = std::make_unique<MassSpring>(integrator.get(), &cloth, NODE_MASS, k, k_bend);
+
+    // Fix corners
+    const int index = M * (N - 1);
+    mass_spring->fix_particle(0);
+    mass_spring->fix_particle(index);
+    integrator->fill_containers();
+}
+
+PySimulation::PySimulation(std::vector<double> k, std::vector<double> k_bend, bool graphics) {
+    graphical=graphics;
+
+    integrator = std::make_unique<Integrator>(TimeStep);
+
+    // Create simulable
+    setUpCloth();
     mass_spring = std::make_unique<MassSpring>(integrator.get(), &cloth, NODE_MASS, k, k_bend);
 
     // Fix corners

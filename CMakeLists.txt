@@ -21,6 +21,7 @@ set(SOURCE_FILES
   include/spring_test.hpp
   src/parameter_list.cpp
   src/pysimulation.cpp
+  src/spring_counter.cpp
 )
 set(SOURCE_FILES_MAIN
   ${SOURCE_FILES}
