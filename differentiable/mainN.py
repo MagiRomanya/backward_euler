@@ -4,7 +4,10 @@ from solve_system import solve_system
 from recorder import SimulationReader
 from backpropagation import Backpropagation
 from symulathon import Simulation, count_springs
+import sys, getopt
+from colorama import Fore, Back, Style
 import numpy as np
+
 
 
 def newton_iteration(sim: Simulation, x0, v0, xi, vi):
@@ -19,10 +22,20 @@ def newton_iteration(sim: Simulation, x0, v0, xi, vi):
     return x1, v1
 
 
+def get_user_weather_graphics():
+    enable_graphics = False
+    argv = sys.argv[1:]
+    opts, args = getopt.getopt(argv, "g")
+    for opt, arg in opts:
+        if opt in ['-g']:
+            enable_graphics = True
+    return enable_graphics
+
+
 def simulate(k_list: list, k_bend_list: list):
     reader = SimulationReader(nDoF)
     backpropagation = Backpropagation(mass, h)
-    sim = Simulation(k_list, k_bend_list, True)
+    sim = Simulation(k_list, k_bend_list, get_user_weather_graphics())
     sim.fill_containers()
     for i in range(DIFF_FRAMES+1):
         ##################################
@@ -76,17 +89,27 @@ if __name__ == "__main__":
 
     # Minimization process
     MAX_ITER = 100
-    ALPHA = 0.1
+    ALPHA = 0.0004
     last_loss = 0
     for i in range(MAX_ITER):
         bp = simulate(k_list, k_bend_list)
         g = bp.get_g()
-        print(f"Iteration #{i}\t loss = {g:10.4e}, change={g - last_loss:1.4e}")
+        dg = g - last_loss
+        color = ""
+        if (dg > 0):
+            color = Fore.RED
+        else:
+            color = Fore.GREEN
+
+        print(f"Iteration #{i}\t loss = {g:10.4e}, " +
+              color +
+              f"change={dg:1.4e}" +
+              Style.RESET_ALL)
         last_loss = g
 
         # Update paramters
         dgdp = bp.get_dgdp()
         parameters -= ALPHA * dgdp
-        parameters = np.clip(parameters, 0, 1000000)
+        parameters = np.clip(parameters, 0, 1000)
         k_list = parameters[0:nFlex]
         k_bend_list = parameters[nFlex:]

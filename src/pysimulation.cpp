@@ -48,6 +48,9 @@ void PySimulation::setUpCloth() {
 
     if (graphical) {
         renderer = std::make_unique<Renderer>();
+
+        renderer->change_orbital();
+
         omanager.loadShader("texture", SHADER_PATH "/test.v0.vert",
                            SHADER_PATH "/texture.frag");
         omanager.loadShader("color", SHADER_PATH "/test.v0.vert",

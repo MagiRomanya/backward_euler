@@ -7,7 +7,6 @@
 #include "simulable.hpp"
 #include "spring.h"
 #include "spring_test.hpp"
-#include <iterator>
 
 enum SPRING_TYPE {
 FLEX,
