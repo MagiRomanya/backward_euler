@@ -1,7 +1,9 @@
+#include <pybind11/detail/common.h>
 #include <pybind11/eigen.h> // for sparse and dense matrices
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // for std::vector as argument
 
+#include "mesh.h"
 #include "pysimulation.hpp"
 #include "spring_counter.hpp"
 
@@ -10,7 +12,7 @@ namespace py = pybind11;
 PYBIND11_MODULE(symulathon, m) {
     m.doc() = "A simple simulation backend.";
 
-    m.def("cout_spring", &count_spring, "Returns the number of normal and bend springs of a mesh in that order");
+    m.def("count_springs", py::overload_cast<>(&count_spring), "Returns the number of flex and bending springs that define a dimX x dimY grid.");
 
     // Main simulation interface
     py::class_<PySimulation>(m, "Simulation")
@@ -29,6 +31,7 @@ PYBIND11_MODULE(symulathon, m) {
         .def("getForce", &PySimulation::getForce)
         .def("getPosition", &PySimulation::getPosition)
         .def("getVelocity", &PySimulation::getVelocity)
+        .def("getDiffParameters", &PySimulation::getDiffParameteres)
         .def("getMassMatrix", &PySimulation::getMassMatrix)
         .def("getParameterJacobian", &PySimulation::getParameterJacobian)
         .def("getForcePositionJacobian", &PySimulation::getForcePositionJacobian)

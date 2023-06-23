@@ -6,4 +6,6 @@
 
 std::vector<int> count_spring(const SimpleMesh& mesh);
 
+std::vector<int> count_spring();
+
 #endif // SPRING_COUNTER_H_

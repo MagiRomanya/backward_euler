@@ -35,6 +35,12 @@ PySimulation::PySimulation(std::vector<double> k, std::vector<double> k_bend, bo
     integrator->fill_containers();
 }
 
+PySimulation::~PySimulation() {
+    // std::cout << "Diff paramters = "
+    //           << integrator->diff_manager.get_size()
+    //           << std::endl;
+}
+
 void PySimulation::setUpCloth() {
     const double step = 0.5;
     CreateGrid(mesh, N, M, step);

@@ -25,6 +25,8 @@ class PySimulation {
 
         PySimulation(std::vector<double> k, std::vector<double> k_bend, bool graphics=false);
 
+        ~PySimulation();
+
         void fill_containers() {integrator->fill_containers();}
 
         void recieve_deltaV(Eigen::VectorXd delta_v) {integrator->reciveDeltaV(delta_v);}
@@ -40,6 +42,8 @@ class PySimulation {
         Eigen::VectorXd getPosition() {return integrator->x;}
 
         Eigen::VectorXd getVelocity() {return integrator->v;}
+
+        std::vector<double> getDiffParameteres() {return integrator->diff_manager.get_parameters();}
 
         Eigen::SparseMatrix<double> getMassMatrix() {return integrator->getMassMatrix();}
 

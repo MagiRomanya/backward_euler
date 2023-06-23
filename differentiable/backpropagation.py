@@ -51,6 +51,8 @@ class Backpropagation:
         n_states = len(self.dfdp_array)
         n_steps = n_states - 1
         h = self.h
+        # self.dgdx and self.dgdv are the partial derivatives
+        # dgdx and dgdv are the total derivatives
         dgdx = [a.astype(float) for a in self.dgdx_array]
         dgdv = [a.astype(float) for a in self.dgdv_array]
         S = [0] * n_states

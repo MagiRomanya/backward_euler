@@ -110,9 +110,9 @@ void TwoBodyInteraction::add_parameters_derivative(Integrator &itg, ParticleSyst
     Eigen::MatrixXd df_dp = force_parameters_derivative();
 
     for (unsigned int i = 0; i < 3; i++) {
-        for (unsigned int p = 0; p < parameter_indexs.size(); p++) {
-            itg.add_to_df_dp_element(itg_p1 + i, parameter_indexs[p], df_dp(i, p));
-            itg.add_to_df_dp_element(itg_p2 + i, parameter_indexs[p], -df_dp(i, p));
+        for (unsigned int p = 0; p < parameter_indices.size(); p++) {
+            itg.add_to_df_dp_element(itg_p1 + i, parameter_indices[p], df_dp(i, p));
+            itg.add_to_df_dp_element(itg_p2 + i, parameter_indices[p], -df_dp(i, p));
         }
     }
 }

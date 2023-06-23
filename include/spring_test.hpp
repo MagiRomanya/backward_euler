@@ -29,7 +29,7 @@ class TestingSpring : public TwoBodyInteraction {
                 std::cerr << "ERROR::TestingSpring::TestingSpring: Wrong number of diff parameters" << std::endl;
             }
             allParameters = pList;
-            parameter_indexs = pList.getIndexVector();
+            parameter_indices = pList.getIndexVector();
         }
     private:
         int n_diff_param = 1;

@@ -37,10 +37,23 @@ MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, do
 }
 
 MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass,
-                       std::vector<double> k_spring, std::vector<double> k_bend) {
+                       const std::vector<double>& k_spring,
+                       const std::vector<double>& k_bend) {
     vector_paramters = true;
-    k_springs = k_spring.begin();
-    k_bends = k_bend.begin();
+    for (int i = 0; i < k_spring.size(); i++) {
+        ParameterList pl;
+        pl.addParameter(&integrator->diff_manager, (k_spring[i])); // k
+        pl.addParameter(1); // L
+        pl.addParameter(1); // Alpha
+        parameters.push_back(pl);
+    }
+    for (int i = 0; i < k_bend.size(); i++) {
+        ParameterList pl;
+        pl.addParameter(&integrator->diff_manager, (k_bend[i])); // k
+        pl.addParameter(1); // L
+        pl.addParameter(1); // Alpha
+        parameters.push_back(pl);
+    }
 
     load_from_mesh(integrator, obj, node_mass);
     gravity_vec = mass[0] * vec3(0, -1, 0);
@@ -77,6 +90,7 @@ void MassSpring::load_from_mesh(Integrator* itg, Object *obj, double node_mass) 
     std::vector<Edge> externalEdges;
 
     mesh->boundary(internalEdges, externalEdges);
+    bend_offset = internalEdges.size() / 2.0 + externalEdges.size();
     double L;
 
     for (size_t i = 0; i < externalEdges.size(); i++) {
@@ -117,17 +131,13 @@ void MassSpring::add_spring(Integrator* itg, unsigned int i1, unsigned int i2, S
     }
     else {
         if (type == FLEX) {
-            ParameterList pl;
-            pl.addParameter(&itg->diff_manager, *(k_springs++)); // k
-            pl.addParameter(L); // L
-            pl.addParameter(1.0f); // alpha
-            spring = new TestingSpring(i1, i2, pl);
+            parameters.at(flex_counter).updateParameter(1, L);
+            spring = new TestingSpring(i1, i2, parameters[flex_counter]);
+            flex_counter++;
         } else {
-            ParameterList pl;
-            pl.addParameter(&itg->diff_manager, *(k_bends++)); // k
-            pl.addParameter(L); // L
-            pl.addParameter(1.0f); // alpha
-            spring = new TestingSpring(i1, i2, pl);
+            parameters.at(bend_offset + bend_counter).updateParameter(1, L);
+            spring = new TestingSpring(i1, i2, parameters[bend_offset + bend_counter]);
+            bend_counter++;
         }
     }
 

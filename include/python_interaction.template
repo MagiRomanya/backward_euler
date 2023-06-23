@@ -24,7 +24,7 @@ class @CLASSNAME : public TwoBodyInteraction {
                 std::cerr << "ERROR::@CLASSNAME::@CLASSNAME: Wrong number of diff parameters" << std::endl;
             }
             allParameters = pList;
-            parameter_indexs = pList.getIndexVector();
+            parameter_indices = pList.getIndexVector();
         }
     private:
         int n_diff_param = @NUMBER_OF_DIFF_PARAMETERS;

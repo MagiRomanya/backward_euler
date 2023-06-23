@@ -2,6 +2,7 @@
 #define MASS_SPRING_H_
 
 #include "object.h"
+#include "parameter_list.hpp"
 #include "particle_system.hpp"
 #include "simulable.hpp"
 #include "spring.h"
@@ -23,7 +24,7 @@ class MassSpring : public ParticleSystem {
 
         /* Define Mass Spring with N paramters: a different paramter for each spring */
         MassSpring(Integrator* integrator, Object* obj, double node_mass,
-                   std::vector<double> k_spring, std::vector<double> k_bend);
+                   const std::vector<double>& k_spring, const std::vector<double>& k_bend);
 
         void update_state() override;
 
@@ -44,12 +45,16 @@ class MassSpring : public ParticleSystem {
 
         vec3 gravity_vec;
 
+        // Variables when using 2 paramters
         ParameterList normalSpringParameters;
         ParameterList bendSpringParameters;
 
+        // Variables when using N parameters
         bool vector_paramters = false;
-        std::vector<double>::iterator k_springs;
-        std::vector<double>::iterator k_bends;
+        std::vector<ParameterList> parameters;
+        unsigned int bend_offset = 0;
+        unsigned int flex_counter = 0;
+        unsigned int bend_counter = 0;
 };
 
 #endif // MASS_SPRING_H_

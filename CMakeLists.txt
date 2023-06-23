@@ -22,6 +22,7 @@ set(SOURCE_FILES
   src/parameter_list.cpp
   src/pysimulation.cpp
   src/spring_counter.cpp
+  src/differentiable_manager.cpp
 )
 set(SOURCE_FILES_MAIN
   ${SOURCE_FILES}

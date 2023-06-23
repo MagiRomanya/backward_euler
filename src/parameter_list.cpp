@@ -23,10 +23,10 @@ void ParameterList::addParameter(double value) {
 
 
 std::vector<size_t> ParameterList::getIndexVector() const {
-    std::vector<size_t> indexs;
+    std::vector<size_t> indices;
     for (int i = 0; i < parameters.size(); i++) {
         if (parameters[i].isDiff())
-            indexs.push_back(parameters[i].getIndex());
+            indices.push_back(parameters[i].getIndex());
     }
-    return indexs;
+    return indices;
 }
