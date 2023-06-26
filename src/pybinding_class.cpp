@@ -38,5 +38,12 @@ PYBIND11_MODULE(symulathon, m) {
         .def("getDoF", &PySimulation::getDoF)
         .def("getTimeStep", &PySimulation::getTimeStep)
         .def("render_state", &PySimulation::render_state)
+        .def("getSpringIndices", &PySimulation::getSpringIndices)
+        .def("getBendSpringIndices", &PySimulation::getBendSpringIndices)
+        .def("getMesh", &PySimulation::getMesh)
+        .def("getGridDimensions", &PySimulation::getGridDimensions)
+        ;
+    py::class_<SimpleMesh>(m, "Mesh")
+        .def("getPositions", &SimpleMesh::getPositions)
         ;
 }

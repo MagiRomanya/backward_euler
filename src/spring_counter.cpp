@@ -2,7 +2,7 @@
 #include "pysimulation.hpp"
 #include "mesh.h"
 
-std::vector<int> count_spring(const SimpleMesh& mesh) {
+std::vector<int> count_spring(SimpleMesh& mesh) {
     std::vector<Edge> internalEdges;
     std::vector<Edge> externalEdges;
 

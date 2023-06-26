@@ -4,7 +4,7 @@
 #include "mesh.h"
 #include <vector>
 
-std::vector<int> count_spring(const SimpleMesh& mesh);
+std::vector<int> count_spring(SimpleMesh& mesh);
 
 std::vector<int> count_spring();
 

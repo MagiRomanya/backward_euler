@@ -82,3 +82,39 @@ void PySimulation::render_state() {
         renderer->render();
     }
 }
+
+std::vector<unsigned int> PySimulation::getSpringIndices() {
+    std::vector<unsigned int> indices;
+    std::vector<Edge> internal;
+    std::vector<Edge> external;
+    mesh.boundary(internal, external);
+
+    for (int i = 0; i < external.size(); i++) {
+        indices.push_back(external[i].a);
+        indices.push_back(external[i].b);
+    }
+    for (int i = 0; i < internal.size(); i+=2) {
+        const Edge &e1 = internal[i];
+        const Edge &e2 = internal[i + 1];
+        indices.push_back(e1.a);
+        indices.push_back(e1.b);
+    }
+    return indices;
+}
+
+std::vector<unsigned int> PySimulation::getBendSpringIndices() {
+    std::vector<unsigned int> indices;
+    std::vector<Edge> internal;
+    std::vector<Edge> external;
+    mesh.boundary(internal, external);
+
+    indices.reserve(internal.size());
+
+    for (int i = 0; i < internal.size(); i+=2) {
+        const Edge &e1 = internal[i];
+        const Edge &e2 = internal[i + 1];
+        indices.push_back(e1.opposite);
+        indices.push_back(e2.opposite);
+    }
+    return indices;
+}

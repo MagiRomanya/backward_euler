@@ -3,6 +3,7 @@
 from solve_system import solve_system
 from recorder import SimulationRecorder
 import numpy as np
+from interpolate_values import generate_parameters
 from symulathon import Simulation
 
 
@@ -31,7 +32,9 @@ if __name__ == "__main__":
     rec = SimulationRecorder()
     K_VALUE = 3
     RECORD_FRAMES = 500
-    sim = Simulation(K_VALUE, K_VALUE / 100, True)
+    k, k_bend, _ = generate_parameters((0.1, 1, 10, 0.1),
+                                       (0.1, 0.1, 0.1, 0.1))
+    sim = Simulation(k, k_bend, True)
     h = sim.getTimeStep()
     frames_count = 0
     while (frames_count <= RECORD_FRAMES):

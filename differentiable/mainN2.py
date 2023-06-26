@@ -3,7 +3,6 @@ from solve_system import solve_system
 from recorder import SimulationReader
 from backpropagation import Backpropagation
 from symulathon import Simulation, count_springs
-import interpolate_values
 import sys
 import getopt
 from colorama import Fore, Style
@@ -104,7 +103,7 @@ if __name__ == "__main__":
 
     # Minimization process
     MAX_ITER = 1000
-    ALPHA = 0.005
+    ALPHA = 0.00005
     last_loss = 0
 
     plot = AnimatedPlot()

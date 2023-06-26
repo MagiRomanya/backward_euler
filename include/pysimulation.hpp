@@ -6,6 +6,7 @@
 
 #include "integrator.hpp"
 #include "mass_spring.hpp"
+#include "mesh.h"
 #include "object_manager.hpp"
 #include "renderer.h"
 
@@ -16,8 +17,8 @@
 #define TimeStep 0.5f
 
 // Grid Dimensions
-#define N 10
-#define M 10
+#define N 4
+#define M 3
 
 class PySimulation {
     public:
@@ -51,10 +52,17 @@ class PySimulation {
 
         Eigen::SparseMatrix<double> getForcePositionJacobian() {return integrator->getForcePositionJacobian();}
 
-        int getDoF() {return integrator->getDoF();}
+        inline int getDoF() {return integrator->getDoF();}
 
-        double getTimeStep() {return integrator->getTimeStep();}
+        inline double getTimeStep() {return integrator->getTimeStep();}
         // Eigen::SparseMatrix<double> getForceVelocityJacobian() {return integrator->getForceVelocityJacobian();}
+
+        inline SimpleMesh getMesh() { return mesh; }
+
+        std::vector<unsigned int> getSpringIndices();
+        std::vector<unsigned int> getBendSpringIndices();
+
+        inline std::vector<unsigned int> getGridDimensions() { return {N, M}; }
 
         void render_state();
 
@@ -65,6 +73,8 @@ class PySimulation {
         Object cloth;
         std::unique_ptr<Integrator> integrator;
         std::unique_ptr<MassSpring> mass_spring;
+
+        // Boundary information
 
         // Weather or not to display the simulation graphically
         bool graphical;

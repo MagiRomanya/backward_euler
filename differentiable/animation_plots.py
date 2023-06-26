@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
 
 
 class AnimatedPlot:
+    """
+    A straight forward way to animate plots using matplotlib.
+
+    To use this class just start appending data to the plot with
+    the get_data method.
+    """
+
     def __init__(self):
         self.x_data = []
         self.y_data = []
@@ -16,6 +22,7 @@ class AnimatedPlot:
         self.ax.grid()
 
     def get_data(self, value: float):
+        """Append a new y value to the plot."""
         self.y_data.append(value)
         self.x_data.append(self.iteration)
         if (self.iteration == 0):

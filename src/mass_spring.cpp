@@ -40,6 +40,7 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass,
                        const std::vector<double>& k_spring,
                        const std::vector<double>& k_bend) {
     vector_paramters = true;
+    // Tension / flex springs
     for (int i = 0; i < k_spring.size(); i++) {
         ParameterList pl;
         pl.addParameter(&integrator->diff_manager, (k_spring[i])); // k
@@ -47,6 +48,7 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass,
         pl.addParameter(1); // Alpha
         parameters.push_back(pl);
     }
+    // Bend springs
     for (int i = 0; i < k_bend.size(); i++) {
         ParameterList pl;
         pl.addParameter(&integrator->diff_manager, (k_bend[i])); // k
@@ -115,7 +117,6 @@ void MassSpring::load_from_mesh(Integrator* itg, Object *obj, double node_mass) 
     Interaction *gravity = new Gravity(&gravity_vec);
     add_interaction(gravity);
     class_allocated_interactions.push_back(gravity);
-
 }
 
 void MassSpring::add_spring(Integrator* itg, unsigned int i1, unsigned int i2, SPRING_TYPE type, double L) {
