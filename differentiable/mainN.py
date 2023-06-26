@@ -6,6 +6,7 @@ from backpropagation import Backpropagation
 from symulathon import Simulation, count_springs
 import sys, getopt
 from colorama import Fore, Back, Style
+from animation_plots import AnimatedPlot
 import numpy as np
 
 
@@ -25,11 +26,20 @@ def newton_iteration(sim: Simulation, x0, v0, xi, vi):
 def get_user_weather_graphics():
     enable_graphics = False
     argv = sys.argv[1:]
-    opts, args = getopt.getopt(argv, "g")
+    opts, args = getopt.getopt(argv, "gp")
     for opt, arg in opts:
         if opt in ['-g']:
             enable_graphics = True
     return enable_graphics
+
+def get_user_plots():
+    enable_plots = False
+    argv = sys.argv[1:]
+    opts, args = getopt.getopt(argv, "gp")
+    for opt, arg in opts:
+        if opt in ['-p']:
+            enable_plots = True
+    return enable_plots
 
 
 def simulate(k_list: list, k_bend_list: list):
@@ -88,12 +98,18 @@ if __name__ == "__main__":
     parameters = np.concatenate((k_list, k_bend_list))
 
     # Minimization process
-    MAX_ITER = 100
-    ALPHA = 0.0004
+    MAX_ITER = 1000
+    ALPHA = 0.00005
     last_loss = 0
+
+    plot = AnimatedPlot()
+    draw_plot = get_user_plots()
+    # GRADIENT DESCENT
     for i in range(MAX_ITER):
         bp = simulate(k_list, k_bend_list)
         g = bp.get_g()
+        if (draw_plot):
+            plot.get_data(g)
         dg = g - last_loss
         color = ""
         if (dg > 0):

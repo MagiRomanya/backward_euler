@@ -13,11 +13,11 @@
  * computations. */
 
 #define NODE_MASS 1
-#define TimeStep 0.1f
+#define TimeStep 0.5f
 
 // Grid Dimensions
-#define N 20
-#define M 20
+#define N 10
+#define M 10
 
 class PySimulation {
     public:
