@@ -29,11 +29,11 @@ def newton_iteration(sim: Simulation, x0, v0, xi, vi):
 
 
 if __name__ == "__main__":
-    rec = SimulationRecorder()
+    rec = SimulationRecorder("test")
     K_VALUE = 3
     RECORD_FRAMES = 500
-    k, k_bend, _ = generate_parameters((0.1, 1, 10, 0.1),
-                                       (0.1, 0.1, 0.1, 0.1))
+    k, k_bend = generate_parameters((0.1, 1, 10, 0.1),
+                                    (0.1, 0.1, 0.1, 0.1))
     sim = Simulation(k, k_bend, True)
     h = sim.getTimeStep()
     frames_count = 0

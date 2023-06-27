@@ -17,8 +17,8 @@
 #define TimeStep 0.5f
 
 // Grid Dimensions
-#define N 4
-#define M 3
+#define N 10
+#define M 10
 
 class PySimulation {
     public:

@@ -3,15 +3,18 @@
 from symulathon import Simulation
 import numpy as np
 
+sim = Simulation(1, 1)
+N, M = sim.getGridDimensions()
+spring_indices = sim.getSpringIndices()
+bspring_indices = sim.getBendSpringIndices()
 
-def generate_parameters(k_border: tuple, k_bend_border: tuple) -> (list, list, list):
+
+def generate_parameters(k_border: tuple, k_bend_border: tuple) -> (list, list):
     """Generate cloth paramters interpolating between the ones defined at the corners.
 
     The function returns 3 lists:
     1st: normal spring paramters.
     2nd: bend spring parameters.
-    3d: Indices relative to the full parameter vector [k, k_bend], telling
-    where the k_border and k_bend_border are located.
     """
     sim = Simulation(1, 1)
     N, M = sim.getGridDimensions()
@@ -32,8 +35,6 @@ def generate_parameters(k_border: tuple, k_bend_border: tuple) -> (list, list, l
     # print(maxX, maxZ)
     # print(minX, minZ)
 
-    spring_indices = sim.getSpringIndices()
-    bspring_indices = sim.getBendSpringIndices()
     kspring = []
     kbendspring = []
     for i in range(0, len(spring_indices), 2):
@@ -58,7 +59,12 @@ def generate_parameters(k_border: tuple, k_bend_border: tuple) -> (list, list, l
         v = (v1 + v2) / 2
         kspring.append(__interpolate(u, v, k_bend_border))
 
-    # Generate parameter list
+    return kspring, kbendspring
+
+
+def get_parameter_indices() -> list:
+    """Compute indices wrt parameter list of the corner springs.
+    """
     param_indices = [0] * 8
     bottomleft, bottomright, topleft, topright = __getCornerSpringNodes(N, M)
     param_indices[0] = __getSpringIndex(spring_indices, *bottomleft)
@@ -70,8 +76,7 @@ def generate_parameters(k_border: tuple, k_bend_border: tuple) -> (list, list, l
     param_indices[5] = __getSpringIndex(bspring_indices, *bottomright)
     param_indices[6] = __getSpringIndex(bspring_indices, *topleft)
     param_indices[7] = __getSpringIndex(bspring_indices, *topright)
-
-    return kspring, kbendspring, param_indices
+    return param_indices
 
 
 def __interpolate(u: float, v: float, boundary):

@@ -11,10 +11,12 @@ class AnimatedPlot:
     the get_data method.
     """
 
-    def __init__(self):
+    def __init__(self, limdata=100):
         self.x_data = []
         self.y_data = []
         self.iteration = 0
+        # limdata is an integer which tells the maximum number of stored points
+        self.limdata = limdata
         self.fig, self.ax = plt.subplots()
         self.ax.set_title("Gradient decent convergence.")
         self.ax.set_xlabel("Iterations")
@@ -25,6 +27,9 @@ class AnimatedPlot:
         """Append a new y value to the plot."""
         self.y_data.append(value)
         self.x_data.append(self.iteration)
+        if len(self.y_data) > self.limdata:
+            self.y_data = self.y_data[-self.limdata:]
+            self.x_data = self.x_data[-self.limdata:]
         if (self.iteration == 0):
             self.__init_plot(value)
 

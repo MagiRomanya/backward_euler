@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Computes gradient descent for a interpolated parameter cloth."""
+
 from solve_system import solve_system
 from recorder import SimulationReader
 from backpropagation import Backpropagation
@@ -8,6 +10,7 @@ import getopt
 from colorama import Fore, Style
 from animation_plots import AnimatedPlot
 import numpy as np
+from interpolate_values import generate_parameters, get_parameter_indices
 
 
 def newton_iteration(sim: Simulation, x0, v0, xi, vi):
@@ -99,11 +102,14 @@ if __name__ == "__main__":
     # Define inital state
     k_list = np.ones(nFlex) * 10
     k_bend_list = np.ones(nBend) * 0.1
+    indx = get_parameter_indices()
+    k_list, k_bend_list = generate_parameters((1, 1, 1, 1),
+                                              (0.1, 0.1, 0.1, 0.1))
     parameters = np.concatenate((k_list, k_bend_list))
 
     # Minimization process
     MAX_ITER = 1000
-    ALPHA = 0.00005
+    ALPHA = 0.1
     last_loss = 0
 
     plot = AnimatedPlot()
@@ -130,6 +136,11 @@ if __name__ == "__main__":
         # Update paramters
         dgdp = bp.get_dgdp()
         parameters -= ALPHA * dgdp
-        parameters = np.clip(parameters, 0, 1000)
-        k_list = parameters[0:nFlex]
-        k_bend_list = parameters[nFlex:]
+        parameters = np.clip(parameters, 0, 100)
+        # Get the four values back
+        k4 = (parameters[indx[0]], parameters[indx[1]],
+              parameters[indx[2]], parameters[indx[3]])
+        k_bend4 = (parameters[indx[4]], parameters[indx[5]],
+                   parameters[indx[6]], parameters[indx[7]])
+        # print(k4, k_bend4)
+        k_list, k_bend_list = generate_parameters(k4, k_bend4)
