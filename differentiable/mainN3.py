@@ -7,11 +7,10 @@ from backpropagation import Backpropagation
 from symulathon import Simulation, count_springs
 import sys
 import getopt
-from colorama import Fore, Style
-from animation_plots import AnimatedPlot
 import numpy as np
 from interpolate_values import generate_parameters, get_parameter_indices
-from scipy.optimize import minimize, Bounds
+from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 
 def newton_iteration(sim: Simulation, x0, v0, xi, vi):
@@ -36,17 +35,6 @@ def get_user_weather_graphics():
         if opt in ['-g']:
             enable_graphics = True
     return enable_graphics
-
-
-def get_user_plots():
-    """Return weather the user wants a plot of the gradient descent convergence."""
-    enable_plots = False
-    argv = sys.argv[1:]
-    opts, args = getopt.getopt(argv, "gp")
-    for opt, arg in opts:
-        if opt in ['-p']:
-            enable_plots = True
-    return enable_plots
 
 
 def simulate(k_list: list, k_bend_list: list):
@@ -104,14 +92,6 @@ if __name__ == "__main__":
     h = sim.getTimeStep()
     DIFF_FRAMES = 100
 
-    # CHECK weather the paramters indices make sense
-    # k_list = np.arange(0, 2*nFlex, 2)
-    # k_bend_list = np.arange(1, 2*nBend+1, 2)
-    # parameters = np.concatenate((k_list, k_bend_list))
-    # sim = Simulation(k_list, k_bend_list)
-    # p = sim.getDiffParameters()
-    # print(f"Error : {parameters - p}, total {sum(parameters - p)}")
-
     # Define inital state
     k_list = np.ones(nFlex) * 10
     k_bend_list = np.ones(nBend) * 0.1
@@ -121,50 +101,38 @@ if __name__ == "__main__":
     ALPHA = 0.1
     last_loss = 0
 
-    plot = AnimatedPlot()
-    draw_plot = get_user_plots()
-    x0 = (1, 1, 1, 1,
-          1, 1, 1, 1)
-    x0 = (10, 10, 10, 10,
-          0., 0., 0., 0.)
-    res = minimize(simulation_wrapper, x0, jac=True,
-                   bounds=Bounds(lb=0, ub=200),
-                   tol=1e-5,
-                   options={"disp": True,
-                            "maxfun": 100,
-                            "maxls": 30,
-                            "maxiter": 100},
-                   # method="BFGS"
-                   )
-    print(res)
-    print("Real values: ", (0.1, 1, 10, 0.1), (0.1, 0.1, 0.1, 0.1))
-    # GRADIENT DESCENT
-    # for i in range(MAX_ITER):
-    #     bp = simulate(k_list, k_bend_list)
-    #     g = bp.get_g()
-    #     if (draw_plot):
-    #         plot.get_data(g)
-    #     dg = g - last_loss
-    #     color = ""
-    #     if (dg > 0):
-    #         color = Fore.RED
-    #     else:
-    #         color = Fore.GREEN
+    n_points = 40
+    k_values = np.linspace(0.5, 5, n_points)
+    k_bend_values = np.linspace(1, 500, n_points-1) / 100
+    X, Y = np.meshgrid(k_values, k_bend_values)
 
-    #     print(f"Iteration #{i}\t loss = {g:10.4e}, " +
-    #           color +
-    #           f"change={dg:1.4e}" +
-    #           Style.RESET_ALL)
-    #     last_loss = g
+    g_values = X.tolist()
+    ones = np.zeros(X.shape)
 
-    #     # Update paramters
-    #     dgdp = bp.get_dgdp()
-    #     parameters -= ALPHA * dgdp
-    #     parameters = np.clip(parameters, 0, 100)
-    #     # Get the four values back
-    #     k4 = (parameters[indx[0]], parameters[indx[1]],
-    #           parameters[indx[2]], parameters[indx[3]])
-    #     k_bend4 = (parameters[indx[4]], parameters[indx[5]],
-    #                parameters[indx[6]], parameters[indx[7]])
-    #     # print(k4, k_bend4)
-    #     k_list, k_bend_list = generate_parameters(k4, k_bend4)
+    # Computation of the surface and gradients
+    for i in tqdm(range(len(k_values))):
+        for j in range(len(k_bend_values)):
+            k4 = np.ones(4) * k_values[i]
+            kbend4 = np.ones(4) * k_bend_values[j]
+            k_vec, k_bend_vec = generate_parameters(k4, kbend4)
+            bp = simulate(k_vec, k_bend_vec)
+            dgdp = bp.get_dgdp()
+            g_values[j][i] = bp.get_g()
+
+    # Plotting
+    # 3D plot
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+    g_values = np.array(g_values)
+    print(g_values)
+
+    surf = ax.plot_surface(X, Y, g_values)
+    ax.set_zlim(0, np.mean(g_values))
+    ax.set(
+        xlabel="k values",
+        ylabel="k bend values",
+        zlabel="loss",
+    )
+
+    plt.show()
+    plt.contourf(X, Y, g_values, levels=1000, vmax=g_values[-1][-1]/4)
+    plt.show()

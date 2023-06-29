@@ -1,5 +1,7 @@
 #include "pysimulation.hpp"
 #include "object_manager.hpp"
+#include "spring_counter.hpp"
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -10,7 +12,7 @@ PySimulation::PySimulation(double k, double k_bend, bool graphics) {
 
     // Create simulable
     setUpCloth();
-    mass_spring = std::make_unique<MassSpring>(integrator.get(), &cloth, NODE_MASS, k, k_bend);
+    mass_spring = std::make_unique<MassSpring>(integrator.get(), cloth, NODE_MASS, k, k_bend);
 
     // Fix corners
     const int index = M * (N - 1);
@@ -26,7 +28,7 @@ PySimulation::PySimulation(std::vector<double> k, std::vector<double> k_bend, bo
 
     // Create simulable
     setUpCloth();
-    mass_spring = std::make_unique<MassSpring>(integrator.get(), &cloth, NODE_MASS, k, k_bend);
+    mass_spring = std::make_unique<MassSpring>(integrator.get(), cloth, NODE_MASS, k, k_bend);
 
     // Fix corners
     const int index = M * (N - 1);
@@ -62,18 +64,29 @@ void PySimulation::setUpCloth() {
         omanager.loadTexture("gandalf", TEXTURE_PATH "/gandalf.png");
         omanager.loadTexture("floor", TEXTURE_PATH "/floor.jpg");
 
-        cloth = omanager.createObject("cloth", "normals", "geo_normals");
-        cloth.useTexture("gandalf", omanager.getTextureID("gandalf"));
-        renderer->addObject(&cloth);
+        cloth = omanager.createObject("cloth", "texture");
+        cloth->useTexture("gandalf", omanager.getTextureID("gandalf"));
+        renderer->addObject(cloth);
+
+        SimpleMesh planeMesh;
+        CreateGrid(planeMesh, 2, 2, 20);
+        omanager.loadMesh("floor", planeMesh);
+        Object* floor = omanager.createObject("floor", "texture");
+        floor->useTexture("gandalf", omanager.getTextureID("floor"));
+        floor->translation = glm::vec3(-25.0f, -1.05f, -8.0f*N);
+        floor->scaling = glm::vec3(5);
+        floor->updateModelMatrix();
+        renderer->addObject(floor);
     }
     else {
         cloth = omanager.createObject("cloth");
     }
 
     // Handle model matrix
-    cloth.translation = glm::vec3(-0.5 * N, 0.0f, -4.0f*N);
-    cloth.scaling = glm::vec3(3.0);
-    cloth.updateModelMatrix();
+    cloth->translation = glm::vec3(-0.5 * N, 1.5*M, -4.0f*N);
+    cloth->scaling = glm::vec3(3.0);
+    cloth->updateModelMatrix();
+
 }
 
 void PySimulation::render_state() {
@@ -83,7 +96,9 @@ void PySimulation::render_state() {
     }
 }
 
-std::vector<unsigned int> PySimulation::getSpringIndices() {
+std::vector<unsigned int> PySimulation::getSpringNodeIndices() {
+    /* Return a list of pairwise indexs refering to the two nodes in the mesh which form siprings.
+     *The length of the output will be 2 times the number of springs. */
     std::vector<unsigned int> indices;
     std::vector<Edge> internal;
     std::vector<Edge> external;
@@ -102,7 +117,7 @@ std::vector<unsigned int> PySimulation::getSpringIndices() {
     return indices;
 }
 
-std::vector<unsigned int> PySimulation::getBendSpringIndices() {
+std::vector<unsigned int> PySimulation::getBendSpringNodeIndices() {
     std::vector<unsigned int> indices;
     std::vector<Edge> internal;
     std::vector<Edge> external;
@@ -118,3 +133,26 @@ std::vector<unsigned int> PySimulation::getBendSpringIndices() {
     }
     return indices;
 }
+
+// std::vector<unsigned int> PySimulation::getSpringIndices() {
+//     std::vector<unsigned int> indices;
+//     std::vector<Edge> internal;
+//     std::vector<Edge> external;
+//     mesh.boundary(internal, external);
+
+//     int nFlex = internal.size() / 2.0 + external.size();
+//     int nBend = internal.size() / 2.0;
+//     indices.resize(nFlex + nBend);
+
+//     unsigned int flex_index = 0;
+//     unsigned int bend_index = 0;
+//     for (size_t i = 0; i < external.size(); i++) {
+//         indices[i] = flex_index++;
+//     }
+
+//     for (size_t i = 0; i < internal.max_size(); i++) {
+//         indices[external.size() + i] = flex_index++;
+//         indices[nFlex + i] = bend_index++;
+//     }
+
+// }

@@ -14,7 +14,7 @@
  * computations. */
 
 #define NODE_MASS 1
-#define TimeStep 0.5f
+#define TimeStep 0.2f
 
 // Grid Dimensions
 #define N 10
@@ -59,8 +59,8 @@ class PySimulation {
 
         inline SimpleMesh getMesh() { return mesh; }
 
-        std::vector<unsigned int> getSpringIndices();
-        std::vector<unsigned int> getBendSpringIndices();
+        std::vector<unsigned int> getSpringNodeIndices();
+        std::vector<unsigned int> getBendSpringNodeIndices();
 
         inline std::vector<unsigned int> getGridDimensions() { return {N, M}; }
 
@@ -70,7 +70,7 @@ class PySimulation {
         void setUpCloth();
 
         SimpleMesh mesh;
-        Object cloth;
+        Object* cloth;
         std::unique_ptr<Integrator> integrator;
         std::unique_ptr<MassSpring> mass_spring;
 

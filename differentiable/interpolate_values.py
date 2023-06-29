@@ -85,8 +85,9 @@ def __interpolate(u: float, v: float, boundary):
     w12 = (1-u) * v
     w21 = u * (1 - v)
     w22 = u*v
-    return bottomleft * w11 + bottomright * w12 +\
+    value = bottomleft * w11 + bottomright * w12 +\
         topleft * w21 + topright * w22
+    return value
 
 
 def __find_pair(x, z, valuex, valuez):

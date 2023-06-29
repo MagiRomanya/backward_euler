@@ -55,31 +55,31 @@ int main() {
     manager.loadTexture("gandalf", TEXTURE_PATH"/fabric/FabricPlainGreyFlat015_COL_2K.jpg");
     manager.loadTexture("floor", TEXTURE_PATH"/cobblestone/GroundCobblestone001_COL_2K.jpg");
 
-    Object floor = manager.createObject("plane", "texture");
-    Object cloth = manager.createObject("cloth", "texture", "geo_normals");
-    Object bunny = manager.createObject("bunny", "normals");
+    Object* floor = manager.createObject("plane", "texture");
+    Object* cloth = manager.createObject("cloth", "texture", "geo_normals");
+    Object* bunny = manager.createObject("bunny", "normals");
 
 
-    cloth.useTexture("gandalf", manager.getTextureID("gandalf"));
-    floor.useTexture("gandalf", manager.getTextureID("floor"));
+    cloth->useTexture("gandalf", manager.getTextureID("gandalf"));
+    floor->useTexture("gandalf", manager.getTextureID("floor"));
 
     // Set up model matrix for the object
-    cloth.translation = glm::vec3(0.0f, 0.25 * N, -4.0f);
+    cloth->translation = glm::vec3(0.0f, 0.25 * N, -4.0f);
     // cloth.scaling = glm::vec3(3.0);
-    cloth.updateModelMatrix();
+    cloth->updateModelMatrix();
 
-    floor.translation = glm::vec3(-25.0f, -1.05f, -25.0f);
-    floor.scaling = glm::vec3(5);
-    floor.updateModelMatrix();
+    floor->translation = glm::vec3(-25.0f, -1.05f, -25.0f);
+    floor->scaling = glm::vec3(5);
+    floor->updateModelMatrix();
 
     // Add the object to the renderer
-    renderer.addObject(&cloth);
-    renderer.addObject(&floor);
-    renderer.addObject(&bunny);
+    renderer.addObject(cloth);
+    renderer.addObject(floor);
+    renderer.addObject(bunny);
 
     ////////////////// ADD INTEGRATOR & SIMULABLES ////////////////////
     Integrator integrator(0.05f);
-    MassSpring mass_spring = MassSpring(&integrator , &cloth, NODE_MASS, K_SPRING);
+    MassSpring mass_spring = MassSpring(&integrator , cloth, NODE_MASS, K_SPRING);
     MassSpringGUI mass_spring_gui = MassSpringGUI(&mass_spring, &renderer);
 
     InfPlane plane;
@@ -88,7 +88,7 @@ int main() {
     Contact planeContact(plane);
     mass_spring.add_interaction(&planeContact);
 
-    RigidBody rb = RigidBody(&integrator, &bunny, 100.0f);
+    RigidBody rb = RigidBody(&integrator, bunny, 100.0f);
 
     // Fix corners
     const int index = M * (N - 1);

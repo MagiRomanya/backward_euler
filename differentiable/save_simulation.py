@@ -7,7 +7,7 @@ from interpolate_values import generate_parameters
 from symulathon import Simulation
 
 
-def newton_iteration(sim: Simulation, x0, v0, xi, vi):
+def __newton_iteration(sim: Simulation, x0, v0, xi, vi):
     sim.fill_containers()
     A = sim.getEquationMatrix()
     # b = symulathon.get_equation_vector()
@@ -29,11 +29,16 @@ def newton_iteration(sim: Simulation, x0, v0, xi, vi):
 
 
 if __name__ == "__main__":
-    rec = SimulationRecorder("test")
+    rec = SimulationRecorder()
     K_VALUE = 3
     RECORD_FRAMES = 500
-    k, k_bend = generate_parameters((0.1, 1, 10, 0.1),
-                                    (0.1, 0.1, 0.1, 0.1))
+    # k, k_bend = generate_parameters((0.1, 1, 10, 0.1),
+    #                                 (0.1, 0.1, 0.1, 0.1))
+
+    k, k_bend = generate_parameters((4, 4, 4, 4),
+                                    (0., 0., 0., 0.))
+    k = 4
+    k_bend = 0
     sim = Simulation(k, k_bend, True)
     h = sim.getTimeStep()
     frames_count = 0
