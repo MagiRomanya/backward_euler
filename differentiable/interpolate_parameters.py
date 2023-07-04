@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import numpy as np
 from symulathon import Simulation
 
@@ -125,37 +123,3 @@ def get_parameter_indices() -> list:
     param_indices[6] = __getSpringParameterIndex(pairwise_node_indices, *topleft)
     param_indices[7] = __getSpringParameterIndex(pairwise_node_indices, *topright)
     return param_indices
-
-
-boundary = [1, 2, 3, 4]
-
-bottomleft, bottomright, topleft, topright = __getCornerSpringNodes(N, M)
-
-def getValue(indx2d):
-    sim = Simulation(1, 1)
-    N, M = sim.getGridDimensions()
-    mesh = sim.getMesh()
-    pos = mesh.getPositions()
-    vpos = np.array([pos[i:i+3] for i in range(0, len(pos), 3)])
-    x, y, z = vpos.T
-    maxX = np.max(x)
-    maxZ = np.max(z)
-    minX = np.min(x)
-    minZ = np.min(z)
-    deltaX = maxX - minX
-    deltaZ = maxZ - minZ
-    a, b = indx2d
-    u1 = x[a] / deltaX
-    v1 = z[a] / deltaZ
-    u2 = x[b] / deltaX
-    v2 = z[b] / deltaZ
-    u = (u1 + u2) / 2
-    v = (v1 + v2) / 2
-    value = __interpolate(u, v, boundary)
-    return value
-
-
-print(f"Bottomleft value = {getValue(bottomleft)}")
-print(f"Bottomright value = {getValue(bottomright)}")
-print(f"Topleft value = {getValue(topleft)}")
-print(f"Topright value = {getValue(topright)}")

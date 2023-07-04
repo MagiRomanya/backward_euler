@@ -1,57 +1,12 @@
 #!/usr/bin/env python3
+"""Plot loss landscape for 2 differentiable parameters."""
 
-from solve_system import solve_system
-from recorder import SimulationReader
-from backpropagation import Backpropagation
 from symulathon import Simulation
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from tqdm import tqdm
-
-
-def newton_iteration(sim: Simulation, x0, v0, xi, vi):
-    A = sim.getEquationMatrix()
-    dfdx = sim.getForcePositionJacobian()
-    f = sim.getForce()
-    # M v0 + h fi + h df/dx (x0 – xi) - (M – h² df/dx) vi
-    b = mass * v0 + h * f + h * dfdx @ (x0 - xi) - (mass - h**2 * dfdx) @ vi
-    delta_v = solve_system(A, b)
-    v1 = vi + delta_v
-    x1 = x0 + h * v1
-    return x1, v1
-
-
-def simulate(k, k_bend):
-    reader = SimulationReader(nDoF)
-    backpropagation = Backpropagation(mass, h)
-    sim = Simulation(k, k_bend)
-    sim.fill_containers()
-    for i in range(DIFF_FRAMES+1):
-        ##################################
-        # Record step for backpropagation
-        ##################################
-        x = sim.getPosition()
-        v = sim.getVelocity()
-        x_t, v_t = reader.get_next_state()
-        A = sim.getEquationMatrix()
-        dfdp = sim.getParameterJacobian()
-        dfdx = sim.getForcePositionJacobian()
-        backpropagation.step(x, v, x_t, v_t, A, dfdp, dfdx)
-
-        ##################################
-        # Newton Iterations
-        ##################################
-        iterations = 3
-        xi = x
-        vi = v
-        for it in range(iterations):
-            xi, vi = newton_iteration(sim, x, v, xi, vi)
-            sim.set_state(xi, vi)
-            sim.fill_containers()
-
-    return backpropagation
-
+from simulation_functions import simulate
 
 if __name__ == "__main__":
     # Initialize important constant variables
@@ -59,12 +14,14 @@ if __name__ == "__main__":
     nDoF = sim.getDoF()
     mass = sim.getMassMatrix()
     h = sim.getTimeStep()
-    DIFF_FRAMES = 10
+    DIFF_FRAMES = 100
 
     # Define the region studied
-    n_points = 20
-    k_values = np.linspace(0.01, 10, n_points)
-    k_bend_values = np.linspace(-10, 500, n_points-1) / 100
+    n_points = 11
+    # k_values = np.linspace(0.01, 10, n_points)
+    # k_bend_values = np.linspace(-10, 500, n_points-1) / 100
+    k_values = np.linspace(3.95, 4.05, n_points)
+    k_bend_values = np.linspace(0, 0.2, 51)
     X, Y = np.meshgrid(k_values, k_bend_values)
 
     g_values = X.tolist()
@@ -75,7 +32,7 @@ if __name__ == "__main__":
     # Computation of the surface and gradients
     for i in tqdm(range(len(k_values))):
         for j in range(len(k_bend_values)):
-            bp = simulate(k_values[i], k_bend_values[j])
+            bp = simulate(k_values[i], k_bend_values[j], DIFF_FRAMES)
             dgdp = bp.get_dgdp()
             dgdk_values[j][i] = dgdp[0]
             dgdk_bend_values[j][i] = dgdp[1]
@@ -84,8 +41,6 @@ if __name__ == "__main__":
     # Finite differences
     dk = k_values[1]-k_values[0]
     dk_bend = k_bend_values[1]-k_bend_values[0]
-    # REVIEW: Why does this gradient function accept first dy and then dx and
-    # also returns first dfdy and then dfdx
     dgdk_bend_values_finite, dgdk_values_finite = np.gradient(g_values, dk_bend, dk)
 
     # Plotting
@@ -102,7 +57,8 @@ if __name__ == "__main__":
     diff_rel = diff / np.max(dfdp_magnitude_finite)
 
     colors = cm.Greys(diff)
-    surf = ax.plot_surface(X, Y, g_values, facecolors=colors)
+    # surf = ax.plot_surface(X, Y, g_values, facecolors=colors)
+    surf = ax.plot_surface(X, Y, g_values)
 
     gradient = ax.quiver(X, Y, g_values, dgdk_values, dgdk_bend_values, ones,
                          arrow_length_ratio=0.001,

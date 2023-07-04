@@ -76,7 +76,7 @@ void PySimulation::setUpCloth() {
         floor->translation = glm::vec3(-25.0f, -1.05f, -8.0f*N);
         floor->scaling = glm::vec3(5);
         floor->updateModelMatrix();
-        renderer->addObject(floor);
+        // renderer->addObject(floor);
     }
     else {
         cloth = omanager.createObject("cloth");

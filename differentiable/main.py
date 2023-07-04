@@ -1,61 +1,10 @@
 #!/usr/bin/env python3
 
-from solve_system import solve_system
-from recorder import SimulationReader
-from backpropagation import Backpropagation
 from symulathon import Simulation
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-
-
-def newton_iteration(sim: Simulation, x0, v0, xi, vi):
-    A = sim.getEquationMatrix()
-    dfdx = sim.getForcePositionJacobian()
-    f = sim.getForce()
-    # M v0 + h fi + h df/dx (x0 – xi) - (M – h² df/dx) vi
-    b = mass * v0 + h * f + h * dfdx @ (x0 - xi) - (mass - h**2 * dfdx) @ vi
-    delta_v = solve_system(A, b)
-    v1 = vi + delta_v
-    x1 = x0 + h * v1
-    return x1, v1
-
-
-def simulate(k):
-    reader = SimulationReader(nDoF)
-    backpropagation = Backpropagation(mass, h)
-    sim = Simulation(k, k/100)
-    sim.fill_containers()
-    for i in range(DIFF_FRAMES+1):
-        ##################################
-        # Record step for backpropagation
-        ##################################
-        x = sim.getPosition()
-        v = sim.getVelocity()
-        x_t, v_t = reader.get_next_state()
-        A = sim.getEquationMatrix()
-        dfdp = sim.getParameterJacobian()
-        dfdx = sim.getForcePositionJacobian()
-        backpropagation.step(x, v, x_t, v_t, A, dfdp, dfdx)
-
-        ##################################
-        # Newton Iterations
-        ##################################
-        iterations = 2
-        xi = x
-        vi = v
-        for it in range(iterations):
-            xi, vi = newton_iteration(sim, x, v, xi, vi)
-            sim.set_state(xi, vi)
-            sim.fill_containers()
-            # delta_v = vi - v
-            # f = symulathon.get_force()
-            # print(f"{it+1}th iteration convergence check = {sum(mass @ delta_v - h * f)}")
-
-    dgdp = backpropagation.get_dgdp()
-    g = backpropagation.get_g()
-    return (g, dgdp)
-
+from simulation_functions import simulate
 
 if __name__ == "__main__":
     sim = Simulation(1, 1)
@@ -68,9 +17,9 @@ if __name__ == "__main__":
     g_values = []
     dgdp_values = []
     for k in tqdm(k_values):
-        g, dgdp = simulate(k)
-        g_values.append(g)
-        dgdp_values.append(dgdp[0])
+        bp = simulate(k, k/100, DIFF_FRAMES)
+        g_values.append(bp.get_g())
+        dgdp_values.append(bp.get_dgdp()[0])
 
     # Calculate finite differences
     dgdp_finite = []
