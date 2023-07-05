@@ -17,11 +17,13 @@ if __name__ == "__main__":
     DIFF_FRAMES = 100
 
     # Define the region studied
-    n_points = 11
-    # k_values = np.linspace(0.01, 10, n_points)
-    # k_bend_values = np.linspace(-10, 500, n_points-1) / 100
-    k_values = np.linspace(3.95, 4.05, n_points)
-    k_bend_values = np.linspace(0, 0.2, 51)
+    n_points = 21
+    k_values = np.linspace(0.01, 6, n_points)
+    k_bend_values = np.linspace(0, 2, n_points-1)
+    # k_values = np.linspace(3.95, 4.05, n_points)
+    # k_bend_values = np.linspace(0, 0.2, n_points)
+    # k_values = np.linspace(3.45, 3.55, n_points)
+    # k_bend_values = np.linspace(0.35, 0.4, n_points)
     X, Y = np.meshgrid(k_values, k_bend_values)
 
     g_values = X.tolist()
@@ -92,3 +94,8 @@ if __name__ == "__main__":
     plt.quiver(X, Y, dgdk_values, dgdk_bend_values, color="blue")
     plt.quiver(X, Y, dgdk_values_finite, dgdk_bend_values_finite , color="red")
     plt.show()
+
+    # save the data to disk
+    np.save("data/x_data.npy", X)
+    np.save("data/y_data.npy", Y)
+    np.save("data/g_data.npy", g_values)

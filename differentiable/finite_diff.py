@@ -18,7 +18,7 @@ if __name__ == "__main__":
     h = sim.getTimeStep()
 
     # Define finite der
-    k_list = np.ones(nFlex) * 10
+    k_list = np.ones(nFlex) * 1
     k_bend_list = np.ones(nBend) * 0.1
     parameters = np.concatenate((k_list, k_bend_list))
     dgdp_finite = np.zeros(len(parameters))
@@ -43,8 +43,8 @@ if __name__ == "__main__":
     print("Finite diff:", dgdp_finite)
     print("Error term:", error)
 
-    plt.plot(dgdp, label="backpropagation")
-    plt.plot(dgdp_finite, label="finite differences")
+    plt.plot(dgdp, marker='x', label="backpropagation")
+    plt.plot(dgdp_finite, marker='+', label="finite differences")
     plt.plot(error, label="Error")
     plt.legend()
     plt.show()

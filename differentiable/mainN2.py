@@ -30,14 +30,6 @@ if __name__ == "__main__":
     mass = sim.getMassMatrix()
     h = sim.getTimeStep()
 
-    # CHECK weather the paramters indices make sense
-    # k_list = np.arange(0, 2*nFlex, 2)
-    # k_bend_list = np.arange(1, 2*nBend+1, 2)
-    # parameters = np.concatenate((k_list, k_bend_list))
-    # sim = Simulation(k_list, k_bend_list)
-    # p = sim.getDiffParameters()
-    # print(f"Error : {parameters - p}, total {sum(parameters - p)}")
-
     # Define inital state
     indx = get_parameter_indices()
     # Minimization process
@@ -46,7 +38,7 @@ if __name__ == "__main__":
     last_loss = 0
 
     DIFF_FRAMES = 100
-    x0 = np.ones(4) * 4.1
+    x0 = np.ones(4) * 1
     # x0 = np.array([3.989, 3.967, 4.079,  4.160])
     res = minimize(simulation_wrapper, x0, jac=True,
                    bounds=Bounds(lb=0, ub=200),
