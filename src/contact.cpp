@@ -91,7 +91,7 @@ void Contact::apply(Integrator &itg, ParticleSystem* sys) {
 
         /////////////// COLLISION RESPONSE ////////////////
         vec3 normal_to_surface = geometry->outward_direction(point);
-        vec3 f = force(sys, normal_to_surface, dist);
+        vec3 f = force(normal_to_surface, dist);
         itg.f0(sys->index + 3*i) = f.x();
         itg.f0(sys->index + 3*i+1) = f.y();
         itg.f0(sys->index + 3*i+2) = f.z();
@@ -109,7 +109,7 @@ void Contact::apply(Integrator &itg, ParticleSystem* sys) {
 
 }
 
-vec3 Contact::force(ParticleSystem* sys, const vec3& direction, const double dist) {
+vec3 Contact::force(const vec3& direction, const double dist) {
     return - contact_stiffness * dist * direction;
 }
 

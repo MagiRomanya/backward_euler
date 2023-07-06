@@ -52,7 +52,7 @@ class Contact : public Interaction {
         inline void set_stiffness(double stiffness) { contact_stiffness = stiffness; }
 
     private:
-        vec3 force(ParticleSystem* sys, const vec3& direction, const double dist);
+        vec3 force(const vec3& direction, const double dist);
 
         Eigen::Matrix3d force_derivative(ParticleSystem* sys, const vec3& direction, const double dist);
 
