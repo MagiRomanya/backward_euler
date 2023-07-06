@@ -3,7 +3,7 @@
 
 #include "integrator.hpp"
 #include "simulable.hpp"
-#include "vec3.h"
+#include "vec3.hpp"
 #include "object.h"
 
 class RigidBody : public Simulable {

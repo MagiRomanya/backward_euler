@@ -1,4 +1,4 @@
-#include "spring.h"
+#include "spring.hpp"
 
 void Spring::get_state(ParticleSystem* sys){
     itg_i = sys->index + i*3;

@@ -4,8 +4,8 @@
 #include <system_error>
 #include <vector>
 
-#include "vec3.h"
-#include "interaction.h"
+#include "vec3.hpp"
+#include "interaction.hpp"
 #include "simulable.hpp"
 
 class ParticleSystem : public Simulable {

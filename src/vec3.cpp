@@ -1,4 +1,4 @@
-#include "vec3.h"
+#include "vec3.hpp"
 
 
 void vec3::make_unit_vector() {

@@ -5,7 +5,7 @@
 #include "parameter_list.hpp"
 #include "particle_system.hpp"
 #include "simulable.hpp"
-#include "spring.h"
+#include "spring.hpp"
 #include "spring_test.hpp"
 
 enum SPRING_TYPE {

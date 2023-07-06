@@ -1,10 +1,10 @@
 #ifndef GRAVITY_H
 #define GRAVITY_H
 
-#include "interaction.h"
+#include "interaction.hpp"
 #include "particle_system.hpp"
 #include "integrator.hpp"
-#include "vec3.h"
+#include "vec3.hpp"
 
 class Gravity : public Interaction {
     public:

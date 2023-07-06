@@ -47,7 +47,7 @@ if __name__ == "__main__":
         A = sim.getEquationMatrix()
         b = sim.getEquationVector()
 
-        iterations = 1
+        iterations = 2
         xi = x
         vi = v
         for it in range(iterations):

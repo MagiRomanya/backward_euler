@@ -3,7 +3,7 @@
 
 #include "integrator.hpp"
 #include "constraint.hpp"
-#include "vec3.h"
+#include "vec3.hpp"
 
 class LengthConstraint : public Constraint {
     public:

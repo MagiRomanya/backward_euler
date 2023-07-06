@@ -7,7 +7,7 @@
 #include "particle_system.hpp"
 #include "parameter_list.hpp"
 #include "twobody.hpp"
-#include "vec3.h"
+#include "vec3.hpp"
 #include "math.h"
 
 /* 

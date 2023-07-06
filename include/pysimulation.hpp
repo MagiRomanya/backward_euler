@@ -9,16 +9,16 @@
 #include "mesh.h"
 #include "object_manager.hpp"
 #include "renderer.h"
-#include "contact.h"
+#include "contact.hpp"
 
 /* Simulation class exposed to python for the client to do the neccesary
  * computations. */
 
 #define NODE_MASS 1
 // #define TimeStep 0.2f
-#define TimeStep 0.1f
+#define TimeStep 0.2f
 
-// #define ENABLE_CONTACT
+#define ENABLE_CONTACT
 
 // Grid Dimensions
 #define N 10

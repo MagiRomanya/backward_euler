@@ -2,8 +2,8 @@
 #define CONTACT_H_
 #include <string.h>
 
-#include "interaction.h"
-#include "vec3.h"
+#include "interaction.hpp"
+#include "vec3.hpp"
 
 enum GEOMETRY_TYPE {
 SPHERE = 0,

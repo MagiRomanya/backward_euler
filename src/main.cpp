@@ -3,8 +3,8 @@
 
 #include "mass_spring.hpp"
 #include "integrator.hpp"
-#include "clock.h"
-#include "contact.h"
+#include "clock.hpp"
+#include "contact.hpp"
 
 #include "mass_spring_gui.hpp"
 #include "renderer.h"

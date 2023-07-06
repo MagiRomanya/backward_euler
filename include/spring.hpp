@@ -5,8 +5,8 @@
 #include <ostream>
 #include <vector>
 
-#include "interaction.h"
-#include "vec3.h"
+#include "interaction.hpp"
+#include "vec3.hpp"
 #include "particle_system.hpp"
 #include "integrator.hpp"
 

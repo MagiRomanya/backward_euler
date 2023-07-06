@@ -1,10 +1,10 @@
 #ifndef TWOBODY_H_
 #define TWOBODY_H_
 
-#include "interaction.h"
+#include "interaction.hpp"
 #include "integrator.hpp"
 #include "particle_system.hpp"
-#include "vec3.h"
+#include "vec3.hpp"
 
 class TwoBodyInteraction : public Interaction {
     public:

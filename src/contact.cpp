@@ -1,6 +1,6 @@
-#include "contact.h"
+#include "contact.hpp"
 #include "particle_system.hpp"
-#include "vec3.h"
+#include "vec3.hpp"
 
 double Sphere::distance_point(const vec3& point, bool& valid){
     /* Distance between a point and a sphere.
