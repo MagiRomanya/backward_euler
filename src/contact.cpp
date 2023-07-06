@@ -1,5 +1,6 @@
 #include "contact.h"
 #include "particle_system.hpp"
+#include "vec3.h"
 
 double Sphere::distance_point(const vec3& point, bool& valid){
     /* Distance between a point and a sphere.
@@ -77,11 +78,10 @@ Contact::~Contact(){
 }
 
 void Contact::apply(Integrator &itg, ParticleSystem* sys) {
-    bool valid;
     // std::cout << geometry->distance_point(sys->get_particle_position(19), valid) << std::endl;
     for (int i = 0; i < sys->get_n_particles(); i++) {
         ///////////// COLLISION DETECTION ///////////////
-        bool valid;
+        bool valid = true;
         vec3 point = sys->get_particle_position(i);
         double dist = geometry->distance_point(point, valid);
 
@@ -90,17 +90,19 @@ void Contact::apply(Integrator &itg, ParticleSystem* sys) {
         if (sys->is_fixed(i)) continue;
 
         /////////////// COLLISION RESPONSE ////////////////
-        vec3 direction = geometry->outward_direction(point);
-        vec3 f = force(sys, direction, dist);
+        vec3 normal_to_surface = geometry->outward_direction(point);
+        vec3 f = force(sys, normal_to_surface, dist);
         itg.f0(sys->index + 3*i) = f.x();
         itg.f0(sys->index + 3*i+1) = f.y();
         itg.f0(sys->index + 3*i+2) = f.z();
 
-        Eigen::Matrix3d df_dx = force_derivative(sys, direction, dist);
+        Eigen::Matrix3d df_dx = force_derivative(sys, normal_to_surface, dist);
         typedef Eigen::Triplet<double> tri;
+        double h2 = itg.getTimeStep() * itg.getTimeStep();
         for (int j = 0; j < 3; j++){
             for (int k = 0; k < 3; k++) {
                 itg.add_df_dx_triplet(tri(sys->index + 3*i+j, sys->index + 3*i+k, df_dx(j,k)));
+                itg.add_equation_triplet(tri(sys->index + 3*i+j, sys->index + 3*i+k, -h2 * df_dx(j,k)));
             }
         }
     }
@@ -112,5 +114,5 @@ vec3 Contact::force(ParticleSystem* sys, const vec3& direction, const double dis
 }
 
 Eigen::Matrix3d Contact::force_derivative(ParticleSystem* sys, const vec3& direction, const double dist) {
-    return - contact_stiffness * Eigen::Matrix3d::Identity();
+    return - contact_stiffness * outer_product(direction, direction);
 }

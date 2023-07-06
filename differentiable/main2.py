@@ -85,8 +85,9 @@ if __name__ == "__main__":
     plt.show()
     plt.contourf(X, Y, g_values, levels=40)
     plt.colorbar()
-    plt.quiver(X, Y, dgdk_values, dgdk_bend_values, color="blue")
-    plt.quiver(X, Y, dgdk_values_finite, dgdk_bend_values_finite , color="red")
+    plt.quiver(X, Y, dgdk_values, dgdk_bend_values, label="Backpropagation", color="blue")
+    plt.quiver(X, Y, dgdk_values_finite, dgdk_bend_values_finite, label="Finite diff", color="red")
+    plt.legend()
     plt.show()
 
     plt.contourf(X, Y, diff_rel, levels=40)

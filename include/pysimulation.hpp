@@ -9,12 +9,16 @@
 #include "mesh.h"
 #include "object_manager.hpp"
 #include "renderer.h"
+#include "contact.h"
 
 /* Simulation class exposed to python for the client to do the neccesary
  * computations. */
 
 #define NODE_MASS 1
-#define TimeStep 0.2f
+// #define TimeStep 0.2f
+#define TimeStep 0.1f
+
+// #define ENABLE_CONTACT
 
 // Grid Dimensions
 #define N 10
@@ -79,6 +83,7 @@ class PySimulation {
         // Weather or not to display the simulation graphically
         bool graphical;
         std::unique_ptr<Renderer> renderer;
+        std::unique_ptr<Contact> contact;
         ObjectManager omanager;
 
 };

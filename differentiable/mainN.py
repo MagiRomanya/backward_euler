@@ -39,10 +39,11 @@ if __name__ == "__main__":
     nDoF = sim.getDoF()
     mass = sim.getMassMatrix()
     h = sim.getTimeStep()
-    DIFF_FRAMES = 40
+    DIFF_FRAMES = 100
 
     # Define inital state
-    k_list = np.ones(nFlex) * 10
+    # k_list = np.ones(nFlex) * 10
+    k_list = np.random.randint(0, 10, nFlex)
     k_bend_list = np.ones(nBend) * 0.1
     parameters = np.concatenate((k_list, k_bend_list))
 
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     res = minimize(simulation_wrapper, x0, jac=True,
                    bounds=Bounds(0, 600),
                    options={"disp": True,
-                            "maxiter": 100,
+                            # "maxiter": 100,
                             })
     print(res)
     x_result = res.x
@@ -67,18 +68,18 @@ if __name__ == "__main__":
     print(f"STRETCH: mean value = {np.mean(stretch_res)}, var = {np.var(stretch_res)}")
     print(f"BEND: mean value = {np.mean(bend_res)}, var = {np.var(bend_res)}")
     # Real optimization with 100 frames
-    DIFF_FRAMES = 100
-    x0 = x_result
-    res = minimize(simulation_wrapper, x0, jac=True,
-                   bounds=Bounds(0, 600),
-                   options={"disp": True,})
-    print(res)
-    x_result = res.x
-    print(x_result)
-    stretch_res = x_result[:nFlex]
-    bend_res = x_result[nFlex:]
-    print(f"STRETCH: mean value = {np.mean(stretch_res)}, var = {np.var(stretch_res)}")
-    print(f"BEND: mean value = {np.mean(bend_res)}, var = {np.var(bend_res)}")
+    # DIFF_FRAMES = 100
+    # x0 = x_result
+    # res = minimize(simulation_wrapper, x0, jac=True,
+    #                bounds=Bounds(0, 600),
+    #                options={"disp": True,})
+    # print(res)
+    # x_result = res.x
+    # print(x_result)
+    # stretch_res = x_result[:nFlex]
+    # bend_res = x_result[nFlex:]
+    # print(f"STRETCH: mean value = {np.mean(stretch_res)}, var = {np.var(stretch_res)}")
+    # print(f"BEND: mean value = {np.mean(bend_res)}, var = {np.var(bend_res)}")
 
     # GRADIENT DESCENT
     # previous_g = 0

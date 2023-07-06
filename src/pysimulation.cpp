@@ -13,6 +13,9 @@ PySimulation::PySimulation(double k, double k_bend, bool graphics) {
     // Create simulable
     setUpCloth();
     mass_spring = std::make_unique<MassSpring>(integrator.get(), cloth, NODE_MASS, k, k_bend);
+#ifdef ENABLE_CONTACT
+    mass_spring->add_interaction(contact.get());
+#endif
 
     // Fix corners
     const int index = M * (N - 1);
@@ -76,7 +79,9 @@ void PySimulation::setUpCloth() {
         floor->translation = glm::vec3(-25.0f, -1.05f, -8.0f*N);
         floor->scaling = glm::vec3(5);
         floor->updateModelMatrix();
-        // renderer->addObject(floor);
+#ifdef ENABLE_CONTACT
+        renderer->addObject(floor);
+#endif
     }
     else {
         cloth = omanager.createObject("cloth");
@@ -87,6 +92,11 @@ void PySimulation::setUpCloth() {
     cloth->scaling = glm::vec3(3.0);
     cloth->updateModelMatrix();
 
+    // Plane contact definition
+    InfPlane plane;
+    plane.normal = vec3(0, 1, 0);
+    plane.center = vec3(0, -1, 0);
+    contact = std::make_unique<Contact>(plane);
 }
 
 void PySimulation::render_state() {
@@ -134,25 +144,3 @@ std::vector<unsigned int> PySimulation::getBendSpringNodeIndices() {
     return indices;
 }
 
-// std::vector<unsigned int> PySimulation::getSpringIndices() {
-//     std::vector<unsigned int> indices;
-//     std::vector<Edge> internal;
-//     std::vector<Edge> external;
-//     mesh.boundary(internal, external);
-
-//     int nFlex = internal.size() / 2.0 + external.size();
-//     int nBend = internal.size() / 2.0;
-//     indices.resize(nFlex + nBend);
-
-//     unsigned int flex_index = 0;
-//     unsigned int bend_index = 0;
-//     for (size_t i = 0; i < external.size(); i++) {
-//         indices[i] = flex_index++;
-//     }
-
-//     for (size_t i = 0; i < internal.max_size(); i++) {
-//         indices[external.size() + i] = flex_index++;
-//         indices[nFlex + i] = bend_index++;
-//     }
-
-// }
