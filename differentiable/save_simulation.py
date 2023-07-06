@@ -23,7 +23,7 @@ def newton_iteration(sim: Simulation, x0, v0, xi, vi):
 if __name__ == "__main__":
     rec = SimulationRecorder()
     K_VALUE = 3
-    RECORD_FRAMES = 500
+    RECORD_FRAMES = 5000
     # k, k_bend = generate_parameters((0.1, 1, 10, 0.1),
     #                                 (0.1, 0.1, 0.1, 0.1))
 

@@ -2,7 +2,7 @@
 #include "particle_system.hpp"
 #include "vec3.hpp"
 
-double Sphere::distance_point(const vec3& point, bool& valid){
+double Sphere::distance_point(const vec3& point, bool& valid) const {
     /* Distance between a point and a sphere.
      * The result is positive when the point is outside, zero when the point is on the surface,
      * and is negative when the point is inside the sphere. */
@@ -12,11 +12,11 @@ double Sphere::distance_point(const vec3& point, bool& valid){
     return dv.length() - r;
 }
 
-vec3 Sphere::outward_direction(const vec3& point){
+vec3 Sphere::outward_direction(const vec3& point) const {
     return normalize(point - center);
 }
 
-double InfPlane::distance_point(const vec3& point, bool& valid){
+double InfPlane::distance_point(const vec3& point, bool& valid) const {
     /* Distance between a point and a plane.
      * The result is positive when the point is in the region of space where the
      * normal of the plane points to the point, zero when the point is on the surface of the
@@ -25,11 +25,11 @@ double InfPlane::distance_point(const vec3& point, bool& valid){
     return dot(normal, point - center);
 }
 
-vec3 InfPlane::outward_direction(const vec3 &point){
+vec3 InfPlane::outward_direction(const vec3 &point) const {
     return normal;
 }
 
-double FinPlane::distance_point(const vec3& point,  bool& valid){
+double FinPlane::distance_point(const vec3& point,  bool& valid) const {
     /* Returns the distance between a finite plane and a point.
      * The valid bool means weather or not the point is inside the finite
      * plane domain or, on the contrary, is outside of it. */
@@ -50,31 +50,27 @@ double FinPlane::distance_point(const vec3& point,  bool& valid){
     return d;
 }
 
-vec3 FinPlane::outward_direction(const vec3 &point){
+vec3 FinPlane::outward_direction(const vec3 &point) const {
     return normal;
 }
 
-Contact::Contact(const Sphere& sphere){
+Contact::Contact(const Sphere* sphere) {
     geometry_type = SPHERE;
-    geometry = (ContactGeometry*) malloc(sizeof(Sphere));
-    memcpy((void*) geometry, (void*) &sphere, sizeof(Sphere));
+    geometry = sphere;
 }
 
-Contact::Contact(const InfPlane& plane){
+Contact::Contact(const InfPlane* plane) {
     geometry_type = INFPLANE;
-    geometry = (ContactGeometry*) malloc(sizeof(InfPlane));
-    memcpy((void*) geometry, (void*) &plane, sizeof(InfPlane));
+    geometry = plane;
 }
 
-Contact::Contact(const FinPlane& plane){
+Contact::Contact(const FinPlane* plane) {
     geometry_type = FINPLANE;
-    geometry = (ContactGeometry*) malloc(sizeof(FinPlane));
-    memcpy((void*) geometry, (void*) &plane, sizeof(FinPlane));
+    geometry = plane;
 }
 
 Contact::~Contact(){
-    // Destroy geometry
-    free(geometry);
+
 }
 
 void Contact::apply(Integrator &itg, ParticleSystem* sys) {
@@ -98,7 +94,7 @@ void Contact::apply(Integrator &itg, ParticleSystem* sys) {
 
         Eigen::Matrix3d df_dx = force_derivative(sys, normal_to_surface, dist);
         typedef Eigen::Triplet<double> tri;
-        double h2 = itg.getTimeStep() * itg.getTimeStep();
+        const double h2 = itg.getTimeStep() * itg.getTimeStep();
         for (int j = 0; j < 3; j++){
             for (int k = 0; k < 3; k++) {
                 itg.add_df_dx_triplet(tri(sys->index + 3*i+j, sys->index + 3*i+k, df_dx(j,k)));

@@ -4,6 +4,8 @@
 #include <vector>
 #include <memory>
 
+#include "collision_ball.hpp"
+#include "collision_plane.hpp"
 #include "integrator.hpp"
 #include "mass_spring.hpp"
 #include "mesh.h"
@@ -83,7 +85,9 @@ class PySimulation {
         // Weather or not to display the simulation graphically
         bool graphical;
         std::unique_ptr<Renderer> renderer;
-        std::unique_ptr<Contact> contact;
+        std::unique_ptr<CollisionBall> collision_ball;
+        std::unique_ptr<CollisionPlane> collision_plane;
+        std::unique_ptr<Sphere> sphere;
         ObjectManager omanager;
 
 };

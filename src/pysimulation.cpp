@@ -1,6 +1,11 @@
 #include "pysimulation.hpp"
+#include "collision_ball.hpp"
+#include "contact.hpp"
+#include "mesh.h"
 #include "object_manager.hpp"
+#include "shader_path.h"
 #include "spring_counter.hpp"
+#include "vec3.hpp"
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -14,7 +19,8 @@ PySimulation::PySimulation(double k, double k_bend, bool graphics) {
     setUpCloth();
     mass_spring = std::make_unique<MassSpring>(integrator.get(), cloth, NODE_MASS, k, k_bend);
 #ifdef ENABLE_CONTACT
-    mass_spring->add_interaction(contact.get());
+    // mass_spring->add_interaction(collision_ball->getContact());
+    mass_spring->add_interaction(collision_plane->getContact());
 #endif
 
     // Fix corners
@@ -79,9 +85,7 @@ void PySimulation::setUpCloth() {
         floor->translation = glm::vec3(-25.0f, -1.05f, -8.0f*N);
         floor->scaling = glm::vec3(5);
         floor->updateModelMatrix();
-#ifdef ENABLE_CONTACT
-        renderer->addObject(floor);
-#endif
+
     }
     else {
         cloth = omanager.createObject("cloth");
@@ -93,10 +97,14 @@ void PySimulation::setUpCloth() {
     cloth->updateModelMatrix();
 
     // Plane contact definition
-    InfPlane plane;
-    plane.normal = vec3(0, 1, 0);
-    plane.center = vec3(0, -1, 0);
-    contact = std::make_unique<Contact>(plane);
+    vec3 normal = vec3(0, 1, 0);
+    vec3 center = vec3(0, -2.0f, -4.0f*N);
+#ifdef ENABLE_CONTACT
+    // collision_ball = std::make_unique<CollisionBall>(center, 3.0f, *renderer);
+    collision_plane = std::make_unique<CollisionPlane>(vec3(0.0f, -1.0f, 0.0f),
+                                                       normalize(vec3(1.0f, 1.0f, 0.0f)),
+                                                       *renderer);
+#endif
 }
 
 void PySimulation::render_state() {

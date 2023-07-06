@@ -23,7 +23,11 @@ set(SOURCE_FILES
   src/pysimulation.cpp
   src/spring_counter.cpp
   src/differentiable_manager.cpp
+  src/non_physical.cpp
+  src/collision_ball.cpp
+  src/collision_plane.cpp
 )
+
 set(SOURCE_FILES_MAIN
   ${SOURCE_FILES}
   src/main.cpp

@@ -82,10 +82,10 @@ int main() {
     MassSpring mass_spring = MassSpring(&integrator , cloth, NODE_MASS, K_SPRING);
     MassSpringGUI mass_spring_gui = MassSpringGUI(&mass_spring, &renderer);
 
-    InfPlane plane;
-    plane.normal = vec3(0, 1, 0);
-    plane.center = vec3(0, -1, 0);
-    Contact planeContact(plane);
+    vec3 normal = vec3(0, 1, 0);
+    vec3 center = vec3(0, -1, 0);
+    InfPlane plane = InfPlane(center, normal);
+    Contact planeContact(&plane);
     mass_spring.add_interaction(&planeContact);
 
     RigidBody rb = RigidBody(&integrator, bunny, 100.0f);
