@@ -19,7 +19,7 @@ CollisionPlane::CollisionPlane(vec3 position, vec3 normal, Renderer& renderer) {
 
     const glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 axis = glm::cross(up, normal.to_glm());
-    float angle = to_vec3(axis).length() / normal.length();
+    float angle = asinf(to_vec3(axis).length() / normal.length());
 
     glm::mat4 model = glm::mat4(1.0);
     plane_mesh.make_vertex_relative_to_center();

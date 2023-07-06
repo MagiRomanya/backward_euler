@@ -102,7 +102,7 @@ void PySimulation::setUpCloth() {
 #ifdef ENABLE_CONTACT
     // collision_ball = std::make_unique<CollisionBall>(center, 3.0f, *renderer);
     collision_plane = std::make_unique<CollisionPlane>(vec3(0.0f, -1.0f, 0.0f),
-                                                       normalize(vec3(1.0f, 1.0f, 0.0f)),
+                                                       normalize(vec3(0.0f, 1.0f, 0.0f)),
                                                        *renderer);
 #endif
 }
