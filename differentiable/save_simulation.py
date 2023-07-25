@@ -23,15 +23,11 @@ def newton_iteration(sim: Simulation, x0, v0, xi, vi):
 if __name__ == "__main__":
     rec = SimulationRecorder()
     K_VALUE = 3
-    RECORD_FRAMES = 5000
-    # k, k_bend = generate_parameters((0.1, 1, 10, 0.1),
-    #                                 (0.1, 0.1, 0.1, 0.1))
+    RECORD_FRAMES = 500
 
-    # bottomleft, bottomright, topleft, topright
-    # k, k_bend = generate_parameters((4, 4, 4, 4),
-    #                                 (0.1, 0.1, 0.1, 0.1))
-    k = 4
+    k = 8
     k_bend = 0.1
+
     sim = Simulation(k, k_bend, True)
     h = sim.getTimeStep()
     frames_count = 0
@@ -47,7 +43,7 @@ if __name__ == "__main__":
         A = sim.getEquationMatrix()
         b = sim.getEquationVector()
 
-        iterations = 2
+        iterations = 3
         xi = x
         vi = v
         for it in range(iterations):

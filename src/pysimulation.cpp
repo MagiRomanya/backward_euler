@@ -19,8 +19,8 @@ PySimulation::PySimulation(double k, double k_bend, bool graphics) {
     setUpCloth();
     mass_spring = std::make_unique<MassSpring>(integrator.get(), cloth, NODE_MASS, k, k_bend);
 #ifdef ENABLE_CONTACT
-    // mass_spring->add_interaction(collision_ball->getContact());
-    mass_spring->add_interaction(collision_plane->getContact());
+    mass_spring->add_interaction(collision_ball->getContact());
+    // mass_spring->add_interaction(collision_plane->getContact());
 #endif
 
     // Fix corners
@@ -100,10 +100,18 @@ void PySimulation::setUpCloth() {
     vec3 normal = vec3(0, 1, 0);
     vec3 center = vec3(0, -2.0f, -4.0f*N);
 #ifdef ENABLE_CONTACT
-    // collision_ball = std::make_unique<CollisionBall>(center, 3.0f, *renderer);
-    collision_plane = std::make_unique<CollisionPlane>(vec3(0.0f, -1.0f, 0.0f),
-                                                       normalize(vec3(0.0f, 1.0f, 0.0f)),
-                                                       *renderer);
+    float radius = 5.0f;
+    if (graphical) {
+        collision_ball = std::make_unique<CollisionBall>(center, radius, *renderer);
+        // collision_plane = std::make_unique<CollisionPlane>(vec3(0.0f, -1.05f, 0.0f),
+        //                                                    normalize(vec3(0.0f, 1.0f, 0.0f)),
+        //                                                    *renderer);
+    }
+    else {
+        collision_ball = std::make_unique<CollisionBall>(center, radius);
+        // collision_plane = std::make_unique<CollisionPlane>(vec3(0.0f, -1.05f, 0.0f),
+        //                                                    normalize(vec3(0.0f, 1.0f, 0.0f)));
+    }
 #endif
 }
 

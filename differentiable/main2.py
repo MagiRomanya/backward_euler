@@ -18,8 +18,8 @@ if __name__ == "__main__":
 
     # Define the region studied
     n_points = 21
-    k_values = np.linspace(0.01, 6, n_points)
-    k_bend_values = np.linspace(0, 2, n_points-1)
+    k_values = np.linspace(2, 10, n_points)
+    k_bend_values = np.linspace(0, 2, n_points-3)
     # k_values = np.linspace(3.95, 4.05, n_points)
     # k_bend_values = np.linspace(0, 0.2, n_points)
     # k_values = np.linspace(3.45, 3.55, n_points)
@@ -54,9 +54,10 @@ if __name__ == "__main__":
     diff = np.sqrt(
         (dgdk_values - dgdk_values_finite)**2 +
         (dgdk_bend_values - dgdk_bend_values_finite)**2)
-    dfdp_magnitude_finite = np.sqrt(
-        dgdk_values_finite**2 + dgdk_bend_values_finite**2)
-    diff_rel = diff / np.max(dfdp_magnitude_finite)
+
+    magnitudes = np.sqrt(dgdk_bend_values**2 + dgdk_values**2)
+
+    diff_rel = diff / magnitudes
 
     colors = cm.Greys(diff)
     # surf = ax.plot_surface(X, Y, g_values, facecolors=colors)
@@ -83,6 +84,8 @@ if __name__ == "__main__":
     # Add a color bar which maps values to colors.
     # fig.colorbar(surf, shrink=0.5, aspect=5)
     plt.show()
+
+    plt.title("Real magnitudes")
     plt.contourf(X, Y, g_values, levels=40)
     plt.colorbar()
     plt.quiver(X, Y, dgdk_values, dgdk_bend_values, label="Backpropagation", color="blue")
@@ -90,13 +93,26 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
-    plt.contourf(X, Y, diff_rel, levels=40)
+    plt.title("Normalized magnitudes")
+    plt.contourf(X, Y, g_values, levels=200)
     plt.colorbar()
-    plt.quiver(X, Y, dgdk_values, dgdk_bend_values, color="blue")
-    plt.quiver(X, Y, dgdk_values_finite, dgdk_bend_values_finite , color="red")
+    plt.quiver(X, Y, dgdk_values/magnitudes, dgdk_bend_values/magnitudes, color="blue")
+    plt.quiver(X, Y, dgdk_values_finite/magnitudes, dgdk_bend_values_finite/magnitudes , color="red")
+    plt.show()
+
+    plt.title("Relative differences")
+    plt.contourf(X, Y, diff_rel, levels=200)
+    plt.colorbar()
+    plt.quiver(X, Y, dgdk_values/magnitudes, dgdk_bend_values/magnitudes, color="blue")
+    plt.quiver(X, Y, dgdk_values_finite/magnitudes, dgdk_bend_values_finite/magnitudes , color="red")
     plt.show()
 
     # save the data to disk
     np.save("data/x_data.npy", X)
     np.save("data/y_data.npy", Y)
     np.save("data/g_data.npy", g_values)
+    np.savez("data/dgdk_data.npy",
+             dgdk_values,
+             dgdk_bend_values,
+             dgdk_values_finite,
+             dgdk_bend_values_finite)

@@ -9,6 +9,32 @@
 #include <cmath>
 #include <memory>
 
+CollisionPlane::CollisionPlane(vec3 position, vec3 normal) {
+    CreateGrid(plane_mesh, 10, 10, 100);
+
+    plane_obj = Object(&plane_mesh);
+
+    const glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 axis = glm::cross(up, normal.to_glm());
+    float angle = asinf(to_vec3(axis).length() / normal.length());
+
+    glm::mat4 model = glm::mat4(1.0);
+    plane_mesh.make_vertex_relative_to_center();
+    // note that we displaced the plane along the normal to avoid
+    // z fighting
+    model = glm::translate(model, position.to_glm()-normal.to_glm()*0.05f);
+    if (angle != 0.0f)
+        model = glm::rotate(model, angle, glm::normalize(axis));
+    plane_obj.model = model;
+    plane_obj.inverse_model = glm::inverse(model);
+
+    nphys = std::make_unique<NonPhysical>(plane_obj);
+
+    infplane_geometry = std::make_unique<InfPlane>(position, normal);
+
+    contact = std::make_unique<Contact>(infplane_geometry.get());
+}
+
 CollisionPlane::CollisionPlane(vec3 position, vec3 normal, Renderer& renderer) {
     CreateGrid(plane_mesh, 10, 10, 100);
 

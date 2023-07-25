@@ -60,6 +60,6 @@ class Contact : public Interaction {
 
         GEOMETRY_TYPE geometry_type;
         const ContactGeometry* geometry;
-        double contact_stiffness = 1000.0f;
+        double contact_stiffness = 100000.0f;
 };
 #endif // CONTACT_H_

@@ -6,13 +6,12 @@ import numpy as np
 X = np.load("data/x_data.npy")
 Y = np.load("data/y_data.npy")
 g = np.load("data/g_data.npy")
-maxvalue= 2e6
-plt.contourf(X, Y, g, 1000, vmax=maxvalue)
-scatter = plt.scatter([1],[1])
-arrow = plt.arrow(1, 1, 0.1, 0.1)
-arrow.set_data(x=3, y=0.5, dx=0.1, dy=0.1)
-help(arrow)
-print(type(arrow))
-# scatter.set_offsets([1.5,1.5])
-plt.colorbar()
+derivatives_data = np.load("data/dgdk_data.npy.npz")
+dgdk_values, dgdk_bend_values, dgdk_values_finite, dgdk_bend_values_finite = [derivatives_data[dfile] for dfile in derivatives_data.files]
+
+magnitudes = np.sqrt(dgdk_bend_values**2 + dgdk_values**2)
+
+plt.contourf(X, Y, g, levels=300)
+plt.quiver(X, Y, dgdk_values/magnitudes, dgdk_bend_values/magnitudes, color="blue")
+plt.quiver(X, Y, dgdk_values_finite/magnitudes, dgdk_bend_values_finite/magnitudes , color="red")
 plt.show()

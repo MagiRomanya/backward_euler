@@ -13,6 +13,8 @@
 
 class CollisionBall {
     public:
+        CollisionBall(vec3 position, double radius);
+
         CollisionBall(vec3 position, double radius, Renderer& renderer);
 
         inline Contact* getContact() { return contact.get(); }

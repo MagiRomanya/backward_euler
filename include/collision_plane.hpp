@@ -11,6 +11,8 @@
 
 class CollisionPlane {
     public:
+        CollisionPlane(vec3 position, vec3 normal);
+
         CollisionPlane(vec3 position, vec3 normal, Renderer& renderer);
 
         inline Contact* getContact() { return contact.get(); }

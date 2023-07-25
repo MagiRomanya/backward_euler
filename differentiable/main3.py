@@ -37,7 +37,7 @@ if __name__ == "__main__":
     scatter = plt.scatter([1],[1])
     arrow = plt.arrow(1, 1, 0.1, 0.1,color="white")
 
-    x0 = np.array([1, 1])
+    x0 = np.array([2, 2])
     # x0 = np.array([3.5, 0.35])
     MAX_ITERATIONS = 1000
     ALPHA = 1e-7

@@ -22,6 +22,7 @@ class Backpropagation:
 
         # Loss information
         self.loss = meansquareloss.MeanSquareLoss()
+        # self.loss = meansquareloss.MeanSquareLossLastState()
         self.g_array = []
         self.dgdx_array = []
         self.dgdv_array = []
