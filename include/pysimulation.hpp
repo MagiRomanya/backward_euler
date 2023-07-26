@@ -77,6 +77,10 @@ class PySimulation {
 
         void render_state();
 
+        Eigen::SparseMatrix<double> getInitialPositionJacobian();
+
+        Eigen::SparseMatrix<double> getInitialVelocityJacobian();
+
     private:
         void setUpCloth();
 

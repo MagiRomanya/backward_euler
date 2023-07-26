@@ -185,3 +185,15 @@ std::vector<unsigned int> PySimulation::getBendSpringNodeIndices() {
     return indices;
 }
 
+
+Eigen::SparseMatrix<double> PySimulation::getInitialPositionJacobian() {
+    Eigen::SparseMatrix<double> dx0dp, dv0dp;
+    mass_spring->get_initial_state_jacobian(dx0dp, dv0dp);
+    return dx0dp;
+}
+
+Eigen::SparseMatrix<double> PySimulation::getInitialVelocityJacobian() {
+    Eigen::SparseMatrix<double> dx0dp, dv0dp;
+    mass_spring->get_initial_state_jacobian(dx0dp, dv0dp);
+    return dv0dp;
+}

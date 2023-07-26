@@ -81,7 +81,7 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass,
     bendSpringParameters.addParameter(1.0f);
 
     // TODO: tilt
-    this->tilt_angle = Parameter(&integrator->diff_manager, tilt_angle);
+    this->tilt_angle = Parameter(&integrator->diff_manager, tilt_angle); // (diff)
     load_from_mesh(integrator, obj, node_mass);
     gravity_vec = mass[0] * vec3(0, -1, 0);
     integrator->add_simulable(this);
@@ -246,7 +246,7 @@ void MassSpring::get_initial_state_jacobian(Eigen::SparseMatrix<double>& dx0dp, 
             const vec3 point = vec3(x[3*i], x[3*i+1], x[3*i+2]);
             const vec3 delta = point - origin;
             const double L = sqrt(delta.y() * delta.y() + delta.z() * delta.z());
-            // x coordinate not affected
+            // x coordinate not affected by x axis rotation
 
             // y coordinate
             const double dy0dp_element = L * cos(angle);

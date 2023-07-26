@@ -47,6 +47,8 @@ PYBIND11_MODULE(symulathon, m) {
         .def("getBendSpringIndices", &PySimulation::getBendSpringNodeIndices)
         .def("getMesh", &PySimulation::getMesh)
         .def("getGridDimensions", &PySimulation::getGridDimensions)
+        .def("getInitialPositionJacobian", &PySimulation::getInitialPositionJacobian)
+        .def("getInitialVelocityJacobian", &PySimulation::getInitialVelocityJacobian)
         ;
     py::class_<SimpleMesh>(m, "Mesh")
         .def("getPositions", &SimpleMesh::getPositions)
