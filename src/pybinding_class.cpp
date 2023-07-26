@@ -24,6 +24,11 @@ PYBIND11_MODULE(symulathon, m) {
              py::arg("k"),
              py::arg("k_bend"),
              py::arg("graphics") = false)
+        .def(py::init<double, double, double, bool>(),
+             py::arg("k"),
+             py::arg("k_bend"),
+             py::arg("tilt_angle"),
+             py::arg("graphics") = false)
         .def("fill_containers", &PySimulation::fill_containers)
         .def("set_state", &PySimulation::set_state)
         .def("getEquationMatrix", &PySimulation::getEquationMatrix)

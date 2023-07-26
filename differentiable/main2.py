@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from tqdm import tqdm
 from simulation_functions import simulate
+from concurrent import futures
 
 if __name__ == "__main__":
     # Initialize important constant variables
@@ -17,9 +18,10 @@ if __name__ == "__main__":
     DIFF_FRAMES = 100
 
     # Define the region studied
-    n_points = 21
+    n_points = 61
     k_values = np.linspace(2, 10, n_points)
-    k_bend_values = np.linspace(0, 2, n_points-3)
+    k_values = np.linspace(6, 9, n_points)
+    k_bend_values = np.linspace(0, 1.5, n_points-3)
     # k_values = np.linspace(3.95, 4.05, n_points)
     # k_bend_values = np.linspace(0, 0.2, n_points)
     # k_values = np.linspace(3.45, 3.55, n_points)
@@ -32,14 +34,24 @@ if __name__ == "__main__":
     ones = np.zeros(X.shape)
 
     # Computation of the surface and gradients
+    # for i in tqdm(range(len(k_values))):
+    #     for j in range(len(k_bend_values)):
+    #         bp = simulate(k_values[i], k_bend_values[j], DIFF_FRAMES)
+    #         dgdp = bp.get_dgdp()
+    #         dgdk_values[j][i] = dgdp[0]
+    #         dgdk_bend_values[j][i] = dgdp[1]
+    #         g_values[j][i] = bp.get_g()
+
+    pool = futures.ProcessPoolExecutor()
     for i in tqdm(range(len(k_values))):
-        for j in range(len(k_bend_values)):
-            bp = simulate(k_values[i], k_bend_values[j], DIFF_FRAMES)
+        k_values_i = [k_values[i]] * len(k_bend_values)
+        DIFF_FRAMES_i = [DIFF_FRAMES] * len(k_bend_values)
+        bps = pool.map(simulate, k_values_i, k_bend_values, DIFF_FRAMES_i)
+        for j, bp in enumerate(bps):
             dgdp = bp.get_dgdp()
             dgdk_values[j][i] = dgdp[0]
             dgdk_bend_values[j][i] = dgdp[1]
             g_values[j][i] = bp.get_g()
-
     # Finite differences
     dk = k_values[1]-k_values[0]
     dk_bend = k_bend_values[1]-k_bend_values[0]

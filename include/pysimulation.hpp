@@ -28,9 +28,14 @@
 
 class PySimulation {
     public:
+        /* Two differentiable parameters. */
         PySimulation(double k, double k_bend, bool graphics=false);
 
+        /* A lot of differentiable parameters. */
         PySimulation(std::vector<double> k, std::vector<double> k_bend, bool graphics=false);
+
+        /* Three differentiable parameters. */
+        PySimulation(double k, double k_bend, double tilt_angle, bool graphics);
 
         ~PySimulation();
 
@@ -40,23 +45,23 @@ class PySimulation {
 
         void set_state(Eigen::VectorXd xi, Eigen::VectorXd vi) {integrator->set_state(xi,vi);}
 
-        Eigen::SparseMatrix<double> getEquationMatrix() {return integrator->getEquationMatrix();}
+        inline Eigen::SparseMatrix<double> getEquationMatrix() {return integrator->getEquationMatrix();}
 
-        Eigen::VectorXd getEquationVector() {return integrator->getEquationVector();}
+        inline Eigen::VectorXd getEquationVector() {return integrator->getEquationVector();}
 
-        Eigen::VectorXd getForce() {return integrator->getForceVector();}
+        inline Eigen::VectorXd getForce() {return integrator->getForceVector();}
 
-        Eigen::VectorXd getPosition() {return integrator->x;}
+        inline Eigen::VectorXd getPosition() {return integrator->x;}
 
-        Eigen::VectorXd getVelocity() {return integrator->v;}
+        inline Eigen::VectorXd getVelocity() {return integrator->v;}
 
-        std::vector<double> getDiffParameteres() {return integrator->diff_manager.get_parameters();}
+        inline std::vector<double> getDiffParameteres() {return integrator->diff_manager.get_parameters();}
 
-        Eigen::SparseMatrix<double> getMassMatrix() {return integrator->getMassMatrix();}
+        inline Eigen::SparseMatrix<double> getMassMatrix() {return integrator->getMassMatrix();}
 
-        Eigen::MatrixXd getParameterJacobian() {return integrator->getParameterJacobian();}
+        inline Eigen::MatrixXd getParameterJacobian() {return integrator->getParameterJacobian();}
 
-        Eigen::SparseMatrix<double> getForcePositionJacobian() {return integrator->getForcePositionJacobian();}
+        inline Eigen::SparseMatrix<double> getForcePositionJacobian() {return integrator->getForcePositionJacobian();}
 
         inline int getDoF() {return integrator->getDoF();}
 

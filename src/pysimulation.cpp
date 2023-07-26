@@ -38,6 +38,10 @@ PySimulation::PySimulation(std::vector<double> k, std::vector<double> k_bend, bo
     // Create simulable
     setUpCloth();
     mass_spring = std::make_unique<MassSpring>(integrator.get(), cloth, NODE_MASS, k, k_bend);
+#ifdef ENABLE_CONTACT
+    mass_spring->add_interaction(collision_ball->getContact());
+    // mass_spring->add_interaction(collision_plane->getContact());
+#endif
 
     // Fix corners
     const int index = M * (N - 1);
@@ -45,6 +49,27 @@ PySimulation::PySimulation(std::vector<double> k, std::vector<double> k_bend, bo
     mass_spring->fix_particle(index);
     integrator->fill_containers();
 }
+
+PySimulation::PySimulation(double k, double k_bend, double tilt_angle, bool graphics) {
+    graphical=graphics;
+
+    integrator = std::make_unique<Integrator>(TimeStep);
+
+    // Create simulable
+    setUpCloth();
+    mass_spring = std::make_unique<MassSpring>(integrator.get(), cloth, NODE_MASS, k, k_bend, tilt_angle);
+#ifdef ENABLE_CONTACT
+    mass_spring->add_interaction(collision_ball->getContact());
+    // mass_spring->add_interaction(collision_plane->getContact());
+#endif
+
+    // Fix corners
+    const int index = M * (N - 1);
+    mass_spring->fix_particle(0);
+    mass_spring->fix_particle(index);
+    integrator->fill_containers();
+}
+
 
 PySimulation::~PySimulation() {
     // std::cout << "Diff paramters = "

@@ -1,9 +1,14 @@
 #include "mass_spring.hpp"
+#include "Eigen/src/SparseCore/SparseUtil.h"
+#include "glm/trigonometric.hpp"
 #include "gravity.hpp"
 #include "integrator.hpp"
 #include "mesh.h"
+#include "parameter.hpp"
 #include "parameter_list.hpp"
 #include "spring_test.hpp"
+#include <cmath>
+#include <vector>
 
 MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, double k_spring) {
     double bend_multiplyer = 1.0/100.0;
@@ -21,12 +26,12 @@ MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, do
 
 MassSpring::MassSpring(Integrator *integrator, Object *obj, double node_mass, double k_spring, double k_bend) {
     // Parameters
-    /// Normal Spring Parameters
+    /// Normal Spring Parameter
     normalSpringParameters.addParameter(&integrator->diff_manager, k_spring); // diff
     normalSpringParameters.addParameter(1.0f);
     normalSpringParameters.addParameter(1.0f);
 
-    /// Bend Spring Parameters
+    /// Bend Spring Parameter
     bendSpringParameters.addParameter(&integrator->diff_manager, k_bend); // diff
     bendSpringParameters.addParameter(1.0f);
     bendSpringParameters.addParameter(1.0f);
@@ -46,7 +51,7 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass,
         pl.addParameter(&integrator->diff_manager, (k_spring[i])); // k
         pl.addParameter(1); // L
         pl.addParameter(1); // Alpha
-        parameters.push_back(pl);
+        spring_parameters.push_back(pl);
     }
     // Bend springs
     for (int i = 0; i < k_bend.size(); i++) {
@@ -54,9 +59,29 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass,
         pl.addParameter(&integrator->diff_manager, (k_bend[i])); // k
         pl.addParameter(1); // L
         pl.addParameter(1); // Alpha
-        parameters.push_back(pl);
+        spring_parameters.push_back(pl);
     }
 
+    load_from_mesh(integrator, obj, node_mass);
+    gravity_vec = mass[0] * vec3(0, -1, 0);
+    integrator->add_simulable(this);
+}
+
+MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass,
+                       double k_spring, double k_bend, double tilt_angle) {
+    // Parameters
+    /// Normal Spring Parameter
+    normalSpringParameters.addParameter(&integrator->diff_manager, k_spring); // k_elasticity (diff)
+    normalSpringParameters.addParameter(1.0f); // rest longitude
+    normalSpringParameters.addParameter(1.0f); // alpha multiplicator
+
+    /// Bend Spring Parameter
+    bendSpringParameters.addParameter(&integrator->diff_manager, k_bend); // (diff)
+    bendSpringParameters.addParameter(1.0f);
+    bendSpringParameters.addParameter(1.0f);
+
+    // TODO: tilt
+    this->tilt_angle = Parameter(&integrator->diff_manager, tilt_angle);
     load_from_mesh(integrator, obj, node_mass);
     gravity_vec = mass[0] * vec3(0, -1, 0);
     integrator->add_simulable(this);
@@ -68,6 +93,8 @@ void MassSpring::load_from_mesh(Integrator* itg, Object *obj, double node_mass) 
     SimpleMesh* mesh = obj->mesh;
     mesh->isDynamic = true;
     this->obj = obj;
+    obj->rotation = glm::vec3(tilt_angle.getValue(), 0, 0);
+    obj->updateModelMatrix();
 
     const unsigned int n_coord = 3 * mesh->vertices.size();
     n_particles = mesh->vertices.size();
@@ -132,12 +159,12 @@ void MassSpring::add_spring(Integrator* itg, unsigned int i1, unsigned int i2, S
     }
     else {
         if (type == FLEX) {
-            parameters.at(flex_counter).updateParameter(1, L);
-            spring = new TestingSpring(i1, i2, parameters[flex_counter]);
+            spring_parameters.at(flex_counter).updateParameter(1, L);
+            spring = new TestingSpring(i1, i2, spring_parameters[flex_counter]);
             flex_counter++;
         } else {
-            parameters.at(bend_offset + bend_counter).updateParameter(1, L);
-            spring = new TestingSpring(i1, i2, parameters[bend_offset + bend_counter]);
+            spring_parameters.at(bend_offset + bend_counter).updateParameter(1, L);
+            spring = new TestingSpring(i1, i2, spring_parameters[bend_offset + bend_counter]);
             bend_counter++;
         }
     }
@@ -182,7 +209,7 @@ void MassSpring::update_mesh() {
     // update graphics
     mesh->updateVAO();
 
-    // Now that the mesh has been updated we need to go back to world frame to properlly simulate
+    // Now that the mesh has been updated we need to go back to world frame to do the simulation
     positions_to_world();
 }
 
@@ -201,5 +228,36 @@ void MassSpring::positions_to_world() {
         glm::vec3 world_pos_glm = obj->toWorld(get_particle_position(i).to_glm());
         vec3 world_pos = to_vec3(world_pos_glm);
         set_particle_position(i, world_pos);
+    }
+}
+
+void MassSpring::get_initial_state_jacobian(Eigen::SparseMatrix<double>& dx0dp, Eigen::SparseMatrix<double>& dv0dp) {
+    // Initialize velocities to zero
+    dv0dp.resize(nDoF, integrator->diff_manager.get_size());
+    dx0dp.resize(nDoF, integrator->diff_manager.get_size());
+
+    if (tilt_angle.isDiff() && nDoF >= 3) {
+        // Calculate the position derivatives wrt angle
+        std::vector<Eigen::Triplet<double>> dx0dp_triplets;
+        const vec3 origin = vec3(x[0], x[1], x[2]);
+        const double angle = glm::radians(tilt_angle.getValue());
+
+        for (size_t i = 0; i < nDoF; i++) {
+            const vec3 point = vec3(x[3*i], x[3*i+1], x[3*i+2]);
+            const vec3 delta = point - origin;
+            const double L = sqrt(delta.y() * delta.y() + delta.z() * delta.z());
+            // x coordinate not affected
+
+            // y coordinate
+            const double dy0dp_element = L * cos(angle);
+            dx0dp_triplets.push_back(Eigen::Triplet<double>(3*i+1,tilt_angle.getIndex(), dy0dp_element));
+
+            // z coordinate
+            const double dz0dp_element = - L * sin(angle);
+            dx0dp_triplets.push_back(Eigen::Triplet<double>(3*i+2,tilt_angle.getIndex(), dz0dp_element));
+
+            dx0dp.setFromSortedTriplets(dx0dp_triplets.begin(), dx0dp_triplets.end());
+        }
+
     }
 }

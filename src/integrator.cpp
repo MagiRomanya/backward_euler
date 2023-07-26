@@ -13,6 +13,9 @@ void Integrator::resize_containers() {
     df_dx.resize(nDoF, nDoF);
     df_dp.resize(nDoF, diff_manager.get_size());
 
+    for (size_t i = 0; i < simulables.size(); i++) {
+        simulables[i]->get_initial_state_jacobian(dx0dp, dv0dp);
+    }
     clear_containers();
 }
 

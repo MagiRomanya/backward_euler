@@ -26,6 +26,7 @@ set(SOURCE_FILES
   src/non_physical.cpp
   src/collision_ball.cpp
   src/collision_plane.cpp
+  src/simulable.cpp
 )
 
 set(SOURCE_FILES_MAIN
@@ -39,8 +40,8 @@ add_subdirectory(${RENDERER_DIR} ${CMAKE_SOURCE_DIR}/build/render)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/pybind11/)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/eigen/)
 
-# set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE Release)
 
 
 # set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -Wall)

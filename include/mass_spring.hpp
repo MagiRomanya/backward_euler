@@ -2,11 +2,13 @@
 #define MASS_SPRING_H_
 
 #include "object.h"
+#include "parameter.hpp"
 #include "parameter_list.hpp"
 #include "particle_system.hpp"
 #include "simulable.hpp"
 #include "spring.hpp"
 #include "spring_test.hpp"
+#include <memory>
 
 enum SPRING_TYPE {
 FLEX,
@@ -25,9 +27,15 @@ class MassSpring : public ParticleSystem {
         MassSpring(Integrator* integrator, Object* obj, double node_mass,
                    const std::vector<double>& k_spring, const std::vector<double>& k_bend);
 
+        /* Define Mass spring with elasticity parameters for flex and bend, and a tilt angle. */
+        MassSpring(Integrator* integrator, Object* obj, double node_mass,
+                       double k_spring, double k_bend, double tilt_angle);
+
         void update_state() override;
 
         void set_state() override;
+
+        void get_initial_state_jacobian(Eigen::SparseMatrix<double>& dx0dp, Eigen::SparseMatrix<double>& dv0dp) override;
 
     private:
         void update_mesh();
@@ -50,10 +58,13 @@ class MassSpring : public ParticleSystem {
 
         // Variables when using N parameters
         bool vector_paramters = false;
-        std::vector<ParameterList> parameters;
+        std::vector<ParameterList> spring_parameters;
         unsigned int bend_offset = 0;
         unsigned int flex_counter = 0;
         unsigned int bend_counter = 0;
+
+        // Tilt parameter
+        Parameter tilt_angle = Parameter(0.0);
 };
 
 #endif // MASS_SPRING_H_

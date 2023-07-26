@@ -29,6 +29,7 @@ class Integrator {
         Eigen::VectorXd delta_v;
         Eigen::VectorXd constraint_value;
 
+
         DifferentiableManager diff_manager;
 
         void clear_containers();
@@ -88,7 +89,6 @@ class Integrator {
         Eigen::SparseMatrix<double> mass;
         Eigen::SparseMatrix<double> df_dx;
         Eigen::SparseMatrix<double> df_dv;
-        Eigen::MatrixXd df_dp;
 
         std::vector<tri> df_dx_triplets;
         std::vector<tri> df_dv_triplets;
@@ -99,6 +99,11 @@ class Integrator {
         std::vector<Simulable*> simulables;
 
         std::vector<Constraint*> constraints;
+
+        // Differenciable
+        Eigen::MatrixXd df_dp;
+        Eigen::SparseMatrix<double> dx0dp;
+        Eigen::SparseMatrix<double> dv0dp;
 };
 
 #endif // INTEGRATOR_H_

@@ -1,6 +1,8 @@
 #ifndef SIMULABLE_H_
 #define SIMULABLE_H_
 
+#include <Eigen/Eigen>
+
 class Integrator;
 
 /* Abstract class which represents a simulable object. The integrator will
@@ -42,6 +44,13 @@ class Simulable {
          * and velocities from the ones stored in the integrator.
          */
         virtual void set_state() = 0;
+
+        /*
+        ** Computes the derivatives of the initial state with respect to the
+        ** differentiable parameters.
+        ** The default behaviour is to set all the derivatives to zero
+         */
+        virtual void get_initial_state_jacobian(Eigen::SparseMatrix<double>& dx0dp, Eigen::SparseMatrix<double>& dv0dp);
 
 };
 
