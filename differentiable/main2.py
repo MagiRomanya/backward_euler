@@ -18,10 +18,10 @@ if __name__ == "__main__":
     DIFF_FRAMES = 100
 
     # Define the region studied
-    n_points = 61
-    k_values = np.linspace(2, 10, n_points)
-    k_values = np.linspace(6, 9, n_points)
-    k_bend_values = np.linspace(0, 1.5, n_points-3)
+    n_points = 21
+    k_values = np.linspace(3.5, 4, n_points)
+    # k_values = np.linspace(6, 9, n_points)
+    k_bend_values = np.linspace(2, 2.5, n_points-1)
     # k_values = np.linspace(3.95, 4.05, n_points)
     # k_bend_values = np.linspace(0, 0.2, n_points)
     # k_values = np.linspace(3.45, 3.55, n_points)
@@ -98,25 +98,33 @@ if __name__ == "__main__":
     plt.show()
 
     plt.title("Real magnitudes")
-    plt.contourf(X, Y, g_values, levels=40)
+    plt.contourf(X, Y, g_values, levels=1000)
     plt.colorbar()
-    plt.quiver(X, Y, dgdk_values, dgdk_bend_values, label="Backpropagation", color="blue")
-    plt.quiver(X, Y, dgdk_values_finite, dgdk_bend_values_finite, label="Finite diff", color="red")
+    plt.quiver(X, Y, dgdk_values, dgdk_bend_values, label="Backpropagation", color="blue", angles='xy')
+    plt.quiver(X, Y, dgdk_values_finite, dgdk_bend_values_finite, label="Finite diff", color="red", angles='xy')
+    plt.legend()
+    plt.show()
+
+    plt.title("Real magnitudes")
+    plt.contourf(X, Y, g_values, levels=1000)
+    plt.colorbar()
     plt.legend()
     plt.show()
 
     plt.title("Normalized magnitudes")
     plt.contourf(X, Y, g_values, levels=200)
     plt.colorbar()
-    plt.quiver(X, Y, dgdk_values/magnitudes, dgdk_bend_values/magnitudes, color="blue")
-    plt.quiver(X, Y, dgdk_values_finite/magnitudes, dgdk_bend_values_finite/magnitudes , color="red")
+    plt.quiver(X, Y, dgdk_values/magnitudes, dgdk_bend_values/magnitudes, label="Backpropagation", color="blue")
+    plt.quiver(X, Y, dgdk_values_finite/magnitudes, dgdk_bend_values_finite/magnitudes, label="Finite diff", color="red")
+    plt.legend()
     plt.show()
 
     plt.title("Relative differences")
     plt.contourf(X, Y, diff_rel, levels=200)
     plt.colorbar()
-    plt.quiver(X, Y, dgdk_values/magnitudes, dgdk_bend_values/magnitudes, color="blue")
-    plt.quiver(X, Y, dgdk_values_finite/magnitudes, dgdk_bend_values_finite/magnitudes , color="red")
+    plt.quiver(X, Y, dgdk_values/magnitudes, dgdk_bend_values/magnitudes, label="Backpropagation", color="blue")
+    plt.quiver(X, Y, dgdk_values_finite/magnitudes, dgdk_bend_values_finite/magnitudes, label="Finite diff", color="red")
+    plt.legend()
     plt.show()
 
     # save the data to disk

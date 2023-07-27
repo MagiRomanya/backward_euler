@@ -66,7 +66,9 @@ class TestingSpring : public TwoBodyInteraction {
 
         virtual Eigen::MatrixXd force_parameters_derivative() const override {
             Eigen::MatrixXd result(3, n_diff_param);
-            double df_dp[3][1] = {{-(allParameters[2])*(L - (allParameters[1]))*(x1 - x2)/L}, {-(allParameters[2])*(L - (allParameters[1]))*(y1 - y2)/L}, {-(allParameters[2])*(L - (allParameters[1]))*(z1 - z2)/L}};
+            double df_dp[3][1] = {{-(allParameters[2])*(L - (allParameters[1]))*(x1 - x2)/L},
+                                  {-(allParameters[2])*(L - (allParameters[1]))*(y1 - y2)/L},
+                                  {-(allParameters[2])*(L - (allParameters[1]))*(z1 - z2)/L}};
             for (unsigned int i = 0; i < 3; i++) {
                 for (unsigned int j = 0; j < n_diff_param; j++) {
                     result(i,j) = df_dp[i][j];

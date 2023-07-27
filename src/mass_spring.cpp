@@ -80,7 +80,6 @@ MassSpring::MassSpring(Integrator* integrator, Object* obj, double node_mass,
     bendSpringParameters.addParameter(1.0f);
     bendSpringParameters.addParameter(1.0f);
 
-    // TODO: tilt
     this->tilt_angle = Parameter(&integrator->diff_manager, tilt_angle); // (diff)
     load_from_mesh(integrator, obj, node_mass);
     gravity_vec = mass[0] * vec3(0, -1, 0);
@@ -236,25 +235,23 @@ void MassSpring::get_initial_state_jacobian(Eigen::SparseMatrix<double>& dx0dp, 
     dv0dp.resize(nDoF, integrator->diff_manager.get_size());
     dx0dp.resize(nDoF, integrator->diff_manager.get_size());
 
-    if (tilt_angle.isDiff() && nDoF >= 3) {
+    if (tilt_angle.isDiff() && n_particles > 0) {
         // Calculate the position derivatives wrt angle
         std::vector<Eigen::Triplet<double>> dx0dp_triplets;
         const vec3 origin = vec3(x[0], x[1], x[2]);
-        const double angle = glm::radians(tilt_angle.getValue());
 
-        for (size_t i = 0; i < nDoF; i++) {
+        for (size_t i = 0; i < n_particles; i++) {
             const vec3 point = vec3(x[3*i], x[3*i+1], x[3*i+2]);
             const vec3 delta = point - origin;
-            const double L = sqrt(delta.y() * delta.y() + delta.z() * delta.z());
+            // const double L = sqrt(delta.y()*delta.y() + delta.z()*delta.z());
+            // std::cout << "L value = " << L << std::endl;
             // x coordinate not affected by x axis rotation
 
             // y coordinate
-            const double dy0dp_element = L * cos(angle);
-            dx0dp_triplets.push_back(Eigen::Triplet<double>(3*i+1,tilt_angle.getIndex(), dy0dp_element));
+            dx0dp_triplets.push_back(Eigen::Triplet<double>(3*i+1, tilt_angle.getIndex(), delta.z()));
 
             // z coordinate
-            const double dz0dp_element = - L * sin(angle);
-            dx0dp_triplets.push_back(Eigen::Triplet<double>(3*i+2,tilt_angle.getIndex(), dz0dp_element));
+            dx0dp_triplets.push_back(Eigen::Triplet<double>(3*i+2, tilt_angle.getIndex(), -delta.y()));
 
             dx0dp.setFromSortedTriplets(dx0dp_triplets.begin(), dx0dp_triplets.end());
         }

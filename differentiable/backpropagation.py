@@ -10,7 +10,7 @@ class Backpropagation:
     and calculates the loss gradient in backward.
     """
 
-    def __init__(self, mass: float, DeltaTime: float):
+    def __init__(self, mass: float, dx0dp, dv0dp, DeltaTime: float):
         """Initialize the backpropagation class."""
         # Important quantities
         self.equation_matrix_array = []
@@ -19,6 +19,10 @@ class Backpropagation:
 
         self.mass = mass
         self.h = DeltaTime
+
+        # Initial conditions parameter dependance
+        self.dx0dp = dx0dp
+        self.dv0dp = dv0dp
 
         # Loss information
         # self.loss = meansquareloss.MeanSquareLoss()
@@ -67,6 +71,7 @@ class Backpropagation:
             dgdv[i] += sys_solve @ self.mass
             S[i+1] = sys_solve @ (h*self.dfdp_array[i+1])
 
+        S[0] = dgdx[0] * self.dx0dp + dgdv[0] * self.dv0dp
         return sum(S)
 
     def get_g(self):

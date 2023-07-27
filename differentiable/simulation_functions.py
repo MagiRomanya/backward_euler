@@ -4,7 +4,6 @@ from backpropagation import Backpropagation
 from symulathon import Simulation, count_springs
 import sys
 import getopt
-import numpy as np
 
 
 sim = Simulation(1, 1)
@@ -52,8 +51,46 @@ def get_user_plots():
 def simulate(k_list, k_bend_list, DIFF_FRAMES: int):
     """Make a simulation with the specified parameters and return the backpropagation information."""
     reader = SimulationReader(nDoF)
-    backpropagation = Backpropagation(mass, h)
     sim = Simulation(k_list, k_bend_list, get_user_weather_graphics())
+    dx0dp = sim.getInitialPositionJacobian()
+    dv0dp = sim.getInitialVelocityJacobian()
+    backpropagation = Backpropagation(mass, dx0dp, dv0dp, h)
+    sim.fill_containers()
+    for i in range(DIFF_FRAMES+1):
+        ##################################
+        # Record step for backpropagation
+        ##################################
+        x = sim.getPosition()
+        v = sim.getVelocity()
+        x_t, v_t = reader.get_next_state()
+        A = sim.getEquationMatrix()
+        dfdp = sim.getParameterJacobian()
+        dfdx = sim.getForcePositionJacobian()
+        backpropagation.step(x, v, x_t, v_t, A, dfdp, dfdx)
+
+        ##################################
+        # Newton Iterations
+        ##################################
+        iterations = 3
+        xi = x
+        vi = v
+        for it in range(iterations):
+            xi, vi = newton_iteration(sim, x, v, xi, vi)
+            sim.set_state(xi, vi)
+            sim.fill_containers()
+
+        sim.render_state()
+    return backpropagation
+
+
+def simulate_tilt(k_value, tilt_angle, DIFF_FRAMES: int):
+    """Make a simulation with the specified parameters and return the backpropagation information."""
+    reader = SimulationReader(nDoF)
+    k_bend_value = 0.1
+    sim = Simulation(k_value, k_bend_value, tilt_angle, get_user_weather_graphics())
+    dx0dp = sim.getInitialPositionJacobian()
+    dv0dp = sim.getInitialVelocityJacobian()
+    backpropagation = Backpropagation(mass, dx0dp, dv0dp, h)
     sim.fill_containers()
     for i in range(DIFF_FRAMES+1):
         ##################################

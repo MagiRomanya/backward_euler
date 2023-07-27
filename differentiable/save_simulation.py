@@ -27,7 +27,7 @@ if __name__ == "__main__":
     k = 8
     k_bend = 0.1
 
-    sim = Simulation(k, k_bend, -60, True)
+    sim = Simulation(k, k_bend, 0, True)
     h = sim.getTimeStep()
     frames_count = 0
     while (frames_count <= RECORD_FRAMES):
